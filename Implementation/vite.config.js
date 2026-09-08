@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// GitHub Pages serves the app from https://<user>.github.io/<repo>/, so the
-// build needs `base` set to "/<repo>/". The deploy workflow passes it as
-// VITE_BASE; local dev / a user-site deploy fall back to "/".
+// Cloudflare Pages (and Netlify/Vercel) serve from the domain root, so `base`
+// stays "/". Only set VITE_BASE (e.g. "/repo/") if hosting under a sub-path
+// such as project GitHub Pages.
 const base = process.env.VITE_BASE || '/';
 
 export default defineConfig({

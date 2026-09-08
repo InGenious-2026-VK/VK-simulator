@@ -40,28 +40,30 @@ uvicorn app.main:app --reload --port 8000
 Without it, the map and layers still work; the Results panel shows the baseline
 placeholders and a "backend offline" note.
 
-## Deployment (GitHub Pages)
+## Deployment (Cloudflare Pages)
 
-`.github/workflows/deploy.yml` builds this app and publishes it to GitHub Pages
-on every push to `main`.
+Hosted on Cloudflare Pages via its built-in Git integration — every push to
+`main` builds and deploys automatically. One-time setup in the Cloudflare
+dashboard (**Workers & Pages → Create → Pages → Connect to Git**):
 
-One-time setup on GitHub: **Settings → Pages → Build and deployment →
-Source: GitHub Actions**.
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Root directory | `Implementation` |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Node version | `22` (also pinned in `.node-version`) |
 
-The workflow sets Vite's `base` to `/<repo-name>/` automatically (or `/` for a
-`<user>.github.io` repo). The build has no `/api` backend on Pages, so the app
-runs in "backend offline" mode. To make the simulator work there, deploy the
-FastAPI service in `../backend` somewhere (Render, Fly.io, a container host) and
-add a **repository variable** `API_BASE` (Settings → Secrets and variables →
-Actions → Variables) pointing at it, e.g. `https://your-api.example.com/api`.
-That host must allow CORS from the Pages origin — add it to `allow_origins` in
-`backend/app/main.py`.
+`public/_redirects` sends every path to `index.html` so deep links work.
 
-Local production preview with a subpath:
+The build has no `/api` backend, so the app runs in "backend offline" mode
+(map, layers, baseline figures only). To enable the simulator, deploy the
+FastAPI service in `../backend` (Render, Fly.io, a container host), add a
+Pages **environment variable** `VITE_API_BASE` = `https://your-api/api`, and
+add the Pages origin to `allow_origins` in `backend/app/main.py`.
 
-```
-VITE_BASE=/your-repo/ npm run build && npm run preview
-```
+Netlify / Vercel work with the same three build settings. Local production
+preview: `npm run build && npm run preview`.
 
 ## What is wired vs. illustrative
 
