@@ -43,8 +43,10 @@ placeholders and a "backend offline" note.
 ## Deployment (Cloudflare)
 
 Deployed with **Wrangler static assets** — the built `dist/` is uploaded as a
-Worker with no server code. Config: `wrangler.jsonc` (`assets.directory: ./dist`,
-SPA `not_found_handling`).
+Worker with no server code. Config: `wrangler.jsonc` (`assets.directory: ./dist`).
+SPA deep links are handled by `assets.not_found_handling:
+"single-page-application"` (don't add a `_redirects` `/* → /index.html` rule —
+Workers Assets rejects it as an infinite loop).
 
 Deploy from your machine:
 
@@ -65,8 +67,7 @@ Settings → Build**, connect the Git repo):
 | Node version | `22` (also pinned in `.node-version`) |
 
 **The `name` in `wrangler.jsonc` must match your Cloudflare project name** — edit
-it if your project isn't called `vk-simulator`. `public/_redirects` is also
-honoured (belt-and-braces SPA fallback).
+it if your project isn't called `vk-simulator`.
 
 The build has no `/api` backend, so the app runs in "backend offline" mode
 (map, layers, baseline figures only). To enable the simulator, deploy the
