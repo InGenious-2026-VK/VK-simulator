@@ -1,0 +1,21 @@
+{
+  "name": "ostergotland-food-resilience-platform",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Layered map visualization of Ostergotland's food supply chain for resilience and crisis planning.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "maplibre-gl": "^4.7.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.2.2"
+  }
+}

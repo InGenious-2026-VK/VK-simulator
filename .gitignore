@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+.vite/
+
+# Python backend
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# Raw source datasets (large). Derived, clipped extracts live in
+# Implementation/public/data/ and are committed. See
+# Implementation/scripts/extract-population-density.mjs
+/data/
