@@ -4,9 +4,14 @@
  * In dev, Vite proxies `/api` to http://localhost:8000 (vite.config.js). If the
  * backend isn't running these reject — callers should surface that as a
  * friendly "start the backend" message rather than crashing the map.
+ *
+ * On a static host (e.g. GitHub Pages) there is no `/api`. Set VITE_API_BASE at
+ * build time to a deployed backend URL (e.g. https://my-api.onrender.com/api)
+ * to make the simulator work there; otherwise the app runs in "backend offline"
+ * mode and shows baseline placeholders only.
  */
 
-const BASE = '/api';
+const BASE = import.meta.env.VITE_API_BASE || '/api';
 
 async function get(path) {
   const res = await fetch(`${BASE}${path}`);

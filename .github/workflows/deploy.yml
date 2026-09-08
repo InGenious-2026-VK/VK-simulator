@@ -1,0 +1,75 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Allow GITHUB_TOKEN to deploy to Pages and to mint an OIDC token for it.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One in-flight Pages deploy at a time; don't cancel a running one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Implementation
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: Implementation/package-lock.json
+
+      - name: Compute Pages base path
+        id: base
+        run: |
+          name="${{ github.event.repository.name }}"
+          if [[ "$name" == *.github.io ]]; then
+            echo "base=/" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=/$name/" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          VITE_BASE: ${{ steps.base.outputs.base }}
+          # Optional: point the simulator at a hosted FastAPI backend.
+          # Define a repository variable API_BASE (Settings → Secrets and
+          # variables → Actions → Variables) like https://host/api.
+          VITE_API_BASE: ${{ vars.API_BASE }}
+        run: npm run build
+
+      - name: SPA fallback (deep links / refresh)
+        run: cp dist/index.html dist/404.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: Implementation/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
