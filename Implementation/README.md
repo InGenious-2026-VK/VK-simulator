@@ -40,21 +40,33 @@ uvicorn app.main:app --reload --port 8000
 Without it, the map and layers still work; the Results panel shows the baseline
 placeholders and a "backend offline" note.
 
-## Deployment (Cloudflare Pages)
+## Deployment (Cloudflare)
 
-Hosted on Cloudflare Pages via its built-in Git integration — every push to
-`main` builds and deploys automatically. One-time setup in the Cloudflare
-dashboard (**Workers & Pages → Create → Pages → Connect to Git**):
+Deployed with **Wrangler static assets** — the built `dist/` is uploaded as a
+Worker with no server code. Config: `wrangler.jsonc` (`assets.directory: ./dist`,
+SPA `not_found_handling`).
+
+Deploy from your machine:
+
+```
+npm run deploy          # = vite build && wrangler deploy
+# first time: npx wrangler login
+```
+
+Auto-deploy on push (Cloudflare dashboard → **Workers & Pages → your project →
+Settings → Build**, connect the Git repo):
 
 | Setting | Value |
 | --- | --- |
 | Production branch | `main` |
 | Root directory | `Implementation` |
 | Build command | `npm run build` |
-| Build output directory | `dist` |
+| Deploy command | `npx wrangler deploy` |
 | Node version | `22` (also pinned in `.node-version`) |
 
-`public/_redirects` sends every path to `index.html` so deep links work.
+**The `name` in `wrangler.jsonc` must match your Cloudflare project name** — edit
+it if your project isn't called `vk-simulator`. `public/_redirects` is also
+honoured (belt-and-braces SPA fallback).
 
 The build has no `/api` backend, so the app runs in "backend offline" mode
 (map, layers, baseline figures only). To enable the simulator, deploy the

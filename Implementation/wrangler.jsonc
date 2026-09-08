@@ -1,0 +1,16 @@
+{
+  // Cloudflare Workers static-assets deploy for the built Vite app.
+  // `npx wrangler deploy` (run with this folder as the project root) uploads
+  // ./dist as a static site. No Worker script — `assets` with no `main`.
+  //
+  // IMPORTANT: "name" must match the Worker/Pages project name in your
+  // Cloudflare account. Rename it here if your project is called something else.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "vk-simulator",
+  "compatibility_date": "2025-06-01",
+  "assets": {
+    "directory": "./dist",
+    // Serve index.html (HTTP 200) for any unmatched path — SPA deep links.
+    "not_found_handling": "single-page-application"
+  }
+}
