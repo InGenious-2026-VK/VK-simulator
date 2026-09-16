@@ -1,8 +1,12 @@
-<video src="https://raw.githubusercontent.com/InGenious-2026-VK/VK-simulator/main/documentation/VK-2026_demo_V1.mp4" controls width="100%"></video>
-
-📺 Video not playing? [Watch it directly](documentation/VK-2026_demo_V1.mp4) · 🚀 [Live app](https://vk-simulator.ttmpeiris.workers.dev)
+[Live app](https://vk-simulator.ttmpeiris.workers.dev)
 
 ---
+
+
+
+https://github.com/user-attachments/assets/af52f054-293f-4b8f-884f-b23f4625b2de
+
+
 
 # InGenious-2026-VK — Östergötland Food Supply Chain Resilience Platform
 
