@@ -1,3 +1,5 @@
+DEMO : https://vk-simulator.ttmpeiris.workers.dev
+
 # InGenious-2026-VK — Östergötland Food Supply Chain Resilience Platform
 
 A layered map visualization platform for planning Östergötland's food supply
