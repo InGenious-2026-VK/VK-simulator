@@ -9,9 +9,12 @@ for the team to discuss and build on.
 
 ## What it does
 
-It takes a table of numbers and draws it as a chart. So far there are two chart
-types, each with one example table: a line chart (farmland area in Östergötland
-over time) and a pie chart (arable land in Östergötland by crop).
+It takes a table of numbers and draws it as a chart. There are three chart
+types, each with one example table:
+
+- a line chart (farmland area in Östergötland over time),
+- a pie chart (arable land in Östergötland by crop),
+- a bubble map (how much of the fresh vegetables each municipality buys is Swedish).
 
 ## How the data travels
 
@@ -43,6 +46,7 @@ drawing something misleading.
 | `datasets.json` | The list of datasets: id, chart type, file name, title, unit, source |
 | `farmland-use.csv` | The example table for the line chart |
 | `arable-land-use.csv` | The example table for the pie chart |
+| `swedish-vegetables-public-kitchens.csv` | The example table for the bubble map |
 
 **Backend (Python)** — `backend/app/viz/`
 
@@ -53,9 +57,9 @@ drawing something misleading.
 | `api.py` | Makes the data available at `/api/viz/...` |
 | `transform.py` | Reshapes messy source tables into the contract shape |
 
-Also: `backend/scripts/ingest_farmland_use.py` and `ingest_arable_land_use.py`
-(they turn the Excel source into the two CSVs) and `backend/tests/test_viz.py`
-(automatic checks for all of the above).
+Also: the three `ingest_*.py` scripts in `backend/scripts/` (each turns an Excel
+source into one of the CSVs) and `backend/tests/test_viz.py` (automatic checks
+for all of the above).
 
 **Frontend (React)** — `Implementation/src/visualisation/`
 
@@ -64,6 +68,7 @@ Also: `backend/scripts/ingest_farmland_use.py` and `ingest_arable_land_use.py`
 | `VisualisationPanel.jsx` | The one component the main app will use. Picks the chart for the dataset's type |
 | `LineChartView.jsx` | Draws the line chart |
 | `PieChartView.jsx` | Draws the pie chart |
+| `BubbleMapView.jsx` | Draws the bubble map |
 | `useDataset.js` | Loads a dataset and tracks loading / ready / error |
 | `api.js` | Asks the backend for a dataset |
 | `visualisation.css` | Colours and layout, limited to the panel |
@@ -80,7 +85,8 @@ Also: `backend/scripts/ingest_farmland_use.py` and `ingest_arable_land_use.py`
 1. Start the app as usual (double-click `run.bat`, or see the main README).
    If you pulled this branch, run `npm install` in `Implementation/` once first.
 2. Open <http://localhost:5173/visualisation.html>. You should see the farmland
-   line chart and, below it, the arable land pie chart.
+   line chart, the arable land pie chart and the vegetables bubble map, one
+   below the other.
 3. Open <http://localhost:5173/> to confirm the main app looks the same as before.
 
 To run the automatic checks: in `backend/`, with the venv active, run `pytest`.
@@ -105,6 +111,14 @@ To run the automatic checks: in `backend/`, with the venv active, run `pytest`.
    Barley,800
    ```
 
+   For a bubble map, one row per place, with its position:
+
+   ```
+   name,lat,lon,value
+   Linköping,58.41,15.62,1200
+   Norrköping,58.59,16.18,950
+   ```
+
 2. Save it in `backend/app/data/lake/`, for example as `wheat.csv`.
 3. Add an entry to `datasets.json` in the same folder:
 
@@ -125,15 +139,32 @@ Good to know for a pie chart:
   slices in similar colours are hard to tell apart.
 - Values cannot be negative.
 
+Good to know for a bubble map:
+
+- `lat` and `lon` are the place's position in decimal degrees, the numbers a
+  map website shows for a point (for Linköping about `58.41` and `15.62`).
+  `lat` is north–south, `lon` is east–west. Swapping them puts the circles in
+  the wrong country.
+- The size of a circle shows the value: twice the value is twice the area. It
+  works best for amounts (tonnes, people). The little key in the corner shows
+  what two circle sizes stand for.
+- Values cannot be negative.
+- It is its own small map inside the panel, not the app's main map. The
+  background comes from the internet (the same map service the main app uses),
+  so it needs a connection.
+- To zoom, hold Ctrl and scroll, or use the + and − buttons. Plain scrolling
+  moves the page as usual.
+
 ### Add a dataset from an Excel report
 
 Copy `backend/scripts/ingest_farmland_use.py`, change the sheet name, the row
 labels and the output file name at the top, and run it. Then do steps 3–5 above.
 This step needs some Python.
 
-### Add a chart type (bubble map)
+### Add a chart type
 
-The pie chart was added this way; its files are a good example to copy.
+The pie chart and the bubble map were added this way; their files are good
+examples to copy.
 
 1. `backend/app/viz/contract.py`: add the type and its columns to `CHART_TYPES`.
 2. `Implementation/src/visualisation/`: write the component (like

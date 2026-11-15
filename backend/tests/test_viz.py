@@ -104,6 +104,32 @@ def test_validate_rejects_bad_pie_data(rows, message):
         validate(rows, "pie")
 
 
+PLACE = {"name": "Linköping", "lat": "58.41", "lon": "15.62", "value": "1200"}
+
+
+def test_validate_accepts_bubble_map_data():
+    rows = validate([PLACE, {**PLACE, "name": "Norrköping", "value": "0"}], "bubble-map")
+    assert rows[0] == {"name": "Linköping", "lat": 58.41, "lon": 15.62, "value": 1200.0}
+    assert rows[1]["value"] == 0.0
+
+
+@pytest.mark.parametrize(
+    "rows, message",
+    [
+        ([{"name": "Linköping", "lat": "58.41", "value": "1"}], "missing column.*lon"),
+        ([{**PLACE, "lat": "north"}], "'lat' is not a number"),
+        ([{**PLACE, "lat": "158.41"}], "'lat' must be between -90 and 90"),
+        ([{**PLACE, "lon": "-181"}], "'lon' must be between -180 and 180"),
+        ([{**PLACE, "value": "-1"}], "negative"),
+        ([{**PLACE, "name": ""}], "empty"),
+        ([PLACE, PLACE], "duplicate"),
+    ],
+)
+def test_validate_rejects_bad_bubble_map_data(rows, message):
+    with pytest.raises(ContractError, match=message):
+        validate(rows, "bubble-map")
+
+
 def test_validate_rejects_unknown_chart_type():
     with pytest.raises(ContractError, match="unknown chart type"):
         validate([{"a": "1"}], "radar")
@@ -147,6 +173,20 @@ def test_api_reports_pie_contract_breach(temp_lake):
     res = client.get("/api/viz/datasets/d")
     assert res.status_code == 500
     assert "line 3: duplicate" in res.json()["detail"]
+
+
+def test_api_returns_bubble_map_dataset(temp_lake):
+    temp_lake("name,lat,lon,value\nLinköping,58.41,15.62,1200\n", chart_type="bubble-map")
+    body = client.get("/api/viz/datasets/d").json()
+    assert body["type"] == "bubble-map"
+    assert body["rows"] == [{"name": "Linköping", "lat": 58.41, "lon": 15.62, "value": 1200.0}]
+
+
+def test_api_reports_bubble_map_contract_breach(temp_lake):
+    temp_lake("name,lat,lon,value\nLinköping,58.41,1562,1200\n", chart_type="bubble-map")
+    res = client.get("/api/viz/datasets/d")
+    assert res.status_code == 500
+    assert "line 2: 'lon' must be between" in res.json()["detail"]
 
 
 def test_api_lists_datasets(temp_lake):

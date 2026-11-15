@@ -1,13 +1,15 @@
+import BubbleMapView from './BubbleMapView.jsx';
 import LineChartView from './LineChartView.jsx';
 import PieChartView from './PieChartView.jsx';
 import { useDataset } from './useDataset.js';
 import './visualisation.css';
 
-// Chart type -> component. Add 'bubble-map' here; the backend
-// (backend/app/viz/contract.py) guarantees the columns each type needs.
+// Chart type -> component. The backend (backend/app/viz/contract.py)
+// guarantees the columns each type needs.
 const CHARTS = {
   line: LineChartView,
   pie: PieChartView,
+  'bubble-map': BubbleMapView,
 };
 
 /**

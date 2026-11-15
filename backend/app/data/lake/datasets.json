@@ -16,5 +16,14 @@
     "subtitle": "Share of area, 2024",
     "unit": "ha",
     "source": "Jordbruksverket"
+  },
+  {
+    "id": "swedish-vegetables-public-kitchens",
+    "type": "bubble-map",
+    "file": "swedish-vegetables-public-kitchens.csv",
+    "title": "Swedish vegetables in public kitchens",
+    "subtitle": "Share of each municipality's fresh vegetable purchases with Swedish origin, by cost, 2023",
+    "unit": "%",
+    "source": "Jordbruksverket, SILO database"
   }
 ]

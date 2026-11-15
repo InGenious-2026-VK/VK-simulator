@@ -29,13 +29,18 @@ no thousands separators. Files are "tidy": one observation per row.
 - `series`, `category`, `name` are free text and are shown to the user as written.
 - Extra columns are allowed and are passed through untouched.
 - A `(date, series)` pair, a `category` or a `name` may appear only once per file.
-- In a `pie` file, `value` may not be negative.
+- `lat` must be between -90 and 90, `lon` between -180 and 180.
+- In a `pie` or `bubble-map` file, `value` may not be negative.
 
-`line` and `pie` are implemented. `bubble-map` is not yet.
+All three types are implemented.
 
 A pie chart shows at most six slices, in file order. With more rows than that,
 the frontend keeps the five biggest and adds the rest up into one "Other" slice.
 The file itself may have any number of rows.
+
+A bubble map draws one circle per row at (`lat`, `lon`). The circle's area is
+proportional to `value`, scaled so the largest value in the file gets the
+largest circle.
 
 ## Manifest
 
@@ -80,6 +85,10 @@ import VisualisationPanel from './visualisation/VisualisationPanel.jsx';
 - **The data lake holds tidy CSV files only**, in the shape described above.
   Raw source files (Excel reports etc.) stay outside the lake; scripts in
   `backend/scripts/` turn them into tidy CSVs.
+- **The bubble map is its own small map inside the panel**, not a layer on the
+  main app's map (issue #25). It works wherever the panel is placed and leaves
+  the main UI unchanged. Its background map is loaded from the same online
+  service as the main map.
 
 ## Open questions for the team
 

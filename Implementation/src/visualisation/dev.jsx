@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom/client';
 import VisualisationPanel from './VisualisationPanel.jsx';
 import '../index.css';
 
-const EXAMPLES = ['farmland-use', 'arable-land-use'];
+const EXAMPLES = ['farmland-use', 'arable-land-use', 'swedish-vegetables-public-kitchens'];
 const asked = new URLSearchParams(window.location.search).get('dataset');
 const datasetIds = asked ? [asked] : EXAMPLES;
 

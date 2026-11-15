@@ -53,3 +53,63 @@
 .viz-error {
   color: var(--viz-error);
 }
+
+/* Bubble map: the map fills the panel body; legend and tooltip float on top. */
+.viz-map {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.viz-map-canvas {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Top left: the zoom buttons are top right, the map credits bottom right. */
+.viz-map-legend {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  box-sizing: content-box;
+  padding: 6px 8px;
+  border: 1px solid var(--viz-axis);
+  border-radius: 6px;
+  background: var(--viz-surface);
+  pointer-events: none;
+}
+
+.viz-map-legend circle {
+  fill: none;
+  stroke: var(--viz-text-muted);
+}
+
+.viz-map-legend line {
+  stroke: var(--viz-axis);
+}
+
+.viz-map-legend text {
+  font-size: 11px;
+  fill: var(--viz-text-muted);
+}
+
+.viz-map-tooltip {
+  position: absolute;
+  transform: translate(12px, 12px);
+  display: grid;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 1px solid var(--viz-axis);
+  border-radius: 6px;
+  background: var(--viz-surface);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.viz-map-tooltip-left {
+  transform: translate(calc(-100% - 12px), 12px);
+}
