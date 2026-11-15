@@ -1,0 +1,11 @@
+[
+  {
+    "id": "farmland-use",
+    "type": "line",
+    "file": "farmland-use.csv",
+    "title": "Farmland in Östergötland",
+    "subtitle": "Area by land type, hectares",
+    "unit": "ha",
+    "source": "Jordbruksverket"
+  }
+]
