@@ -12,6 +12,10 @@
   --viz-series-2: #eb6834;
   --viz-series-3: #1baf7a;
   --viz-series-4: #eda100;
+  --viz-series-5: #e87ba4;
+  --viz-series-6: #008300;
+  /* Neutral, for a pie's grouped "Other" slice. */
+  --viz-other: #a1a1aa;
 
   display: flex;
   flex-direction: column;

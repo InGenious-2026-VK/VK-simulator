@@ -79,6 +79,31 @@ def test_validate_rejects_bad_data(rows, message):
         validate(rows, "line")
 
 
+def test_validate_accepts_pie_data():
+    rows = validate(
+        [{"category": "Wheat", "value": "1200"}, {"category": "Barley", "value": "0"}], "pie"
+    )
+    assert rows == [{"category": "Wheat", "value": 1200.0}, {"category": "Barley", "value": 0.0}]
+
+
+@pytest.mark.parametrize(
+    "rows, message",
+    [
+        ([{"category": "Wheat"}], "missing column"),
+        ([{"category": "Wheat", "value": "lots"}], "not a number"),
+        ([{"category": " ", "value": "1"}], "empty"),
+        ([{"category": "Wheat", "value": "-5"}], "negative"),
+        (
+            [{"category": "Wheat", "value": "1"}, {"category": "Wheat", "value": "2"}],
+            "duplicate",
+        ),
+    ],
+)
+def test_validate_rejects_bad_pie_data(rows, message):
+    with pytest.raises(ContractError, match=message):
+        validate(rows, "pie")
+
+
 def test_validate_rejects_unknown_chart_type():
     with pytest.raises(ContractError, match="unknown chart type"):
         validate([{"a": "1"}], "radar")
@@ -105,6 +130,23 @@ def test_api_returns_dataset(temp_lake):
     assert body["title"] == "Demo"
     assert "file" not in body
     assert body["rows"][1] == {"date": "2021", "series": "A", "value": 2.0}
+
+
+def test_api_returns_pie_dataset(temp_lake):
+    temp_lake("category,value\nWheat,1200\nBarley,800\n", chart_type="pie")
+    body = client.get("/api/viz/datasets/d").json()
+    assert body["type"] == "pie"
+    assert body["rows"] == [
+        {"category": "Wheat", "value": 1200.0},
+        {"category": "Barley", "value": 800.0},
+    ]
+
+
+def test_api_reports_pie_contract_breach(temp_lake):
+    temp_lake("category,value\nWheat,1200\nWheat,800\n", chart_type="pie")
+    res = client.get("/api/viz/datasets/d")
+    assert res.status_code == 500
+    assert "line 3: duplicate" in res.json()["detail"]
 
 
 def test_api_lists_datasets(temp_lake):

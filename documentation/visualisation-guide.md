@@ -9,8 +9,9 @@ for the team to discuss and build on.
 
 ## What it does
 
-It takes a table of numbers and draws it as a chart. So far there is one chart
-type (a line chart) and one example table (farmland area in Östergötland).
+It takes a table of numbers and draws it as a chart. So far there are two chart
+types, each with one example table: a line chart (farmland area in Östergötland
+over time) and a pie chart (arable land in Östergötland by crop).
 
 ## How the data travels
 
@@ -40,7 +41,8 @@ drawing something misleading.
 | File | What it is |
 |---|---|
 | `datasets.json` | The list of datasets: id, chart type, file name, title, unit, source |
-| `farmland-use.csv` | The example table |
+| `farmland-use.csv` | The example table for the line chart |
+| `arable-land-use.csv` | The example table for the pie chart |
 
 **Backend (Python)** — `backend/app/viz/`
 
@@ -51,8 +53,9 @@ drawing something misleading.
 | `api.py` | Makes the data available at `/api/viz/...` |
 | `transform.py` | Reshapes messy source tables into the contract shape |
 
-Also: `backend/scripts/ingest_farmland_use.py` (turns the Excel source into the
-CSV) and `backend/tests/test_viz.py` (automatic checks for all of the above).
+Also: `backend/scripts/ingest_farmland_use.py` and `ingest_arable_land_use.py`
+(they turn the Excel source into the two CSVs) and `backend/tests/test_viz.py`
+(automatic checks for all of the above).
 
 **Frontend (React)** — `Implementation/src/visualisation/`
 
@@ -60,6 +63,7 @@ CSV) and `backend/tests/test_viz.py` (automatic checks for all of the above).
 |---|---|
 | `VisualisationPanel.jsx` | The one component the main app will use. Picks the chart for the dataset's type |
 | `LineChartView.jsx` | Draws the line chart |
+| `PieChartView.jsx` | Draws the pie chart |
 | `useDataset.js` | Loads a dataset and tracks loading / ready / error |
 | `api.js` | Asks the backend for a dataset |
 | `visualisation.css` | Colours and layout, limited to the panel |
@@ -76,7 +80,7 @@ CSV) and `backend/tests/test_viz.py` (automatic checks for all of the above).
 1. Start the app as usual (double-click `run.bat`, or see the main README).
    If you pulled this branch, run `npm install` in `Implementation/` once first.
 2. Open <http://localhost:5173/visualisation.html>. You should see the farmland
-   line chart.
+   line chart and, below it, the arable land pie chart.
 3. Open <http://localhost:5173/> to confirm the main app looks the same as before.
 
 To run the automatic checks: in `backend/`, with the venv active, run `pytest`.
@@ -93,6 +97,14 @@ To run the automatic checks: in `backend/`, with the venv active, run `pytest`.
    2023,Wheat,1350
    ```
 
+   For a pie chart, one row per slice:
+
+   ```
+   category,value
+   Wheat,1200
+   Barley,800
+   ```
+
 2. Save it in `backend/app/data/lake/`, for example as `wheat.csv`.
 3. Add an entry to `datasets.json` in the same folder:
 
@@ -101,8 +113,17 @@ To run the automatic checks: in `backend/`, with the venv active, run `pytest`.
    ```
 
 4. Run `pytest` in `backend/`. It checks every dataset in the folder.
-5. To look at it, change `farmland-use` to `wheat` in
-   `Implementation/src/visualisation/dev.jsx` and reload the test page.
+5. To look at it, open the test page with the id at the end of the address:
+   <http://localhost:5173/visualisation.html?dataset=wheat>
+
+Good to know for a pie chart:
+
+- Slices are drawn in the order of the file, clockwise from the top. Put the
+  biggest first.
+- A pie shows at most six slices. If the file has more rows, the five biggest
+  stay and the rest are added up into one grey slice called "Other". Small
+  slices in similar colours are hard to tell apart.
+- Values cannot be negative.
 
 ### Add a dataset from an Excel report
 
@@ -110,12 +131,17 @@ Copy `backend/scripts/ingest_farmland_use.py`, change the sheet name, the row
 labels and the output file name at the top, and run it. Then do steps 3–5 above.
 This step needs some Python.
 
-### Add a chart type (pie, bubble map)
+### Add a chart type (bubble map)
+
+The pie chart was added this way; its files are a good example to copy.
 
 1. `backend/app/viz/contract.py`: add the type and its columns to `CHART_TYPES`.
 2. `Implementation/src/visualisation/`: write the component (like
-   `LineChartView.jsx`) and add it to `CHARTS` in `VisualisationPanel.jsx`.
-3. Add a test in `backend/tests/test_viz.py`.
+   `PieChartView.jsx`) and add it to `CHARTS` in `VisualisationPanel.jsx`.
+3. Add an example dataset (see "Add a dataset" above) and put its id in
+   `EXAMPLES` in `dev.jsx`, so it shows on the test page.
+4. Add tests in `backend/tests/test_viz.py`.
+5. Update this guide and the data contract.
 
 ### Put a chart in the main app
 

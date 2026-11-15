@@ -29,8 +29,13 @@ no thousands separators. Files are "tidy": one observation per row.
 - `series`, `category`, `name` are free text and are shown to the user as written.
 - Extra columns are allowed and are passed through untouched.
 - A `(date, series)` pair, a `category` or a `name` may appear only once per file.
+- In a `pie` file, `value` may not be negative.
 
-Only `line` is implemented so far.
+`line` and `pie` are implemented. `bubble-map` is not yet.
+
+A pie chart shows at most six slices, in file order. With more rows than that,
+the frontend keeps the five biggest and adds the rest up into one "Other" slice.
+The file itself may have any number of rows.
 
 ## Manifest
 
