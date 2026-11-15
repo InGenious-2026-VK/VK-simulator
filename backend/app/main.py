@@ -5,6 +5,7 @@ Routes (all under /api):
   GET  /api/network   the baseline synthetic supply-chain network (for drawing)
   GET  /api/presets   named example scenarios
   POST /api/simulate  run a scenario, return per-town impact + a day-by-day timeline
+  GET  /api/viz/...   datasets for the visualisation window (see app/viz/api.py)
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from .models import Scenario, SimulationResult
 from .network import load_network
 from .presets import PRESETS
 from .simulation import simulate
+from .viz.api import router as viz_router
 
 app = FastAPI(
     title="Ostergotland Food Resilience - Simulation API",
@@ -33,6 +35,8 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+app.include_router(viz_router)
 
 
 @app.get("/api/health")
