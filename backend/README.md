@@ -73,6 +73,13 @@ On startup the service:
 
 The frontend (`../frontend`) proxies `/api` to `http://127.0.0.1:8000`.
 
+## Docker
+
+`Dockerfile` builds the production image: Python 3.13 slim, running uvicorn
+as an unprivileged user, with uploads on the `/data` volume. A health check
+calls `/api/health`. Use it through the root `docker-compose.yml` (see the root
+README, "Deploy with Docker").
+
 ## Storage
 
 Uploaded files go to `STORAGE_DIR` (default `backend/storage/`, gitignored):

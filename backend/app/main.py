@@ -12,6 +12,7 @@ documentation/api/openapi.yaml. Window by window:
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -35,6 +36,12 @@ from .seed import purge_removed, seed
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    log = logging.getLogger("uvicorn.error")
+    if settings.jwt_secret.startswith("dev-only") or settings.admin_password == "admin1234":
+        log.warning(
+            "FoodChainIQ is using development defaults for JWT_SECRET and/or ADMIN_PASSWORD. "
+            "Set them (see .env.example) before exposing this server."
+        )
     settings.storage_dir.mkdir(parents=True, exist_ok=True)
     init_db()
     db = SessionLocal()
