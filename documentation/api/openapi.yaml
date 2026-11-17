@@ -1,0 +1,1461 @@
+openapi: 3.1.0
+info:
+  title: FoodChainIQ API
+  version: 1.0.0-draft
+  summary: Data lake, visualization and supply-chain simulation API for FoodChainIQ.
+  description: |
+    API for the four FoodChainIQ windows: Home (auth), Data Lake (datasets),
+    Visualization (summaries) and Simulation (scenario runs).
+
+    Operations tagged `x-status: live` exist in `backend/` today; `planned`
+    operations are specification only. Human-readable reference:
+    `documentation/api/README.md`.
+servers:
+  - url: http://localhost:8000/api
+    description: Local development
+  - url: https://api.foodchainiq.example/api
+    description: Production (placeholder)
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Groups
+  - name: Datasets
+  - name: Removal requests
+  - name: Metadata
+  - name: Selections
+  - name: Visualization
+  - name: Simulation
+  - name: Admin
+
+paths:
+  # ---------------------------------------------------------------- Auth
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Sign in with email and password
+      x-status: planned
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '200':
+          description: Signed in. Sets the `fciq_refresh` httpOnly cookie.
+          headers:
+            Set-Cookie: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Exchange the refresh cookie for a new access token
+      x-status: planned
+      security:
+        - refreshCookie: []
+      responses:
+        '200':
+          description: New access token; refresh cookie rotated.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke the refresh token
+      x-status: planned
+      responses:
+        '204': { description: Signed out }
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user
+      x-status: planned
+      responses:
+        '200':
+          description: The signed-in user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /stats/public:
+    get:
+      tags: [Auth]
+      summary: Public catalogue teaser numbers for the Home page
+      x-status: planned
+      security: []
+      responses:
+        '200':
+          description: Counts only, no dataset content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  public_datasets: { type: integer }
+                  categories:
+                    type: object
+                    additionalProperties: { type: integer }
+
+  # ---------------------------------------------------------------- Groups
+  /groups:
+    get:
+      tags: [Groups]
+      summary: Groups the caller belongs to (all groups for admins)
+      x-status: planned
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated groups
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/Group' }
+  /groups/{group_id}/members:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+    get:
+      tags: [Groups]
+      summary: List members of a group
+      x-status: planned
+      responses:
+        '200':
+          description: Members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/GroupMember' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Groups]
+      summary: Add a member (group admin)
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id]
+              properties:
+                user_id: { type: string }
+                role: { type: string, enum: [member, admin], default: member }
+      responses:
+        '201':
+          description: Added
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/GroupMember' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /groups/{group_id}/members/{user_id}:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+      - name: user_id
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [Groups]
+      summary: Remove a member (group admin)
+      x-status: planned
+      responses:
+        '204': { description: Removed }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ---------------------------------------------------------------- Datasets
+  /datasets:
+    get:
+      tags: [Datasets]
+      summary: List datasets visible to the caller (Data Lake grid)
+      x-status: planned
+      parameters:
+        - name: scope
+          in: query
+          schema: { type: string, enum: [all, mine, groups, public], default: all }
+        - name: q
+          in: query
+          description: Full-text search over title, description, keywords
+          schema: { type: string }
+        - name: category
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/Category' }
+        - name: format
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/FileFormat' }
+        - name: visibility
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/Visibility' }
+        - name: group_id
+          in: query
+          schema: { type: string }
+        - name: owner_id
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/DatasetStatus' }
+        - name: updated_after
+          in: query
+          schema: { type: string, format: date }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [updated_at, -updated_at, title, -title, size_bytes, -size_bytes]
+            default: -updated_at
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated datasets
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/Dataset' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Datasets]
+      summary: Upload a dataset (data files + one standard metadata file)
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [metadata, files, visibility]
+              properties:
+                metadata:
+                  type: string
+                  format: binary
+                  description: Exactly one metadata.json conforming to dataset-metadata.schema.json
+                files:
+                  type: array
+                  minItems: 1
+                  maxItems: 50
+                  items: { type: string, format: binary }
+                visibility: { $ref: '#/components/schemas/Visibility' }
+                group_id:
+                  type: string
+                  description: Required when visibility is `group`
+            encoding:
+              metadata:
+                contentType: application/json
+      responses:
+        '202':
+          description: Accepted; ingestion runs in the background (status `processing`).
+          headers:
+            Location: { schema: { type: string } }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dataset' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '413': { $ref: '#/components/responses/TooLarge' }
+        '415': { $ref: '#/components/responses/UnsupportedFormat' }
+  /datasets/{dataset_id}:
+    parameters:
+      - $ref: '#/components/parameters/DatasetId'
+    get:
+      tags: [Datasets]
+      summary: Dataset details (metadata + file column profiles)
+      x-status: planned
+      responses:
+        '200':
+          description: Dataset
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DatasetDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Datasets]
+      summary: Edit descriptive fields or visibility (owner)
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                description: { type: string }
+                keywords:
+                  type: array
+                  items: { type: string }
+                visibility: { $ref: '#/components/schemas/Visibility' }
+                group_id: { type: [string, 'null'] }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dataset' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /datasets/{dataset_id}/files:
+    parameters:
+      - $ref: '#/components/parameters/DatasetId'
+    put:
+      tags: [Datasets]
+      summary: Upload a new version of the dataset's files (owner)
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [metadata, files]
+              properties:
+                metadata: { type: string, format: binary }
+                files:
+                  type: array
+                  items: { type: string, format: binary }
+      responses:
+        '202':
+          description: New version accepted (version incremented)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dataset' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /datasets/{dataset_id}/files/{file_id}:
+    parameters:
+      - $ref: '#/components/parameters/DatasetId'
+      - name: file_id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Datasets]
+      summary: Download a file (redirect to a signed URL; audit-logged)
+      x-status: planned
+      responses:
+        '302':
+          description: Redirect to short-lived signed object-storage URL
+          headers:
+            Location: { schema: { type: string, format: uri } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /datasets/{dataset_id}/metadata:
+    parameters:
+      - $ref: '#/components/parameters/DatasetId'
+    get:
+      tags: [Datasets]
+      summary: The original metadata file
+      x-status: planned
+      responses:
+        '200':
+          description: metadata.json as uploaded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DatasetMetadata' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /datasets/{dataset_id}/preview:
+    parameters:
+      - $ref: '#/components/parameters/DatasetId'
+    get:
+      tags: [Datasets]
+      summary: First rows / features of a file
+      x-status: planned
+      parameters:
+        - name: file_id
+          in: query
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, maximum: 200 }
+      responses:
+        '200':
+          description: Preview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file_id: { type: string }
+                  columns:
+                    type: array
+                    items: { type: string }
+                  rows:
+                    type: array
+                    items: { type: array, items: {} }
+                  truncated: { type: boolean }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /datasets/{dataset_id}/summary:
+    parameters:
+      - $ref: '#/components/parameters/DatasetId'
+    get:
+      tags: [Visualization]
+      summary: Visual summary of one dataset
+      x-status: planned
+      responses:
+        '200':
+          description: Summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DatasetSummary' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /datasets/{dataset_id}/geometry:
+    parameters:
+      - $ref: '#/components/parameters/DatasetId'
+    get:
+      tags: [Visualization]
+      summary: GeoJSON features for map display
+      x-status: planned
+      parameters:
+        - name: file_id
+          in: query
+          schema: { type: string }
+        - name: simplify
+          in: query
+          description: Simplification tolerance in degrees
+          schema: { type: number, minimum: 0 }
+        - name: bbox
+          in: query
+          description: minx,miny,maxx,maxy
+          schema: { type: string }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 5000, maximum: 50000 }
+      responses:
+        '200':
+          description: GeoJSON FeatureCollection
+          content:
+            application/geo+json:
+              schema:
+                type: object
+                properties:
+                  type: { const: FeatureCollection }
+                  features:
+                    type: array
+                    items: { type: object }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------- Removal requests
+  /datasets/{dataset_id}/removal-requests:
+    parameters:
+      - $ref: '#/components/parameters/DatasetId'
+    post:
+      tags: [Removal requests]
+      summary: Request removal of an own dataset
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, minLength: 5, maxLength: 2000 }
+      responses:
+        '201':
+          description: Request created (status `pending`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RemovalRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /removal-requests:
+    get:
+      tags: [Removal requests]
+      summary: The caller's removal requests
+      x-status: planned
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/RemovalStatus' }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated requests
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/RemovalRequest' }
+  /removal-requests/{request_id}:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    get:
+      tags: [Removal requests]
+      summary: One removal request
+      x-status: planned
+      responses:
+        '200':
+          description: Request
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RemovalRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /removal-requests/{request_id}/cancel:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      tags: [Removal requests]
+      summary: Cancel a pending request (requester)
+      x-status: planned
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RemovalRequest' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  # ---------------------------------------------------------------- Metadata
+  /metadata/template:
+    get:
+      tags: [Metadata]
+      summary: Download a pre-filled metadata.json template
+      x-status: planned
+      responses:
+        '200':
+          description: Template
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DatasetMetadata' }
+  /metadata/validate:
+    post:
+      tags: [Metadata]
+      summary: Validate a metadata file without uploading data
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DatasetMetadata' }
+          multipart/form-data:
+            schema:
+              type: object
+              required: [metadata]
+              properties:
+                metadata: { type: string, format: binary }
+      responses:
+        '200':
+          description: Validation result (200 even when invalid)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [valid, errors]
+                properties:
+                  valid: { type: boolean }
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path: { type: string, description: JSON Pointer }
+                        message: { type: string }
+
+  # ---------------------------------------------------------------- Selections
+  /selections:
+    post:
+      tags: [Selections]
+      summary: Save the Data Lake selection (handed to Visualization and Simulation)
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dataset_ids]
+              properties:
+                dataset_ids:
+                  type: array
+                  minItems: 1
+                  maxItems: 20
+                  uniqueItems: true
+                  items: { type: string }
+      responses:
+        '201':
+          description: Selection created; dataset versions pinned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Selection' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /selections/{selection_id}:
+    parameters:
+      - $ref: '#/components/parameters/SelectionId'
+    get:
+      tags: [Selections]
+      summary: Get a selection (access re-checked)
+      x-status: planned
+      responses:
+        '200':
+          description: Selection
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Selection' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------- Visualization
+  /visualizations/summary:
+    get:
+      tags: [Visualization]
+      summary: Visual summary of a selection (Window 3)
+      x-status: planned
+      parameters:
+        - $ref: '#/components/parameters/SelectionIdQueryRequired'
+      responses:
+        '200':
+          description: Summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SelectionSummary' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------- Simulation
+  /health:
+    get:
+      tags: [Simulation]
+      summary: Liveness and network size
+      x-status: live
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  nodes: { type: integer }
+                  edges: { type: integer }
+                  total_demand_tpd: { type: number }
+  /network:
+    get:
+      tags: [Simulation]
+      summary: Baseline network, optionally merged with a selection
+      description: '`selection_id` is planned; without it the live behaviour is unchanged.'
+      x-status: live
+      parameters:
+        - $ref: '#/components/parameters/SelectionIdQuery'
+      responses:
+        '200':
+          description: Network
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Network' }
+  /presets:
+    get:
+      tags: [Simulation]
+      summary: Named example scenarios
+      x-status: live
+      responses:
+        '200':
+          description: Presets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: { type: string }
+                    name: { type: string }
+                    description: { type: string }
+                    scenario: { $ref: '#/components/schemas/Scenario' }
+  /simulation/context:
+    get:
+      tags: [Simulation]
+      summary: How a selection maps onto the simulation model
+      x-status: planned
+      parameters:
+        - $ref: '#/components/parameters/SelectionIdQueryRequired'
+      responses:
+        '200':
+          description: Context
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SimulationContext' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /simulate:
+    post:
+      tags: [Simulation]
+      summary: Run a disruption scenario
+      description: '`selection_id` in the body is planned; omit it for the synthetic baseline (live behaviour).'
+      x-status: live
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Scenario' }
+      responses:
+        '200':
+          description: Simulation result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SimulationResult' }
+        '422':
+          description: Invalid scenario (FastAPI validation error)
+  /simulations:
+    get:
+      tags: [Simulation]
+      summary: The caller's run history
+      x-status: planned
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated runs
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/SimulationRun' }
+  /simulations/{run_id}:
+    parameters:
+      - name: run_id
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Simulation]
+      summary: One stored run (scenario, pinned dataset versions, result)
+      x-status: planned
+      responses:
+        '200':
+          description: Run
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SimulationRun' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------- Admin
+  /admin/removal-requests:
+    get:
+      tags: [Admin]
+      summary: Removal request queue
+      x-status: planned
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/RemovalStatus' }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated requests
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/RemovalRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/removal-requests/{request_id}/decision:
+    parameters:
+      - $ref: '#/components/parameters/RequestId'
+    post:
+      tags: [Admin]
+      summary: Approve or reject a removal request
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [approve, reject] }
+                note: { type: string }
+      responses:
+        '200':
+          description: Decided
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RemovalRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List users
+      x-status: planned
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated users
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/User' }
+    post:
+      tags: [Admin]
+      summary: Invite a user
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, display_name]
+              properties:
+                email: { type: string, format: email }
+                display_name: { type: string }
+                role: { $ref: '#/components/schemas/UserRole' }
+      responses:
+        '201':
+          description: Invited
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+  /admin/users/{user_id}:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema: { type: string }
+    patch:
+      tags: [Admin]
+      summary: Change role, quota or disable a user
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role: { $ref: '#/components/schemas/UserRole' }
+                quota_bytes: { type: integer }
+                disabled: { type: boolean }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+  /admin/groups:
+    post:
+      tags: [Admin]
+      summary: Create a group
+      x-status: planned
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                description: { type: string }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Group' }
+  /admin/audit-log:
+    get:
+      tags: [Admin]
+      summary: Audit log
+      x-status: planned
+      parameters:
+        - { name: actor_id, in: query, schema: { type: string } }
+        - { name: dataset_id, in: query, schema: { type: string } }
+        - { name: action, in: query, schema: { $ref: '#/components/schemas/AuditAction' } }
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated audit events
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id: { type: string }
+                            at: { type: string, format: date-time }
+                            actor: { $ref: '#/components/schemas/UserRef' }
+                            action: { $ref: '#/components/schemas/AuditAction' }
+                            target: { type: object, additionalProperties: true }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    refreshCookie:
+      type: apiKey
+      in: cookie
+      name: fciq_refresh
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSize:
+      name: page_size
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 25 }
+    DatasetId:
+      name: dataset_id
+      in: path
+      required: true
+      schema: { type: string, example: ds_8f2k }
+    GroupId:
+      name: group_id
+      in: path
+      required: true
+      schema: { type: string, example: grp_vk }
+    RequestId:
+      name: request_id
+      in: path
+      required: true
+      schema: { type: string, example: rr_7c1d }
+    SelectionId:
+      name: selection_id
+      in: path
+      required: true
+      schema: { type: string, example: sel_3hq9 }
+    SelectionIdQuery:
+      name: selection_id
+      in: query
+      required: false
+      schema: { type: string }
+    SelectionIdQueryRequired:
+      name: selection_id
+      in: query
+      required: true
+      schema: { type: string }
+
+  responses:
+    BadRequest:
+      description: Validation error (e.g. metadata_missing, invalid_metadata, file_mismatch)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Missing, invalid or expired credentials
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Not allowed (e.g. visibility_not_allowed, not owner)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not found or not visible to the caller
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Conflict:
+      description: State conflict (e.g. removal_already_pending, dataset_not_ready)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooLarge:
+      description: upload_too_large or quota_exceeded
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    UnsupportedFormat:
+      description: unsupported_format
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    RateLimited:
+      description: Too many requests
+      headers:
+        Retry-After: { schema: { type: integer } }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string, example: dataset_not_found }
+            message: { type: string }
+            details: { type: object, additionalProperties: true }
+    Page:
+      type: object
+      required: [items, page, page_size, total]
+      properties:
+        items: { type: array, items: {} }
+        page: { type: integer }
+        page_size: { type: integer }
+        total: { type: integer }
+
+    # -- auth / users
+    UserRole: { type: string, enum: [user, admin] }
+    UserRef:
+      type: object
+      properties:
+        id: { type: string }
+        display_name: { type: string }
+    User:
+      type: object
+      properties:
+        id: { type: string, example: usr_41ab }
+        email: { type: string, format: email }
+        display_name: { type: string }
+        role: { $ref: '#/components/schemas/UserRole' }
+        groups:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+              role: { type: string, enum: [member, admin] }
+        storage:
+          type: object
+          properties:
+            used_bytes: { type: integer }
+            quota_bytes: { type: integer }
+        disabled: { type: boolean }
+    TokenResponse:
+      type: object
+      required: [access_token, token_type, expires_in, user]
+      properties:
+        access_token: { type: string }
+        token_type: { const: Bearer }
+        expires_in: { type: integer, example: 900 }
+        user: { $ref: '#/components/schemas/User' }
+    Group:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        role: { type: string, enum: [member, admin], description: The caller's role in the group }
+        member_count: { type: integer }
+    GroupMember:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/UserRef' }
+        role: { type: string, enum: [member, admin] }
+        added_at: { type: string, format: date-time }
+
+    # -- datasets
+    Visibility: { type: string, enum: [private, group, public] }
+    DatasetStatus: { type: string, enum: [uploading, processing, ready, invalid, removed] }
+    Sensitivity: { type: string, enum: [open, internal, restricted] }
+    Category:
+      type: string
+      enum: [production, processing, logistics, energy, water, population, demand, vulnerability, other]
+    FileFormat:
+      type: string
+      enum: [csv, xlsx, geojson, gpkg, shapefile, parquet, json]
+    SimulationRole:
+      type: string
+      enum: [production, processing, logistics, energy, population, demand, reference]
+    DatasetFile:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        format: { $ref: '#/components/schemas/FileFormat' }
+        size_bytes: { type: integer }
+        record_count: { type: [integer, 'null'] }
+    ColumnProfile:
+      type: object
+      properties:
+        name: { type: string }
+        type: { type: string }
+        unit: { type: string }
+        missing_pct: { type: number }
+        min: {}
+        max: {}
+        mean: { type: number }
+        top_values:
+          type: array
+          items:
+            type: object
+            properties:
+              value: {}
+              count: { type: integer }
+        histogram:
+          type: object
+          properties:
+            bins: { type: array, items: { type: number } }
+            counts: { type: array, items: { type: integer } }
+    Dataset:
+      type: object
+      required: [id, version, title, category, owner, visibility, status]
+      properties:
+        id: { type: string }
+        version: { type: integer }
+        title: { type: string }
+        description: { type: string }
+        category: { $ref: '#/components/schemas/Category' }
+        keywords: { type: array, items: { type: string } }
+        owner: { $ref: '#/components/schemas/UserRef' }
+        visibility: { $ref: '#/components/schemas/Visibility' }
+        group:
+          oneOf:
+            - type: 'null'
+            - type: object
+              properties:
+                id: { type: string }
+                name: { type: string }
+        status: { $ref: '#/components/schemas/DatasetStatus' }
+        status_reason: { type: [string, 'null'] }
+        sensitivity: { $ref: '#/components/schemas/Sensitivity' }
+        license: { type: string }
+        files:
+          type: array
+          items: { $ref: '#/components/schemas/DatasetFile' }
+        spatial:
+          type: object
+          properties:
+            crs: { type: string }
+            bbox: { type: array, items: { type: number }, minItems: 4, maxItems: 4 }
+            has_geometry: { type: boolean }
+        temporal:
+          type: object
+          properties:
+            start: { type: string, format: date }
+            end: { type: string, format: date }
+            resolution: { type: string }
+        simulation:
+          type: object
+          properties:
+            role: { $ref: '#/components/schemas/SimulationRole' }
+        removal_request:
+          oneOf:
+            - type: 'null'
+            - type: object
+              properties:
+                id: { type: string }
+                status: { $ref: '#/components/schemas/RemovalStatus' }
+        size_bytes: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        permissions:
+          type: object
+          properties:
+            can_edit: { type: boolean }
+            can_request_removal: { type: boolean }
+            can_download: { type: boolean }
+    DatasetDetail:
+      allOf:
+        - $ref: '#/components/schemas/Dataset'
+        - type: object
+          properties:
+            metadata: { $ref: '#/components/schemas/DatasetMetadata' }
+            files:
+              type: array
+              items:
+                allOf:
+                  - $ref: '#/components/schemas/DatasetFile'
+                  - type: object
+                    properties:
+                      columns:
+                        type: array
+                        items: { $ref: '#/components/schemas/ColumnProfile' }
+    DatasetMetadata:
+      description: >
+        Standard metadata file. Authoritative definition:
+        documentation/api/dataset-metadata.schema.json (JSON Schema 2020-12).
+      type: object
+      required: [schema_version, title, description, category, source, license, sensitivity, files]
+      properties:
+        schema_version: { const: '1.0' }
+        title: { type: string }
+        description: { type: string }
+        category: { $ref: '#/components/schemas/Category' }
+        keywords: { type: array, items: { type: string } }
+        source: { type: object }
+        license: { type: string }
+        contact: { type: object }
+        sensitivity: { $ref: '#/components/schemas/Sensitivity' }
+        spatial: { type: object }
+        temporal: { type: object }
+        files: { type: array, items: { type: object } }
+        simulation:
+          type: object
+          properties:
+            role: { $ref: '#/components/schemas/SimulationRole' }
+            mapping: { type: object, additionalProperties: { type: string } }
+
+    # -- removal
+    RemovalStatus: { type: string, enum: [pending, approved, rejected, cancelled] }
+    RemovalRequest:
+      type: object
+      properties:
+        id: { type: string }
+        dataset:
+          type: object
+          properties:
+            id: { type: string }
+            title: { type: string }
+        requested_by: { $ref: '#/components/schemas/UserRef' }
+        reason: { type: string }
+        status: { $ref: '#/components/schemas/RemovalStatus' }
+        decided_by: { oneOf: [{ type: 'null' }, { $ref: '#/components/schemas/UserRef' }] }
+        decision_note: { type: [string, 'null'] }
+        created_at: { type: string, format: date-time }
+        decided_at: { type: [string, 'null'], format: date-time }
+
+    # -- selections & visualization
+    Selection:
+      type: object
+      properties:
+        id: { type: string }
+        datasets:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              version: { type: integer }
+              title: { type: string }
+              simulation_role: { $ref: '#/components/schemas/SimulationRole' }
+        unavailable:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              reason: { type: string, enum: [removed, access_revoked] }
+        created_by: { type: string }
+        created_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+    Chart:
+      type: object
+      properties:
+        kind: { type: string, enum: [timeseries, bar, histogram, point_map, choropleth, table] }
+        title: { type: string }
+        x: { type: string }
+        y: { type: string }
+        agg: { type: string, enum: [sum, mean, count, min, max] }
+        data: { type: array, items: {} }
+        geometry_url: { type: string }
+    DatasetSummary:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        category: { $ref: '#/components/schemas/Category' }
+        simulation_role: { $ref: '#/components/schemas/SimulationRole' }
+        record_count: { type: integer }
+        bbox: { type: array, items: { type: number } }
+        fields:
+          type: array
+          items: { $ref: '#/components/schemas/ColumnProfile' }
+        charts:
+          type: array
+          items: { $ref: '#/components/schemas/Chart' }
+    SelectionSummary:
+      type: object
+      properties:
+        selection_id: { type: string }
+        generated_at: { type: string, format: date-time }
+        overview:
+          type: object
+          properties:
+            dataset_count: { type: integer }
+            total_records: { type: integer }
+            features_with_geometry: { type: integer }
+            time_span:
+              type: object
+              properties:
+                start: { type: string, format: date }
+                end: { type: string, format: date }
+            combined_bbox: { type: array, items: { type: number } }
+            municipalities_covered: { type: integer }
+        datasets:
+          type: array
+          items: { $ref: '#/components/schemas/DatasetSummary' }
+        cross_checks:
+          type: array
+          items:
+            type: object
+            properties:
+              level: { type: string, enum: [info, warning, error] }
+              code: { type: string }
+              message: { type: string }
+        simulation_readiness:
+          type: object
+          description: Per input role, `baseline` or `dataset:<id>`
+          additionalProperties: { type: string }
+
+    # -- simulation (live models in backend/app/models.py)
+    Disruption:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [edge_closure, node_outage, energy_outage, production_shock, fuel_shortage]
+        edge_id: { type: string }
+        node_id: { type: string }
+        capacity_factor: { type: number, minimum: 0, maximum: 1 }
+        backup_factor: { type: number, minimum: 0, maximum: 1 }
+        factor: { type: number, minimum: 0, maximum: 1 }
+    Scenario:
+      type: object
+      properties:
+        name: { type: string }
+        duration_days: { type: integer, minimum: 1, default: 14 }
+        selection_id:
+          type: string
+          description: Planned. Run against the network merged with this selection.
+        disruptions:
+          type: array
+          items: { $ref: '#/components/schemas/Disruption' }
+    SimulationResult:
+      description: >
+        Live response from backend/app/models.py (per-town impact and day-by-day
+        timeline). Planned additions: run_id and inputs.
+      type: object
+      additionalProperties: true
+      properties:
+        run_id: { type: string, description: Planned }
+        inputs:
+          description: Planned
+          type: object
+          properties:
+            selection_id: { type: string }
+            datasets:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: string }
+                  version: { type: integer }
+    SimulationRun:
+      type: object
+      properties:
+        run_id: { type: string }
+        created_at: { type: string, format: date-time }
+        scenario: { $ref: '#/components/schemas/Scenario' }
+        result: { $ref: '#/components/schemas/SimulationResult' }
+    Network:
+      type: object
+      properties:
+        meta:
+          type: object
+          additionalProperties: true
+          properties:
+            sources:
+              description: Planned. Which dataset each node/edge came from.
+              type: object
+              additionalProperties: { type: string }
+        disclaimer: { type: string }
+        nodes: { type: array, items: { type: object } }
+        edges: { type: array, items: { type: object } }
+    SimulationContext:
+      type: object
+      properties:
+        selection_id: { type: string }
+        inputs:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              source: { type: string, enum: [baseline, dataset] }
+              dataset_id: { type: string }
+              version: { type: integer }
+              nodes_added: { type: integer }
+              nodes_replaced: { type: integer }
+              edges_replaced: { type: integer }
+        map_layers:
+          type: array
+          items:
+            type: object
+            properties:
+              dataset_id: { type: string }
+              title: { type: string }
+              geometry_url: { type: string }
+        warnings: { type: array, items: { type: string } }
+
+    AuditAction:
+      type: string
+      enum: [login, dataset.upload, dataset.update, dataset.visibility_change, dataset.download, removal.request, removal.decision, simulation.run]

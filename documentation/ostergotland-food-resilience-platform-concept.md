@@ -1,15 +1,15 @@
-# Östergötland Food Supply Chain Resilience Platform
+# FoodChainIQ — Östergötland Food Supply Chain Resilience Platform
 ### Concept & Architecture Document
 
 Prepared for: Vreta Kluster, Östergötland municipalities, Länsstyrelsen Östergötland, and partners in the InGenious 2026 programme
 Prepared by: Tharindu (InGenious-2026-VK)
-Date: September 2026
+Date: September 2026 · Revised: November 2026 (renamed to FoodChainIQ; added the four-window application structure and the data lake)
 
 ---
 
 ## 1. Executive Summary
 
-Östergötland needs a shared, visual picture of how food actually moves through the region — from field to storage to transport to plate — and of where that system is fragile. This document proposes a **digital platform that visualises Östergötland's food supply chain as a stack of interactive map layers**: production, processing, storage, logistics, energy and water dependencies, and demand. Layered together, these let planners see not just *what* exists, but *how it depends on what else* — so that a disruption (a blocked road, a lost power connection, a fuel shortage) can be traced through to its effect on food reaching people.
+Östergötland needs a shared, visual picture of how food actually moves through the region — from field to storage to transport to plate — and of where that system is fragile. This document proposes **FoodChainIQ**, a **digital platform that visualises Östergötland's food supply chain as a stack of interactive map layers**: production, processing, storage, logistics, energy and water dependencies, and demand. Layered together, these let planners see not just *what* exists, but *how it depends on what else* — so that a disruption (a blocked road, a lost power connection, a fuel shortage) can be traced through to its effect on food reaching people.
 
 The timing is deliberate. In July 2026 the Swedish government adopted its first national **supply preparedness strategy** (försörjningsberedskap), explicitly built around the 2024 total defence decision and the 2025–2030 defence period, with food and drinking water named as priority areas. In May 2026, Sweden's county governors met in Linköping specifically to discuss total defence and food supply — putting Östergötland at the centre of this conversation. And Östergötland already has its own regional food strategy roadmap, *Från östgötsk jord till våra bord*, whose fourth pillar is explicitly "security and resilience." What Östergötland does not yet have is a shared operational tool that turns these strategies into something planners, producers, and civil-defence actors can actually look at, query, and plan against together.
 
@@ -52,7 +52,33 @@ At its core, the platform is a **map of Östergötland with switchable, combinab
 Two views are intended to sit on top of the same layered data:
 
 - **A planning view**, open to municipalities, Vreta Kluster members, and regional planners, for everyday use in investment and strategy discussions — aligned with the food strategy roadmap's "competitiveness" and "public procurement" goals.
-- **A resilience/scenario view**, with more restricted access, for Länsstyrelsen Östergötland, MSB-aligned civil-defence planners, and total-defence exercises — where sensitive detail (exact capacities, single points of failure) is visible only to those with a legitimate planning need. Section 10 addresses why this split matters.
+- **A resilience/scenario view**, with more restricted access, for Länsstyrelsen Östergötland, MSB-aligned civil-defence planners, and total-defence exercises — where sensitive detail (exact capacities, single points of failure) is visible only to those with a legitimate planning need. Section 9 addresses why this split matters.
+
+### 4.1 Application structure: four windows
+
+FoodChainIQ is delivered as four connected windows, used in sequence. The full
+functional specification is in `foodchainiq-application-windows.md`, and the
+API is in `api/README.md`.
+
+1. **Home**: the project's public website. Visitors can read about the
+   platform and sign in. Once signed in, a **To data lake** button appears.
+2. **Data Lake**: a file-browser home page in the style of Google Drive.
+   Users browse the datasets they are allowed to see and select one or more
+   of them. They can also upload new datasets (one or more data files plus a
+   standard metadata file), choosing whether each is **private**, shared with
+   a **group**, or **public** to all signed-in users. Owners can request
+   removal of their own datasets.
+3. **Visualization**: a visual summary of the selected datasets, covering
+   coverage, field profiles, automatic charts, cross-dataset checks and how
+   ready the selection is for simulation. It opens from **To Visualization**.
+4. **Simulation**: the scenario workspace, which runs disruption scenarios on
+   the network built from the selected datasets. Anything the selection does
+   not provide falls back to a baseline. It opens from **To simulation**.
+
+The Data Lake is how the partner-contributed data described in Sections 5
+and 10 gets onto the platform. The private / group / public visibility levels,
+together with the metadata `sensitivity` classification, put into practice
+the tiered access required by Section 9.
 
 ---
 
@@ -97,10 +123,12 @@ Each layer is intended to draw on existing open or semi-open Swedish data infras
 
 At the concept level, the platform has four functional layers (deliberately described here without committing to specific technologies, so the choice of GIS engine, database, and hosting can be made once data-access agreements with partners are clearer):
 
-1. **Data layer** — ingests and stores the geospatial and attribute data for each map layer, from both open sources (Jordbruksverket, Lantmäteriet, SCB) and partner-contributed sources (Vreta Kluster network, municipalities, Länsstyrelsen).
+1. **Data layer** — ingests and stores the geospatial and attribute data for each map layer, from both open sources (Jordbruksverket, Lantmäteriet, SCB) and partner-contributed sources (Vreta Kluster network, municipalities, Länsstyrelsen). In FoodChainIQ this is the **Data Lake**: versioned datasets in object storage, each described by a standard metadata file and carrying private / group / public visibility.
 2. **Map & visualisation layer** — the interactive map interface itself: layer toggling, zoom from region down to facility level, and combined-layer views.
 3. **Scenario & analysis layer** — the logic that lets a user simulate "remove this node/link" and see downstream effects, and that derives the vulnerability overlay from the underlying layers.
 4. **Access & governance layer** — controls who sees what: the open planning view versus the restricted resilience view described in Section 4, with authentication and audit logging for the sensitive layers.
+
+These layers map onto the four application windows: Home (access), Data Lake (data), Visualization (map & visualisation) and Simulation (scenario & analysis). They talk to one backend API, specified in `api/openapi.yaml`.
 
 This structure is intended to let the project start small (a public planning view built entirely on open data) and grow into the more sensitive resilience-planning capability as data-sharing agreements and security review catch up — see the roadmap below.
 
@@ -113,6 +141,7 @@ A platform that maps food-critical infrastructure for wartime planning is, by it
 - **Tiered access from day one.** The public/planning view should never contain the level of detail (exact capacities, single-supplier dependencies, specific vulnerability findings) that the restricted resilience view does.
 - **Data-sharing agreements, not scraping.** Sensitive infrastructure and capacity data should be contributed under explicit agreement with each data owner (municipalities, companies, agencies), not inferred or aggregated from public sources in a way that reconstructs what those owners chose not to publish.
 - **Alignment with existing classification practice.** Länsstyrelsen and MSB already have frameworks for handling security-sensitive information in civil-defence contexts; the platform's restricted layer should be built to fit inside that practice rather than invent a parallel one.
+- **Dataset visibility and sensitivity.** Every dataset uploaded to the Data Lake is private, group-shared or public ("public" means visible to signed-in users only, never anonymous visitors). Its metadata declares a sensitivity of `open`, `internal` or `restricted`, and `restricted` data can never be made public. Owners cannot hard-delete a dataset. They request removal, an admin decides, and the decision is audit-logged.
 - **This is a genuine open design question, not a footnote** — it should be raised directly with Länsstyrelsen Östergötland and, if relevant, MSB, early in the project, before detailed infrastructure data is collected.
 
 ---

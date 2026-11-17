@@ -1,4 +1,4 @@
-# Simulation backend
+# FoodChainIQ backend
 
 Python service that turns the Östergötland food supply chain into a **disruption
 simulator**: describe a shock (a severed corridor, a substation failure, a poor
@@ -7,7 +7,14 @@ food demand goes unmet and how many people are affected.
 
 This is the "scenario & analysis layer" from the concept document
 (`../documentation/ostergotland-food-resilience-platform-concept.md`, Sections 4,
-6 and 8.3).
+6 and 8.3). It powers **Window 4 (Simulation)** of FoodChainIQ.
+
+> **Planned extensions.** This service will also host the auth, Data Lake,
+> selection and visualization endpoints, and `/api/network` and
+> `/api/simulate` will take an optional `selection_id` so that runs use the
+> datasets the user selected. The full specification is in
+> `../documentation/api/README.md` and `../documentation/api/openapi.yaml`.
+> The endpoints listed below are the ones live today.
 
 ## Stack
 
@@ -36,7 +43,7 @@ cd backend
 pytest -q
 ```
 
-## API
+## API (live)
 
 | Method | Path            | Purpose |
 |--------|-----------------|---------|

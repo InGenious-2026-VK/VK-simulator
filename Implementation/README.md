@@ -1,12 +1,24 @@
 # Implementation
 
-Prototype web app for the Östergötland Food Supply Chain Resilience Platform
-— a GIS analysis **workspace** built with React + Vite + MapLibre GL. The UI
+Prototype web app for **FoodChainIQ**, the Östergötland Food Supply Chain
+Resilience Platform. Today it is the **Simulation window (Window 4)**: a GIS
+analysis **workspace** built with React + Vite + MapLibre GL. The UI
 follows the Claude Design handoff in
 `../documentation/InGenious-2026 GIS mockups-handoff.zip`: a top app bar, a
 three-panel workspace (Layers · Simulation + Map · Results) and a bottom
 timeline, with collapsible panels, a focus mode, an A/B compare view and a
 "New scenario" wizard.
+
+### Planned windows
+
+FoodChainIQ adds three windows in front of this workspace: **Home** (`/`,
+project website + login), **Data Lake** (`/datalake`) and **Visualization**
+(`/visualize?selection=…`). The workspace moves to `/simulate?selection=…`
+and loads the selected datasets. See
+`../documentation/foodchainiq-application-windows.md` and
+`../documentation/api/README.md`. These need client-side routing (e.g.
+React Router) and new `src/api/client.js` wrappers for the endpoints
+specified there.
 
 ## Stack
 
