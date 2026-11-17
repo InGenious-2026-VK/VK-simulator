@@ -18,6 +18,7 @@ import openpyxl
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from app.viz.lake import lake_dir  # noqa: E402
+from app.viz.places import load_places  # noqa: E402
 
 SHEET = "SILOdata"
 # The sheet holds several tables. This one is the first, and its value column
@@ -25,22 +26,13 @@ SHEET = "SILOdata"
 VALUE_HEADER = "Svenskt ursprung"
 OUT_FILE = "swedish-vegetables-public-kitchens.csv"
 
-# The workbook has no coordinates. These are the municipality's main town
-# (WGS84 decimal degrees), keyed by the official municipality code.
+# The workbook has no coordinates. Positions come from the place master table
+# (app/data/reference/places.csv, a placeholder still to be reviewed): each
+# municipality is drawn at its seat. Östergötland is county code 05.
 PLACES = {
-    "0509": ("Ödeshög", 58.229, 14.653),
-    "0512": ("Ydre", 57.826, 15.274),
-    "0513": ("Kinda", 57.988, 15.632),
-    "0560": ("Boxholm", 58.197, 15.053),
-    "0561": ("Åtvidaberg", 58.201, 15.997),
-    "0562": ("Finspång", 58.706, 15.767),
-    "0563": ("Valdemarsvik", 58.203, 16.602),
-    "0580": ("Linköping", 58.411, 15.621),
-    "0581": ("Norrköping", 58.592, 16.186),
-    "0582": ("Söderköping", 58.481, 16.323),
-    "0583": ("Motala", 58.537, 15.037),
-    "0584": ("Vadstena", 58.449, 14.890),
-    "0586": ("Mjölby", 58.326, 15.124),
+    p["municipality_code"]: (p["name"], p["lat"], p["lon"])
+    for p in load_places()
+    if p["kind"] == "municipality" and p["county_code"] == "05"
 }
 
 

@@ -161,6 +161,12 @@ Copy `backend/scripts/ingest_farmland_use.py`, change the sheet name, the row
 labels and the output file name at the top, and run it. Then do steps 3–5 above.
 This step needs some Python.
 
+For a map, the sheet usually names places but has no coordinates. Look them up
+with `municipality()` or `town()` from `backend/app/viz/places.py`, as
+`ingest_swedish_vegetables.py` does. The table behind it
+(`backend/app/data/reference/places.csv`) is still a **placeholder**: not yet
+reviewed, and it has towns for Östergötland only. See the README next to it.
+
 ### Add a chart type
 
 The pie chart and the bubble map were added this way; their files are good

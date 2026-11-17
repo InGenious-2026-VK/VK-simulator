@@ -294,3 +294,56 @@ def test_every_view_of_every_shipped_dataset_meets_the_contract(monkeypatch):
         for view in views:
             raw = [{k: str(v) for k, v in r.items()} for r in view["rows"]]
             validate(raw, data["type"])
+
+
+# --- place master table (placeholder, see app/data/reference/README.md) -----
+
+from app.viz import places  # noqa: E402
+
+SWEDEN_LAT = (55.0, 69.1)
+SWEDEN_LON = (10.9, 24.2)
+
+
+def test_place_table_has_every_municipality_once():
+    codes = [p["municipality_code"] for p in places.load_places() if p["kind"] == "municipality"]
+    assert len(codes) == 290
+    assert len(set(codes)) == 290
+    assert all(len(c) == 4 and c.isdigit() for c in codes)
+
+
+def test_place_table_positions_are_in_sweden():
+    for p in places.load_places():
+        assert SWEDEN_LAT[0] <= p["lat"] <= SWEDEN_LAT[1], p
+        assert SWEDEN_LON[0] <= p["lon"] <= SWEDEN_LON[1], p
+
+
+def test_place_table_towns_belong_to_known_municipalities():
+    codes = {p["municipality_code"] for p in places.load_places() if p["kind"] == "municipality"}
+    rows = places.load_places()
+    assert {p["kind"] for p in rows} == {"municipality", "town"}
+    assert all(p["municipality_code"] in codes for p in rows)
+    assert all(p["reviewed"] in ("yes", "no") for p in rows)
+
+
+@pytest.mark.parametrize("key", ["0580", "580", "Linköping", "linköping", "Linköpings kommun"])
+def test_municipality_lookup(key):
+    p = places.municipality(key)
+    assert p["municipality_code"] == "0580"
+    assert p["name"] == "Linköping"
+
+
+def test_municipality_lookup_keeps_names_ending_in_s():
+    assert places.municipality("Borås kommun")["name"] == "Borås"
+
+
+def test_municipality_lookup_unknown():
+    with pytest.raises(KeyError):
+        places.municipality("Atlantis")
+
+
+def test_town_lookup():
+    kisa = places.town("Kisa")
+    assert kisa["municipality"] == "Kinda"
+    assert places.town("kisa", municipality_code="0513") == kisa
+    with pytest.raises(KeyError):
+        places.town("Kisa", municipality_code="0580")
