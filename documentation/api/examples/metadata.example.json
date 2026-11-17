@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "title": "Dairy processing capacity 2025",
+  "description": "Daily milk intake and cold-storage capacity of dairies and cheese plants in Östergötland, with monthly intake for 2025. Synthetic example data.",
+  "category": "processing",
+  "keywords": ["dairy", "cold chain", "processing capacity"],
+  "source": {
+    "organization": "Vreta Kluster producer network (example)",
+    "collected_at": "2026-01-15",
+    "method": "Producer survey, self-reported capacities"
+  },
+  "license": "CC-BY-4.0",
+  "contact": { "name": "Data steward", "email": "data@example.se" },
+  "sensitivity": "internal",
+  "spatial": {
+    "crs": "EPSG:4326",
+    "bbox": [14.9, 57.8, 16.9, 58.9],
+    "region": "Östergötland",
+    "geometry_type": "point"
+  },
+  "temporal": { "start": "2025-01-01", "end": "2025-12-31", "resolution": "month" },
+  "files": [
+    {
+      "name": "dairies.geojson",
+      "format": "geojson",
+      "description": "One point per facility.",
+      "columns": [
+        { "name": "facility_id", "type": "string", "role": "id" },
+        { "name": "name", "type": "string", "role": "name" },
+        { "name": "type", "type": "string", "role": "category", "description": "dairy | cheese | powder" },
+        { "name": "intake_tpd", "type": "number", "unit": "t/day", "role": "measure" },
+        { "name": "cold_storage_t", "type": "number", "unit": "tonnes", "role": "measure" },
+        { "name": "geometry", "type": "geometry", "role": "geometry" }
+      ]
+    },
+    {
+      "name": "capacity_by_month.csv",
+      "format": "csv",
+      "delimiter": ",",
+      "description": "Monthly average intake per facility.",
+      "columns": [
+        { "name": "month", "type": "date", "role": "time" },
+        { "name": "facility_id", "type": "string", "role": "id" },
+        { "name": "intake_tpd", "type": "number", "unit": "t/day", "role": "measure" }
+      ]
+    }
+  ],
+  "simulation": {
+    "role": "processing",
+    "mapping": {
+      "file": "dairies.geojson",
+      "id": "facility_id",
+      "name": "name",
+      "capacity_tpd": "intake_tpd",
+      "stock_tonnes": "cold_storage_t"
+    }
+  }
+}
