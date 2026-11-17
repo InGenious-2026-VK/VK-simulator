@@ -66,6 +66,7 @@ largest circle.
 |---|---|---|
 | GET | `/api/viz/datasets` | The manifest entries (without `file`) |
 | GET | `/api/viz/datasets/{id}` | One manifest entry plus `rows`, the validated CSV rows as JSON |
+| GET | `/api/viz/datasets/{id}/views?offset=0&limit=10` | One page of the dataset's views (cards of the data overview): `{dataset, total, offset, views}`. `limit` is 1–50 |
 
 Errors: `404` for an unknown id, `500` with a readable `detail` when a file is
 missing or breaks the contract.
@@ -80,6 +81,15 @@ import VisualisationPanel from './visualisation/VisualisationPanel.jsx';
 <VisualisationPanel datasetId="farmland-use" />
 ```
 
+The data overview (every dataset as a card stack) is a separate screen; it
+takes no props:
+
+```jsx
+import DataOverview from './visualisation/DataOverview.jsx';
+
+<DataOverview />
+```
+
 ## Decisions
 
 - **The data lake holds tidy CSV files only**, in the shape described above.
@@ -89,6 +99,16 @@ import VisualisationPanel from './visualisation/VisualisationPanel.jsx';
   main app's map (issue #25). It works wherever the panel is placed and leaves
   the main UI unchanged. Its background map is loaded from the same online
   service as the main map.
+- **Bubble map: size and colour are scaled between the lowest and the highest
+  value**, not from zero (decided 2026-11-17). Each place gets a level from 5%
+  (lowest) to 100% (highest) in 1% steps; the level sets the circle's area and
+  its colour, light pink to dark red. Circles carry no name labels; the tooltip
+  names a place. This makes differences easy to see, at the cost of
+  exaggerating them, so the legend always shows the real lowest and highest
+  values.
+- **The data overview is its own screen**, separate from the simulation screen
+  (issue #27). It does not go into the simulation UI or replace part of it.
+  How users get to it from the main app is decided by Erik, in separate issues.
 
 ## Open questions for the team
 
