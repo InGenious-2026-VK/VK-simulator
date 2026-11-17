@@ -1,0 +1,1460 @@
+date,series,value
+1980,Wheat flour,46.99
+1981,Wheat flour,47.19
+1982,Wheat flour,47.48
+1983,Wheat flour,47.66
+1984,Wheat flour,48.93
+1985,Wheat flour,49.27
+1986,Wheat flour,49.43
+1987,Wheat flour,49.86
+1988,Wheat flour,50.14
+1989,Wheat flour,50.79
+1990,Wheat flour,51.71
+1991,Wheat flour,50.98
+1992,Wheat flour,52.16
+1993,Wheat flour,53.54
+1994,Wheat flour,53.5
+1995,Wheat flour,51.77
+1996,Wheat flour,51.25
+1997,Wheat flour,53.82
+1998,Wheat flour,55.1
+1999,Wheat flour,54.4
+2000,Wheat flour,59.57
+2001,Wheat flour,56.49
+2002,Wheat flour,55.78
+2003,Wheat flour,57.13
+2004,Wheat flour,52.46
+2005,Wheat flour,52.12
+2006,Wheat flour,52.5
+2007,Wheat flour,50.39
+2008,Wheat flour,53.56
+2009,Wheat flour,48.96
+2010,Wheat flour,48.22
+2011,Wheat flour,45.21
+2012,Wheat flour,46.66
+2013,Wheat flour,46.2
+2014,Wheat flour,46.12
+2015,Wheat flour,44.44
+2016,Wheat flour,45.08
+2017,Wheat flour,44.77
+2018,Wheat flour,45.29
+2019,Wheat flour,43.48
+2020,Wheat flour,45.18
+2021,Wheat flour,44.9
+2022,Wheat flour,45.26
+1980,Rye flour,12.3
+1981,Rye flour,12.16
+1982,Rye flour,11.64
+1983,Rye flour,12.08
+1984,Rye flour,12.1
+1985,Rye flour,11.83
+1986,Rye flour,11.63
+1987,Rye flour,11.11
+1988,Rye flour,11
+1989,Rye flour,10.24
+1990,Rye flour,10
+1991,Rye flour,9.67
+1992,Rye flour,8.8
+1993,Rye flour,8.32
+1994,Rye flour,7.78
+1995,Rye flour,9.22
+1996,Rye flour,9.2
+1997,Rye flour,7.69
+1998,Rye flour,9.07
+1999,Rye flour,8.6
+2000,Rye flour,8.31
+2001,Rye flour,8.23
+2002,Rye flour,8.48
+2003,Rye flour,7.6
+2004,Rye flour,7.52
+2005,Rye flour,8.28
+2006,Rye flour,8.05
+2007,Rye flour,8.46
+2008,Rye flour,7.84
+2009,Rye flour,7.31
+2010,Rye flour,7.01
+2011,Rye flour,7.01
+2012,Rye flour,6.42
+2013,Rye flour,6.78
+2014,Rye flour,6.52
+2015,Rye flour,6.35
+2016,Rye flour,6.59
+2017,Rye flour,6.32
+2018,Rye flour,6.06
+2019,Rye flour,5.73
+2020,Rye flour,6.08
+2021,Rye flour,6.29
+2022,Rye flour,6.15
+1980,Rice and rice flour,2.31
+1981,Rice and rice flour,2.48
+1982,Rice and rice flour,2.73
+1983,Rice and rice flour,2.87
+1984,Rice and rice flour,2.72
+1985,Rice and rice flour,2.9
+1986,Rice and rice flour,3.65
+1987,Rice and rice flour,3.5
+1988,Rice and rice flour,3.59
+1989,Rice and rice flour,3.65
+1990,Rice and rice flour,4.17
+1991,Rice and rice flour,4.36
+1992,Rice and rice flour,4.53
+1993,Rice and rice flour,4.61
+1994,Rice and rice flour,4.84
+1995,Rice and rice flour,4.4
+1996,Rice and rice flour,3.47
+1997,Rice and rice flour,3.81
+1998,Rice and rice flour,4.14
+1999,Rice and rice flour,4.36
+2000,Rice and rice flour,4.33
+2001,Rice and rice flour,4.78
+2002,Rice and rice flour,4.98
+2003,Rice and rice flour,5.54
+2004,Rice and rice flour,5.85
+2005,Rice and rice flour,5.89
+2006,Rice and rice flour,5.87
+2007,Rice and rice flour,6.12
+2008,Rice and rice flour,6.36
+2009,Rice and rice flour,5.64
+2010,Rice and rice flour,5.88
+2011,Rice and rice flour,5.98
+2012,Rice and rice flour,5.52
+2013,Rice and rice flour,5.72
+2014,Rice and rice flour,5.89
+2015,Rice and rice flour,6.24
+2016,Rice and rice flour,6.56
+2017,Rice and rice flour,5.9
+2018,Rice and rice flour,5.92
+2019,Rice and rice flour,6.83
+2020,Rice and rice flour,6.86
+2021,Rice and rice flour,6.13
+2022,Rice and rice flour,6.75
+1980,"Oats, barley and other grains",1.97
+1981,"Oats, barley and other grains",1.96
+1982,"Oats, barley and other grains",2.08
+1983,"Oats, barley and other grains",2.03
+1984,"Oats, barley and other grains",2.21
+1985,"Oats, barley and other grains",2.42
+1986,"Oats, barley and other grains",2.45
+1987,"Oats, barley and other grains",2.21
+1988,"Oats, barley and other grains",2.31
+1989,"Oats, barley and other grains",2.51
+1990,"Oats, barley and other grains",2.75
+1991,"Oats, barley and other grains",2.65
+1992,"Oats, barley and other grains",2.66
+1993,"Oats, barley and other grains",2.73
+1994,"Oats, barley and other grains",2.65
+1995,"Oats, barley and other grains",2.72
+1996,"Oats, barley and other grains",2.87
+1997,"Oats, barley and other grains",2.77
+1998,"Oats, barley and other grains",3.64
+1999,"Oats, barley and other grains",3.25
+2000,"Oats, barley and other grains",3.23
+2001,"Oats, barley and other grains",3.72
+2002,"Oats, barley and other grains",4.37
+2003,"Oats, barley and other grains",4.54
+2004,"Oats, barley and other grains",5.06
+2005,"Oats, barley and other grains",4.77
+2006,"Oats, barley and other grains",5.22
+2007,"Oats, barley and other grains",6.29
+2008,"Oats, barley and other grains",4.97
+2009,"Oats, barley and other grains",4.64
+2010,"Oats, barley and other grains",5.01
+2011,"Oats, barley and other grains",4.47
+2012,"Oats, barley and other grains",4.33
+2013,"Oats, barley and other grains",5.16
+2014,"Oats, barley and other grains",5.79
+2015,"Oats, barley and other grains",6.29
+2016,"Oats, barley and other grains",5.9
+2017,"Oats, barley and other grains",4.57
+2018,"Oats, barley and other grains",4.61
+2019,"Oats, barley and other grains",4.9
+2020,"Oats, barley and other grains",4.89
+2021,"Oats, barley and other grains",4.42
+2022,"Oats, barley and other grains",4.19
+1980,Beef and veal,18.3
+1981,Beef and veal,17.39
+1982,Beef and veal,16.9
+1983,Beef and veal,17.02
+1984,Beef and veal,15.83
+1985,Beef and veal,16.54
+1986,Beef and veal,16.17
+1987,Beef and veal,17.3
+1988,Beef and veal,16.75
+1989,Beef and veal,16.92
+1990,Beef and veal,17.3
+1991,Beef and veal,17.31
+1992,Beef and veal,17.12
+1993,Beef and veal,17.41
+1994,Beef and veal,18.02
+1995,Beef and veal,18.51
+1996,Beef and veal,19.35
+1997,Beef and veal,20.1
+1998,Beef and veal,20.42
+1999,Beef and veal,21.58
+2000,Beef and veal,22.55
+2001,Beef and veal,21.74
+2002,Beef and veal,24.39
+2003,Beef and veal,25.17
+2004,Beef and veal,25.42
+2005,Beef and veal,25.63
+2006,Beef and veal,25.96
+2007,Beef and veal,25.54
+2008,Beef and veal,25.1
+2009,Beef and veal,25.04
+2010,Beef and veal,25.72
+2011,Beef and veal,26.25
+2012,Beef and veal,25.88
+2013,Beef and veal,26.08
+2014,Beef and veal,26.21
+2015,Beef and veal,26.11
+2016,Beef and veal,25.94
+2017,Beef and veal,24.9
+2018,Beef and veal,24.51
+2019,Beef and veal,24.43
+2020,Beef and veal,22.72
+2021,Beef and veal,22.61
+2022,Beef and veal,23.15
+1980,Lamb and mutton,0.65
+1981,Lamb and mutton,0.7
+1982,Lamb and mutton,0.64
+1983,Lamb and mutton,0.73
+1984,Lamb and mutton,0.67
+1985,Lamb and mutton,0.74
+1986,Lamb and mutton,0.78
+1987,Lamb and mutton,0.83
+1988,Lamb and mutton,0.72
+1989,Lamb and mutton,0.68
+1990,Lamb and mutton,0.77
+1991,Lamb and mutton,0.85
+1992,Lamb and mutton,0.69
+1993,Lamb and mutton,0.63
+1994,Lamb and mutton,0.67
+1995,Lamb and mutton,0.72
+1996,Lamb and mutton,0.77
+1997,Lamb and mutton,0.79
+1998,Lamb and mutton,0.82
+1999,Lamb and mutton,0.91
+2000,Lamb and mutton,0.94
+2001,Lamb and mutton,1.03
+2002,Lamb and mutton,1
+2003,Lamb and mutton,1.09
+2004,Lamb and mutton,1
+2005,Lamb and mutton,1.18
+2006,Lamb and mutton,1.32
+2007,Lamb and mutton,1.33
+2008,Lamb and mutton,1.43
+2009,Lamb and mutton,1.61
+2010,Lamb and mutton,1.42
+2011,Lamb and mutton,1.55
+2012,Lamb and mutton,1.58
+2013,Lamb and mutton,1.65
+2014,Lamb and mutton,1.72
+2015,Lamb and mutton,1.76
+2016,Lamb and mutton,1.87
+2017,Lamb and mutton,1.97
+2018,Lamb and mutton,1.9
+2019,Lamb and mutton,1.68
+2020,Lamb and mutton,1.67
+2021,Lamb and mutton,1.49
+2022,Lamb and mutton,1.58
+1980,Horse meat,0.42
+1981,Horse meat,0.34
+1982,Horse meat,0.32
+1983,Horse meat,0.36
+1984,Horse meat,0.31
+1985,Horse meat,0.35
+1986,Horse meat,0.43
+1987,Horse meat,0.46
+1988,Horse meat,0.38
+1989,Horse meat,0.38
+1990,Horse meat,0.37
+1991,Horse meat,0.39
+1992,Horse meat,0.36
+1993,Horse meat,0.37
+1994,Horse meat,0.35
+1995,Horse meat,0.42
+1996,Horse meat,0.38
+1997,Horse meat,0.36
+1998,Horse meat,0.3
+1999,Horse meat,0.31
+2000,Horse meat,0.26
+2001,Horse meat,0.21
+2002,Horse meat,0.17
+2003,Horse meat,0.2
+2004,Horse meat,0.19
+2005,Horse meat,0.17
+2006,Horse meat,0.14
+2007,Horse meat,0.14
+2008,Horse meat,0.15
+2009,Horse meat,0.15
+2010,Horse meat,0.16
+2011,Horse meat,0.18
+2012,Horse meat,0.16
+2013,Horse meat,0.13
+2014,Horse meat,0.09
+2015,Horse meat,0.1
+2016,Horse meat,0.09
+2017,Horse meat,0.08
+2018,Horse meat,0.07
+2019,Horse meat,0.07
+2020,Horse meat,0.06
+2021,Horse meat,0.05
+2022,Horse meat,0.05
+1980,Pork,34.52
+1981,Pork,33.5
+1982,Pork,31.66
+1983,Pork,30.69
+1984,Pork,29.42
+1985,Pork,29.84
+1986,Pork,29.7
+1987,Pork,30.28
+1988,Pork,31.7
+1989,Pork,31.43
+1990,Pork,30.61
+1991,Pork,30.93
+1992,Pork,32.6
+1993,Pork,32.5
+1994,Pork,33.99
+1995,Pork,35.55
+1996,Pork,34.95
+1997,Pork,35.46
+1998,Pork,37.1
+1999,Pork,35.9
+2000,Pork,35.35
+2001,Pork,34.55
+2002,Pork,36.01
+2003,Pork,35.83
+2004,Pork,36.33
+2005,Pork,35.87
+2006,Pork,35.6
+2007,Pork,36.11
+2008,Pork,36.26
+2009,Pork,36.11
+2010,Pork,36.97
+2011,Pork,37.29
+2012,Pork,35.98
+2013,Pork,36.59
+2014,Pork,35.11
+2015,Pork,34.12
+2016,Pork,33.53
+2017,Pork,32.79
+2018,Pork,32.47
+2019,Pork,30.53
+2020,Pork,29.61
+2021,Pork,29.33
+2022,Pork,29.43
+1980,Reindeer meat,0.18
+1981,Reindeer meat,0.2
+1982,Reindeer meat,0.24
+1983,Reindeer meat,0.24
+1984,Reindeer meat,0.24
+1985,Reindeer meat,0.24
+1986,Reindeer meat,0.07
+1987,Reindeer meat,0.24
+1988,Reindeer meat,0.25
+1989,Reindeer meat,0.24
+1990,Reindeer meat,0.3
+1991,Reindeer meat,0.35
+1992,Reindeer meat,0.31
+1993,Reindeer meat,0.36
+1994,Reindeer meat,0.22
+1995,Reindeer meat,0.25
+1996,Reindeer meat,0.16
+1997,Reindeer meat,0.11
+1998,Reindeer meat,0.13
+1999,Reindeer meat,0.12
+2000,Reindeer meat,0.17
+2001,Reindeer meat,0.16
+2002,Reindeer meat,0.17
+2003,Reindeer meat,0.16
+2004,Reindeer meat,0.15
+2005,Reindeer meat,0.19
+2006,Reindeer meat,0.28
+2007,Reindeer meat,0.21
+2008,Reindeer meat,0.2
+2009,Reindeer meat,0.17
+2010,Reindeer meat,0.17
+2011,Reindeer meat,0.18
+2012,Reindeer meat,0.15
+2013,Reindeer meat,0.14
+2014,Reindeer meat,0.13
+2015,Reindeer meat,0.11
+2016,Reindeer meat,0.13
+2017,Reindeer meat,0.12
+2018,Reindeer meat,0.1
+2019,Reindeer meat,0.13
+2020,Reindeer meat,0.1
+2021,Reindeer meat,0.1
+2022,Reindeer meat,0.12
+1980,Poultry,4.91
+1981,Poultry,5.63
+1982,Poultry,5.51
+1983,Poultry,5.37
+1984,Poultry,5.33
+1985,Poultry,5.33
+1986,Poultry,5.24
+1987,Poultry,4.54
+1988,Poultry,5.35
+1989,Poultry,5.82
+1990,Poultry,5.89
+1991,Poultry,6.52
+1992,Poultry,7.12
+1993,Poultry,7.48
+1994,Poultry,8.18
+1995,Poultry,8.69
+1996,Poultry,9.56
+1997,Poultry,9.31
+1998,Poultry,9.82
+1999,Poultry,11.46
+2000,Poultry,12.79
+2001,Poultry,13.91
+2002,Poultry,14.81
+2003,Poultry,14.3
+2004,Poultry,14.87
+2005,Poultry,15.72
+2006,Poultry,16.28
+2007,Poultry,16.69
+2008,Poultry,18.09
+2009,Poultry,17.51
+2010,Poultry,18.37
+2011,Poultry,18.74
+2012,Poultry,18.99
+2013,Poultry,20.27
+2014,Poultry,21.39
+2015,Poultry,22.4
+2016,Poultry,23.65
+2017,Poultry,23.25
+2018,Poultry,22.18
+2019,Poultry,22.44
+2020,Poultry,21.78
+2021,Poultry,23.19
+2022,Poultry,22.97
+1980,Game meat,2.39
+1981,Game meat,2.69
+1982,Game meat,3.18
+1983,Game meat,3.04
+1984,Game meat,2.71
+1985,Game meat,2.43
+1986,Game meat,2.36
+1987,Game meat,2.46
+1988,Game meat,2.54
+1989,Game meat,2.63
+1990,Game meat,2.78
+1991,Game meat,2.56
+1992,Game meat,2.47
+1993,Game meat,2.32
+1994,Game meat,2.17
+1995,Game meat,2.02
+1996,Game meat,1.97
+1997,Game meat,1.94
+1998,Game meat,2.08
+1999,Game meat,2.13
+2000,Game meat,2.12
+2001,Game meat,2.17
+2002,Game meat,2.06
+2003,Game meat,2.1
+2004,Game meat,1.96
+2005,Game meat,1.98
+2006,Game meat,1.76
+2007,Game meat,1.83
+2008,Game meat,1.91
+2009,Game meat,1.91
+2010,Game meat,1.95
+2011,Game meat,1.98
+2012,Game meat,2.02
+2013,Game meat,2.01
+2014,Game meat,1.83
+2015,Game meat,1.81
+2016,Game meat,1.8
+2017,Game meat,1.99
+2018,Game meat,1.96
+2019,Game meat,2.13
+2020,Game meat,2.22
+2021,Game meat,1.89
+2022,Game meat,1.8
+1980,Offal,2.58
+1981,Offal,2.44
+1982,Offal,2.56
+1983,Offal,2.52
+1984,Offal,2.41
+1985,Offal,2.49
+1986,Offal,2.26
+1987,Offal,2.2
+1988,Offal,2.25
+1989,Offal,2.15
+1990,Offal,2.13
+1991,Offal,2.09
+1992,Offal,2.09
+1993,Offal,1.98
+1994,Offal,2
+1995,Offal,2.11
+1996,Offal,1.54
+1997,Offal,1.68
+1998,Offal,0.93
+1999,Offal,1.48
+2000,Offal,1.75
+2001,Offal,1.84
+2002,Offal,1.85
+2003,Offal,1.85
+2004,Offal,1.89
+2005,Offal,1.81
+2006,Offal,1.72
+2007,Offal,1.66
+2008,Offal,1.55
+2009,Offal,1.6
+2010,Offal,1.59
+2011,Offal,1.47
+2012,Offal,1.36
+2013,Offal,1.34
+2014,Offal,1.39
+2015,Offal,1.32
+2016,Offal,1.32
+2017,Offal,1.23
+2018,Offal,1.3
+2019,Offal,1.23
+2020,Offal,1.23
+2021,Offal,1.27
+2022,Offal,1.25
+1980,"Fish, fresh and frozen",18.46
+1981,"Fish, fresh and frozen",18.5
+1982,"Fish, fresh and frozen",18.03
+1983,"Fish, fresh and frozen",18.17
+1984,"Fish, fresh and frozen",17.56
+1985,"Fish, fresh and frozen",17.71
+1986,"Fish, fresh and frozen",19.13
+1987,"Fish, fresh and frozen",18.04
+1988,"Fish, fresh and frozen",17.46
+1989,"Fish, fresh and frozen",18.24
+1990,"Fish, fresh and frozen",17.33
+1991,"Fish, fresh and frozen",15.3
+1992,"Fish, fresh and frozen",16.3
+1993,"Fish, fresh and frozen",14.67
+1994,"Fish, fresh and frozen",16.19
+1995,"Fish, fresh and frozen",14.84
+1996,"Fish, fresh and frozen",15.89
+1997,"Fish, fresh and frozen",15.13
+1998,"Fish, fresh and frozen",14.05
+1999,"Fish, fresh and frozen",13.94
+1980,"Fish, canned and prepared",10.01
+1981,"Fish, canned and prepared",9.01
+1982,"Fish, canned and prepared",9.07
+1983,"Fish, canned and prepared",8.96
+1984,"Fish, canned and prepared",9.27
+1985,"Fish, canned and prepared",10.02
+1986,"Fish, canned and prepared",10.49
+1987,"Fish, canned and prepared",13.66
+1988,"Fish, canned and prepared",12.78
+1989,"Fish, canned and prepared",13.56
+1990,"Fish, canned and prepared",12.83
+1991,"Fish, canned and prepared",13.1
+1992,"Fish, canned and prepared",12.76
+1993,"Fish, canned and prepared",12.11
+1994,"Fish, canned and prepared",13.24
+1995,"Fish, canned and prepared",11.82
+1996,"Fish, canned and prepared",13
+1997,"Fish, canned and prepared",12.31
+1998,"Fish, canned and prepared",14.12
+1999,"Fish, canned and prepared",14.59
+1980,Milk (litres),162.11
+1981,Milk (litres),160.29
+1982,Milk (litres),156.91
+1983,Milk (litres),155.97
+1984,Milk (litres),154.4
+1985,Milk (litres),151.16
+1986,Milk (litres),144.63
+1987,Milk (litres),141.58
+1988,Milk (litres),139.52
+1989,Milk (litres),135.25
+1990,Milk (litres),129.97
+1991,Milk (litres),126.61
+1992,Milk (litres),124.31
+1993,Milk (litres),122.48
+1994,Milk (litres),119.94
+1995,Milk (litres),118.79
+1996,Milk (litres),118.56
+1997,Milk (litres),116.38
+1998,Milk (litres),114.83
+1999,Milk (litres),112.69
+2000,Milk (litres),113.89
+2001,Milk (litres),113.2
+2002,Milk (litres),112.86
+2003,Milk (litres),111.22
+2004,Milk (litres),110.4
+2005,Milk (litres),108.07
+2006,Milk (litres),103.3
+2007,Milk (litres),100.13
+2008,Milk (litres),97.53
+2009,Milk (litres),95.91
+2010,Milk (litres),95.72
+2011,Milk (litres),91.11
+2012,Milk (litres),82.68
+2013,Milk (litres),82.45
+2014,Milk (litres),80.17
+2015,Milk (litres),79.12
+2016,Milk (litres),76.73
+2017,Milk (litres),74.16
+2018,Milk (litres),72.92
+2019,Milk (litres),70.48
+2020,Milk (litres),66.47
+2021,Milk (litres),64.6
+2022,Milk (litres),62.83
+1980,Fermented milk products (litres),22.85
+1981,Fermented milk products (litres),23.04
+1982,Fermented milk products (litres),24.29
+1983,Fermented milk products (litres),24.91
+1984,Fermented milk products (litres),25.62
+1985,Fermented milk products (litres),25.69
+1986,Fermented milk products (litres),26.08
+1987,Fermented milk products (litres),25.85
+1988,Fermented milk products (litres),26.92
+1989,Fermented milk products (litres),27.74
+1990,Fermented milk products (litres),27.21
+1991,Fermented milk products (litres),27.32
+1992,Fermented milk products (litres),27.65
+1993,Fermented milk products (litres),27.35
+1994,Fermented milk products (litres),28.39
+1995,Fermented milk products (litres),28.21
+1996,Fermented milk products (litres),28.03
+1997,Fermented milk products (litres),29.81
+1998,Fermented milk products (litres),29.76
+1999,Fermented milk products (litres),30.63
+2000,Fermented milk products (litres),29.78
+2001,Fermented milk products (litres),30.98
+2002,Fermented milk products (litres),31.61
+2003,Fermented milk products (litres),31.58
+2004,Fermented milk products (litres),31.66
+2005,Fermented milk products (litres),32.55
+2006,Fermented milk products (litres),33.19
+2007,Fermented milk products (litres),33.42
+2008,Fermented milk products (litres),34.75
+2009,Fermented milk products (litres),33.75
+2010,Fermented milk products (litres),33.9
+2011,Fermented milk products (litres),33.93
+2012,Fermented milk products (litres),33.7
+2013,Fermented milk products (litres),33.27
+2014,Fermented milk products (litres),33.55
+2015,Fermented milk products (litres),32.51
+2016,Fermented milk products (litres),31.13
+2017,Fermented milk products (litres),29.85
+2018,Fermented milk products (litres),28.41
+2019,Fermented milk products (litres),28.58
+2020,Fermented milk products (litres),28.03
+2021,Fermented milk products (litres),27.63
+2022,Fermented milk products (litres),26.89
+1980,Double cream,5.27
+1981,Double cream,5.29
+1982,Double cream,5.36
+1983,Double cream,5.38
+1984,Double cream,5.33
+1985,Double cream,5.9
+1986,Double cream,6.25
+1987,Double cream,6.42
+1988,Double cream,6.45
+1989,Double cream,6.49
+1990,Double cream,6.47
+1991,Double cream,6.56
+1992,Double cream,6.81
+1993,Double cream,7
+1994,Double cream,7.12
+1995,Double cream,7.35
+1996,Double cream,7.56
+1997,Double cream,7.6
+1998,Double cream,7.52
+1999,Double cream,7.56
+2000,Double cream,7.12
+2001,Double cream,7.08
+2002,Double cream,6.72
+2003,Double cream,6.47
+2004,Double cream,6.24
+2005,Double cream,6.15
+2006,Double cream,6.33
+2007,Double cream,6.52
+2008,Double cream,6.69
+2009,Double cream,7.39
+2010,Double cream,8.03
+2011,Double cream,8.16
+2012,Double cream,8.34
+2013,Double cream,7.47
+2014,Double cream,7.67
+2015,Double cream,8.17
+2016,Double cream,8.46
+2017,Double cream,7.76
+2018,Double cream,7.45
+2019,Double cream,6.97
+2020,Double cream,3.81
+2021,Double cream,3.28
+2022,Double cream,3.04
+1980,Single cream,2.61
+1981,Single cream,2.56
+1982,Single cream,2.52
+1983,Single cream,2.43
+1984,Single cream,2.41
+1985,Single cream,2.41
+1986,Single cream,2.42
+1987,Single cream,2.36
+1988,Single cream,2.36
+1989,Single cream,2.34
+1990,Single cream,2.56
+1991,Single cream,2.54
+1992,Single cream,2.53
+1993,Single cream,2.53
+1994,Single cream,2.69
+1995,Single cream,2.76
+1996,Single cream,2.86
+1997,Single cream,2.85
+1998,Single cream,2.94
+1999,Single cream,3.08
+2000,Single cream,3.72
+2001,Single cream,4.14
+2002,Single cream,3.65
+2003,Single cream,3.65
+2004,Single cream,3.78
+2005,Single cream,3.73
+2006,Single cream,3.63
+2007,Single cream,3.77
+2008,Single cream,3.78
+2009,Single cream,3.78
+2010,Single cream,3.67
+2011,Single cream,3.47
+2012,Single cream,3.5
+2013,Single cream,3.35
+2014,Single cream,3.18
+2015,Single cream,3.29
+2016,Single cream,2.9
+2017,Single cream,2.71
+2018,Single cream,2.57
+2019,Single cream,2.46
+2020,Single cream,3.34
+2021,Single cream,3.04
+2022,Single cream,3.09
+1980,Cheese,14.07
+1981,Cheese,14.29
+1982,Cheese,14.41
+1983,Cheese,15.06
+1984,Cheese,15.01
+1985,Cheese,15.13
+1986,Cheese,15.37
+1987,Cheese,15.67
+1988,Cheese,16.18
+1989,Cheese,15.67
+1990,Cheese,16.46
+1991,Cheese,15.75
+1992,Cheese,16.12
+1993,Cheese,16.66
+1994,Cheese,17.09
+1995,Cheese,16.32
+1996,Cheese,16.24
+1997,Cheese,16.19
+1998,Cheese,16.48
+1999,Cheese,16.93
+2000,Cheese,16.79
+2001,Cheese,17.19
+2002,Cheese,17.59
+2003,Cheese,17.79
+2004,Cheese,17.9
+2005,Cheese,17.96
+2006,Cheese,18.18
+2007,Cheese,18.03
+2008,Cheese,18.19
+2009,Cheese,19.35
+2010,Cheese,18.84
+2011,Cheese,18.67
+2012,Cheese,19
+2013,Cheese,19.72
+2014,Cheese,20.26
+2015,Cheese,20.23
+2016,Cheese,19.7
+2017,Cheese,18.94
+2018,Cheese,19.03
+2019,Cheese,19.09
+2020,Cheese,19.7
+2021,Cheese,19.47
+2022,Cheese,19
+1980,Butter,3.61
+1981,Butter,3.68
+1982,Butter,3.58
+1983,Butter,3.71
+1984,Butter,3.68
+1985,Butter,3.41
+1986,Butter,3.14
+1987,Butter,3.07
+1988,Butter,2.88
+1989,Butter,2.48
+1990,Butter,2.37
+1991,Butter,2.23
+1992,Butter,2.2
+1993,Butter,2.28
+1994,Butter,2.4
+1995,Butter,2.08
+1996,Butter,1.8
+1997,Butter,1.8
+1998,Butter,1.66
+1999,Butter,1.46
+2000,Butter,1.41
+2001,Butter,1.44
+2002,Butter,1.53
+2003,Butter,1.47
+2004,Butter,1.52
+2005,Butter,1.62
+2006,Butter,1.77
+2007,Butter,1.93
+2008,Butter,1.96
+2009,Butter,2.37
+2010,Butter,2.39
+2011,Butter,2.62
+2012,Butter,3.39
+2013,Butter,2.65
+2014,Butter,2.61
+2015,Butter,2.76
+2016,Butter,2.72
+2017,Butter,2.65
+2018,Butter,2.74
+2019,Butter,2.72
+2020,Butter,2.86
+2021,Butter,2.86
+2022,Butter,2.81
+1980,Margarine and butter blends,15.76
+1981,Margarine and butter blends,15.84
+1982,Margarine and butter blends,15.76
+1983,Margarine and butter blends,15.9
+1984,Margarine and butter blends,15.58
+1985,Margarine and butter blends,15.1
+1986,Margarine and butter blends,14.4
+1987,Margarine and butter blends,13.71
+1988,Margarine and butter blends,13.72
+1989,Margarine and butter blends,12.26
+1990,Margarine and butter blends,11.78
+1991,Margarine and butter blends,11.01
+1992,Margarine and butter blends,10.51
+1993,Margarine and butter blends,10.12
+1994,Margarine and butter blends,9.77
+1995,Margarine and butter blends,9.87
+1996,Margarine and butter blends,9.93
+1997,Margarine and butter blends,9.16
+1998,Margarine and butter blends,8.98
+1999,Margarine and butter blends,8.26
+2000,Margarine and butter blends,8.67
+2001,Margarine and butter blends,7.59
+2002,Margarine and butter blends,6.52
+2003,Margarine and butter blends,6.52
+2004,Margarine and butter blends,5.66
+2005,Margarine and butter blends,5.79
+2006,Margarine and butter blends,5.73
+2007,Margarine and butter blends,5.92
+2008,Margarine and butter blends,5.6
+2009,Margarine and butter blends,5.72
+2010,Margarine and butter blends,5.77
+2011,Margarine and butter blends,6.01
+2012,Margarine and butter blends,6.48
+2013,Margarine and butter blends,6.42
+2014,Margarine and butter blends,5.73
+2015,Margarine and butter blends,6.16
+2016,Margarine and butter blends,6.22
+2017,Margarine and butter blends,6.59
+2018,Margarine and butter blends,6.42
+2019,Margarine and butter blends,6.31
+2020,Margarine and butter blends,6.04
+2021,Margarine and butter blends,6.08
+2022,Margarine and butter blends,6.3
+1980,Low-fat margarine,1.89
+1981,Low-fat margarine,1.94
+1982,Low-fat margarine,1.84
+1983,Low-fat margarine,1.92
+1984,Low-fat margarine,2.09
+1985,Low-fat margarine,2.62
+1986,Low-fat margarine,2.85
+1987,Low-fat margarine,3.22
+1988,Low-fat margarine,3.39
+1989,Low-fat margarine,3.74
+1990,Low-fat margarine,4.35
+1991,Low-fat margarine,4.73
+1992,Low-fat margarine,4.95
+1993,Low-fat margarine,5.13
+1994,Low-fat margarine,4.73
+1995,Low-fat margarine,5.44
+1996,Low-fat margarine,5.18
+1997,Low-fat margarine,4.77
+1998,Low-fat margarine,4.73
+1999,Low-fat margarine,4.61
+2000,Low-fat margarine,4.98
+2001,Low-fat margarine,4.38
+2002,Low-fat margarine,4.18
+2003,Low-fat margarine,4.16
+2004,Low-fat margarine,4.44
+2005,Low-fat margarine,4.8
+2006,Low-fat margarine,3.82
+2007,Low-fat margarine,3.97
+2008,Low-fat margarine,3.93
+2009,Low-fat margarine,3.79
+2010,Low-fat margarine,3.57
+2011,Low-fat margarine,3.94
+2012,Low-fat margarine,5.33
+2013,Low-fat margarine,4.85
+2014,Low-fat margarine,4.73
+2015,Low-fat margarine,4.92
+2016,Low-fat margarine,4.89
+2017,Low-fat margarine,4.55
+2018,Low-fat margarine,4.24
+2019,Low-fat margarine,4.22
+2020,Low-fat margarine,4.06
+2021,Low-fat margarine,4.1
+2022,Low-fat margarine,4.29
+1980,Bakery margarine,2.12
+1981,Bakery margarine,1.98
+1982,Bakery margarine,1.85
+1983,Bakery margarine,1.98
+1984,Bakery margarine,2.02
+1985,Bakery margarine,2.02
+1986,Bakery margarine,2.09
+1987,Bakery margarine,2.11
+1988,Bakery margarine,2.17
+1989,Bakery margarine,2.11
+1990,Bakery margarine,2.09
+1991,Bakery margarine,1.9
+1992,Bakery margarine,1.86
+1993,Bakery margarine,1.92
+1994,Bakery margarine,1.94
+1995,Bakery margarine,2.37
+1996,Bakery margarine,2.32
+1997,Bakery margarine,2.48
+1998,Bakery margarine,2.28
+1999,Bakery margarine,2.27
+2000,Bakery margarine,2.26
+2001,Bakery margarine,2.08
+2002,Bakery margarine,2.39
+2003,Bakery margarine,2.28
+2004,Bakery margarine,1.81
+2005,Bakery margarine,1.69
+2006,Bakery margarine,1.8
+2007,Bakery margarine,1.29
+2008,Bakery margarine,1.43
+2009,Bakery margarine,1.53
+2010,Bakery margarine,1.28
+2011,Bakery margarine,1.01
+2012,Bakery margarine,0.84
+2013,Bakery margarine,0.57
+2014,Bakery margarine,0.56
+2015,Bakery margarine,0.46
+2016,Bakery margarine,0.45
+2017,Bakery margarine,0.47
+2018,Bakery margarine,0.47
+2019,Bakery margarine,0.49
+2020,Bakery margarine,0.45
+2021,Bakery margarine,0.45
+2022,Bakery margarine,0.46
+1980,Cooking oil,0.78
+1981,Cooking oil,0.77
+1982,Cooking oil,0.76
+1983,Cooking oil,0.82
+1984,Cooking oil,0.83
+1985,Cooking oil,0.79
+1986,Cooking oil,0.85
+1987,Cooking oil,0.89
+1988,Cooking oil,0.91
+1989,Cooking oil,0.88
+1990,Cooking oil,0.75
+1991,Cooking oil,0.82
+1992,Cooking oil,0.85
+1993,Cooking oil,0.86
+1994,Cooking oil,0.85
+1995,Cooking oil,1.02
+1996,Cooking oil,1.06
+1997,Cooking oil,1.2
+1998,Cooking oil,1.25
+1999,Cooking oil,1.05
+2000,Cooking oil,0.96
+2001,Cooking oil,1.2
+2002,Cooking oil,1.11
+2003,Cooking oil,1.32
+2004,Cooking oil,1.36
+2005,Cooking oil,1.74
+2006,Cooking oil,2.13
+2007,Cooking oil,2.6
+2008,Cooking oil,2.76
+2009,Cooking oil,2.71
+2010,Cooking oil,2.18
+2011,Cooking oil,3.05
+2012,Cooking oil,2.99
+2013,Cooking oil,2.36
+2014,Cooking oil,2.51
+2015,Cooking oil,2.77
+2016,Cooking oil,2.48
+2017,Cooking oil,2.04
+2018,Cooking oil,1.82
+2019,Cooking oil,2.39
+2020,Cooking oil,2.11
+2021,Cooking oil,2.35
+2022,Cooking oil,2.18
+1980,Coconut and frying fat,0.39
+1981,Coconut and frying fat,0.41
+1982,Coconut and frying fat,0.36
+1983,Coconut and frying fat,0.32
+1984,Coconut and frying fat,0.31
+1985,Coconut and frying fat,0.31
+1986,Coconut and frying fat,0.32
+1987,Coconut and frying fat,0.33
+1988,Coconut and frying fat,0.34
+1989,Coconut and frying fat,0.35
+1990,Coconut and frying fat,0.32
+1991,Coconut and frying fat,0.29
+1992,Coconut and frying fat,0.24
+1993,Coconut and frying fat,0.26
+1994,Coconut and frying fat,0.27
+1995,Coconut and frying fat,0.36
+1996,Coconut and frying fat,0.41
+1997,Coconut and frying fat,0.53
+1998,Coconut and frying fat,0.75
+1999,Coconut and frying fat,0.51
+2000,Coconut and frying fat,0.53
+2001,Coconut and frying fat,0.63
+2002,Coconut and frying fat,0.45
+2003,Coconut and frying fat,0.46
+2004,Coconut and frying fat,0.54
+2005,Coconut and frying fat,0.82
+2006,Coconut and frying fat,1.07
+2007,Coconut and frying fat,1.73
+2008,Coconut and frying fat,1.8
+2009,Coconut and frying fat,1.75
+2010,Coconut and frying fat,1.49
+2011,Coconut and frying fat,1.62
+2012,Coconut and frying fat,1.01
+2013,Coconut and frying fat,0.92
+2014,Coconut and frying fat,0.58
+2015,Coconut and frying fat,0.6
+2016,Coconut and frying fat,0.45
+2017,Coconut and frying fat,0.32
+2018,Coconut and frying fat,0.36
+2019,Coconut and frying fat,0.37
+2020,Coconut and frying fat,0.31
+2021,Coconut and frying fat,0.32
+2022,Coconut and frying fat,0.31
+1980,Eggs,13.24
+1981,Eggs,13.2
+1982,Eggs,13.23
+1983,Eggs,12.73
+1984,Eggs,13.81
+1985,Eggs,14.04
+1986,Eggs,13.82
+1987,Eggs,13.41
+1988,Eggs,14.06
+1989,Eggs,13.75
+1990,Eggs,13.62
+1991,Eggs,12.81
+1992,Eggs,12.68
+1993,Eggs,12.43
+1994,Eggs,12.55
+1995,Eggs,11.96
+1996,Eggs,12.45
+1997,Eggs,12.13
+1998,Eggs,12.27
+1999,Eggs,11.89
+2000,Eggs,12
+2001,Eggs,11.85
+2002,Eggs,11.26
+2003,Eggs,11.49
+2004,Eggs,12.44
+2005,Eggs,12.05
+2006,Eggs,12.3
+2007,Eggs,12.23
+2008,Eggs,12.52
+2009,Eggs,13.01
+2010,Eggs,13.39
+2011,Eggs,13.6
+2012,Eggs,12.84
+2013,Eggs,13.46
+2014,Eggs,13.62
+2015,Eggs,13.51
+2016,Eggs,15.02
+2017,Eggs,14.73
+2018,Eggs,14.99
+2019,Eggs,14.71
+2020,Eggs,13.94
+2021,Eggs,13.94
+2022,Eggs,14.7
+1980,"Potatoes, fresh",64.9
+1981,"Potatoes, fresh",65.16
+1982,"Potatoes, fresh",66.13
+1983,"Potatoes, fresh",65.24
+1984,"Potatoes, fresh",64.99
+1985,"Potatoes, fresh",64.97
+1986,"Potatoes, fresh",64.27
+1987,"Potatoes, fresh",64.09
+1988,"Potatoes, fresh",62.17
+1989,"Potatoes, fresh",61.25
+1990,"Potatoes, fresh",60.4
+1991,"Potatoes, fresh",60.81
+1992,"Potatoes, fresh",61.49
+1993,"Potatoes, fresh",62.79
+1994,"Potatoes, fresh",61.7
+1995,"Potatoes, fresh",57.22
+1996,"Potatoes, fresh",50.03
+1997,"Potatoes, fresh",50.18
+1998,"Potatoes, fresh",47.78
+1999,"Potatoes, fresh",47.95
+2000,"Potatoes, fresh",47.1
+2001,"Potatoes, fresh",46.01
+2002,"Potatoes, fresh",44.49
+2003,"Potatoes, fresh",43.37
+2004,"Potatoes, fresh",45.69
+2005,"Potatoes, fresh",46.52
+2006,"Potatoes, fresh",46
+2007,"Potatoes, fresh",44.9
+2008,"Potatoes, fresh",44.5
+2009,"Potatoes, fresh",44.7
+2010,"Potatoes, fresh",43.3
+2011,"Potatoes, fresh",45
+2012,"Potatoes, fresh",45.33
+2013,"Potatoes, fresh",45.3
+2014,"Potatoes, fresh",45.11
+2015,"Potatoes, fresh",45.12
+2016,"Potatoes, fresh",47.07
+2017,"Potatoes, fresh",46.55
+2018,"Potatoes, fresh",46.37
+2019,"Potatoes, fresh",46.51
+2020,"Potatoes, fresh",45.91
+2021,"Potatoes, fresh",45.87
+2022,"Potatoes, fresh",46.25
+1980,Potatoes in processed food,18.71
+1981,Potatoes in processed food,18.45
+1982,Potatoes in processed food,17.48
+1983,Potatoes in processed food,18.36
+1984,Potatoes in processed food,18.62
+1985,Potatoes in processed food,18.63
+1986,Potatoes in processed food,19.32
+1987,Potatoes in processed food,19.52
+1988,Potatoes in processed food,21.42
+1989,Potatoes in processed food,22.35
+1990,Potatoes in processed food,23.2
+1991,Potatoes in processed food,22.79
+1992,Potatoes in processed food,22.1
+1993,Potatoes in processed food,20.81
+1994,Potatoes in processed food,21.9
+1995,Potatoes in processed food,26.37
+1996,Potatoes in processed food,33.57
+1997,Potatoes in processed food,33.42
+1998,Potatoes in processed food,35.82
+1999,Potatoes in processed food,35.65
+2000,Potatoes in processed food,36.5
+2001,Potatoes in processed food,37.59
+2002,Potatoes in processed food,39.1
+2003,Potatoes in processed food,40.23
+2004,Potatoes in processed food,37.92
+2005,Potatoes in processed food,37.08
+2006,Potatoes in processed food,37.6
+2007,Potatoes in processed food,38.7
+2008,Potatoes in processed food,39.1
+2009,Potatoes in processed food,38.9
+2010,Potatoes in processed food,40.3
+2011,Potatoes in processed food,38.6
+2012,Potatoes in processed food,38.27
+2013,Potatoes in processed food,38.3
+2014,Potatoes in processed food,38.49
+2015,Potatoes in processed food,38.48
+2016,Potatoes in processed food,36.53
+2017,Potatoes in processed food,37.05
+2018,Potatoes in processed food,37.23
+2019,Potatoes in processed food,37.09
+2020,Potatoes in processed food,37.69
+2021,Potatoes in processed food,37.73
+2022,Potatoes in processed food,37.35
+1980,Sugar and syrup,42.09
+1981,Sugar and syrup,42.02
+1982,Sugar and syrup,41.85
+1983,Sugar and syrup,42.41
+1984,Sugar and syrup,43.61
+1985,Sugar and syrup,43.78
+1986,Sugar and syrup,43.72
+1987,Sugar and syrup,43.11
+1988,Sugar and syrup,43.46
+1989,Sugar and syrup,43.49
+1990,Sugar and syrup,42.62
+1991,Sugar and syrup,43.39
+1992,Sugar and syrup,43.64
+1993,Sugar and syrup,44.05
+1994,Sugar and syrup,49.54
+1995,Sugar and syrup,44.85
+1996,Sugar and syrup,45.83
+1997,Sugar and syrup,46.21
+1998,Sugar and syrup,48.14
+1999,Sugar and syrup,47.06
+2000,Sugar and syrup,48.17
+2001,Sugar and syrup,48.79
+2002,Sugar and syrup,47.76
+2003,Sugar and syrup,48.37
+2004,Sugar and syrup,45.36
+2005,Sugar and syrup,45.84
+2006,Sugar and syrup,47.63
+2007,Sugar and syrup,42.98
+2008,Sugar and syrup,44.02
+2009,Sugar and syrup,44.52
+2010,Sugar and syrup,47.46
+2011,Sugar and syrup,46.06
+2012,Sugar and syrup,44.26
+2013,Sugar and syrup,45.28
+2014,Sugar and syrup,43.21
+2015,Sugar and syrup,41.31
+2016,Sugar and syrup,42.8
+2017,Sugar and syrup,37.52
+2018,Sugar and syrup,40.34
+2019,Sugar and syrup,38.95
+2020,Sugar and syrup,37.07
+2021,Sugar and syrup,40.48
+2022,Sugar and syrup,40.61
+1980,"Coffee, roasted",9.57
+1981,"Coffee, roasted",9.62
+1982,"Coffee, roasted",9.49
+1983,"Coffee, roasted",8.93
+1984,"Coffee, roasted",9.38
+1985,"Coffee, roasted",8.96
+1986,"Coffee, roasted",8.88
+1987,"Coffee, roasted",8.98
+1988,"Coffee, roasted",8.8
+1989,"Coffee, roasted",8.84
+1990,"Coffee, roasted",8.96
+1991,"Coffee, roasted",8.85
+1992,"Coffee, roasted",8.53
+1993,"Coffee, roasted",8.53
+1994,"Coffee, roasted",8.73
+1995,"Coffee, roasted",7.5
+1996,"Coffee, roasted",8.45
+1997,"Coffee, roasted",7.7
+1998,"Coffee, roasted",7.55
+1999,"Coffee, roasted",7.5
+2000,"Coffee, roasted",6.95
+2001,"Coffee, roasted",7
+2002,"Coffee, roasted",7.55
+2003,"Coffee, roasted",7.49
+2004,"Coffee, roasted",7.86
+2005,"Coffee, roasted",7.73
+2006,"Coffee, roasted",8.13
+2007,"Coffee, roasted",7.98
+2008,"Coffee, roasted",7.97
+2009,"Coffee, roasted",7.96
+2010,"Coffee, roasted",8.83
+2011,"Coffee, roasted",7.34
+2012,"Coffee, roasted",7.97
+2013,"Coffee, roasted",8.11
+2014,"Coffee, roasted",7.46
+2015,"Coffee, roasted",7.51
+2016,"Coffee, roasted",8.29
+2017,"Coffee, roasted",7.57
+2018,"Coffee, roasted",7.56
+2019,"Coffee, roasted",7.79
+2020,"Coffee, roasted",7.7
+2021,"Coffee, roasted",6.46
+2022,"Coffee, roasted",7.1
+1980,Tea,0.35
+1981,Tea,0.35
+1982,Tea,0.35
+1983,Tea,0.35
+1984,Tea,0.37
+1985,Tea,0.37
+1986,Tea,0.37
+1987,Tea,0.37
+1988,Tea,0.3
+1989,Tea,0.31
+1990,Tea,0.34
+1991,Tea,0.32
+1992,Tea,0.3
+1993,Tea,0.31
+1994,Tea,0.33
+1995,Tea,0.28
+1996,Tea,0.32
+1997,Tea,0.33
+1998,Tea,0.32
+1999,Tea,0.33
+2000,Tea,0.36
+2001,Tea,0.27
+2002,Tea,0.31
+2003,Tea,0.29
+2004,Tea,0.32
+2005,Tea,0.3
+2006,Tea,0.24
+2007,Tea,0.37
+2008,Tea,0.4
+2009,Tea,0.41
+2010,Tea,0.37
+2011,Tea,0.32
+2012,Tea,0.29
+2013,Tea,0.31
+2014,Tea,0.31
+2015,Tea,0.31
+2016,Tea,0.33
+2017,Tea,0.3
+2018,Tea,0.28
+2019,Tea,0.26
+2020,Tea,0.26
+2021,Tea,0.25
+2022,Tea,0.29
+1980,"Vegetables, fresh and frozen",32.19
+1981,"Vegetables, fresh and frozen",35.88
+1982,"Vegetables, fresh and frozen",36.61
+1983,"Vegetables, fresh and frozen",37.56
+1984,"Vegetables, fresh and frozen",40.19
+1985,"Vegetables, fresh and frozen",41.71
+1986,"Vegetables, fresh and frozen",42.54
+1987,"Vegetables, fresh and frozen",40.65
+1988,"Vegetables, fresh and frozen",41.5
+1989,"Vegetables, fresh and frozen",42.71
+1990,"Vegetables, fresh and frozen",42.65
+1991,"Vegetables, fresh and frozen",41.39
+1992,"Vegetables, fresh and frozen",42.6
+1993,"Vegetables, fresh and frozen",44.57
+1994,"Vegetables, fresh and frozen",45.48
+1995,"Vegetables, fresh and frozen",46.37
+1996,"Vegetables, fresh and frozen",48.35
+1997,"Vegetables, fresh and frozen",49.5
+1998,"Vegetables, fresh and frozen",51.53
+1999,"Vegetables, fresh and frozen",53.05
+2000,"Vegetables, fresh and frozen",53.27
+2001,"Vegetables, fresh and frozen",54.13
+2002,"Vegetables, fresh and frozen",52.1
+2003,"Vegetables, fresh and frozen",52.53
+2004,"Vegetables, fresh and frozen",58.5
+2005,"Vegetables, fresh and frozen",57.39
+2006,"Vegetables, fresh and frozen",60.94
+2007,"Vegetables, fresh and frozen",59.13
+2008,"Vegetables, fresh and frozen",59.24
+2009,"Vegetables, fresh and frozen",59.91
+2010,"Vegetables, fresh and frozen",59.73
+2011,"Vegetables, fresh and frozen",64.66
+2012,"Vegetables, fresh and frozen",67.08
+2013,"Vegetables, fresh and frozen",66.23
+2014,"Vegetables, fresh and frozen",66.58
+2015,"Vegetables, fresh and frozen",66.4
+2016,"Vegetables, fresh and frozen",65.01
+2017,"Vegetables, fresh and frozen",64.32
+2018,"Vegetables, fresh and frozen",60.83
+2019,"Vegetables, fresh and frozen",62.59
+2020,"Vegetables, fresh and frozen",65.03
+2021,"Vegetables, fresh and frozen",65.25
+2022,"Vegetables, fresh and frozen",62.57
+1980,"Vegetables, prepared",8.87
+1981,"Vegetables, prepared",8.31
+1982,"Vegetables, prepared",7.8
+1983,"Vegetables, prepared",7.43
+1984,"Vegetables, prepared",7.34
+1985,"Vegetables, prepared",7.26
+1986,"Vegetables, prepared",8.02
+1987,"Vegetables, prepared",7.95
+1988,"Vegetables, prepared",12.84
+1989,"Vegetables, prepared",12.49
+1990,"Vegetables, prepared",12.36
+1991,"Vegetables, prepared",12.41
+1992,"Vegetables, prepared",11.77
+1993,"Vegetables, prepared",11.64
+1994,"Vegetables, prepared",11.78
+1995,"Vegetables, prepared",10.99
+1996,"Vegetables, prepared",11.46
+1997,"Vegetables, prepared",11.36
+1998,"Vegetables, prepared",11.73
+1999,"Vegetables, prepared",13.04
+2000,"Vegetables, prepared",12.55
+2001,"Vegetables, prepared",13.29
+2002,"Vegetables, prepared",13.25
+2003,"Vegetables, prepared",14.76
+2004,"Vegetables, prepared",14.96
+2005,"Vegetables, prepared",13.85
+2006,"Vegetables, prepared",14.81
+2007,"Vegetables, prepared",15.25
+2008,"Vegetables, prepared",16.25
+2009,"Vegetables, prepared",15.78
+2010,"Vegetables, prepared",15.44
+2011,"Vegetables, prepared",16.08
+2012,"Vegetables, prepared",15.27
+2013,"Vegetables, prepared",14.96
+2014,"Vegetables, prepared",15.14
+2015,"Vegetables, prepared",15.47
+2016,"Vegetables, prepared",16.39
+2017,"Vegetables, prepared",15.97
+2018,"Vegetables, prepared",16.13
+2019,"Vegetables, prepared",16.57
+2020,"Vegetables, prepared",16.66
+2021,"Vegetables, prepared",15.85
+2022,"Vegetables, prepared",16.05
+1980,"Fruit and berries, fresh and frozen",53.87
+1981,"Fruit and berries, fresh and frozen",55.78
+1982,"Fruit and berries, fresh and frozen",55.08
+1983,"Fruit and berries, fresh and frozen",53.91
+1984,"Fruit and berries, fresh and frozen",55.24
+1985,"Fruit and berries, fresh and frozen",57.32
+1986,"Fruit and berries, fresh and frozen",59.85
+1987,"Fruit and berries, fresh and frozen",61.66
+1988,"Fruit and berries, fresh and frozen",54.14
+1989,"Fruit and berries, fresh and frozen",55.01
+1990,"Fruit and berries, fresh and frozen",55.05
+1991,"Fruit and berries, fresh and frozen",58.08
+1992,"Fruit and berries, fresh and frozen",58.31
+1993,"Fruit and berries, fresh and frozen",56.66
+1994,"Fruit and berries, fresh and frozen",57.48
+1995,"Fruit and berries, fresh and frozen",53.99
+1996,"Fruit and berries, fresh and frozen",54.9
+1997,"Fruit and berries, fresh and frozen",57.34
+1998,"Fruit and berries, fresh and frozen",56.64
+1999,"Fruit and berries, fresh and frozen",57.93
+2000,"Fruit and berries, fresh and frozen",60.74
+2001,"Fruit and berries, fresh and frozen",56.37
+2002,"Fruit and berries, fresh and frozen",56.66
+2003,"Fruit and berries, fresh and frozen",61.11
+2004,"Fruit and berries, fresh and frozen",63.26
+2005,"Fruit and berries, fresh and frozen",63.49
+2006,"Fruit and berries, fresh and frozen",65.13
+2007,"Fruit and berries, fresh and frozen",66.16
+2008,"Fruit and berries, fresh and frozen",64.95
+2009,"Fruit and berries, fresh and frozen",58.54
+2010,"Fruit and berries, fresh and frozen",62.8
+2011,"Fruit and berries, fresh and frozen",65.03
+2012,"Fruit and berries, fresh and frozen",66.29
+2013,"Fruit and berries, fresh and frozen",67.56
+2014,"Fruit and berries, fresh and frozen",67.35
+2015,"Fruit and berries, fresh and frozen",68.37
+2016,"Fruit and berries, fresh and frozen",68.16
+2017,"Fruit and berries, fresh and frozen",67.91
+2018,"Fruit and berries, fresh and frozen",61.39
+2019,"Fruit and berries, fresh and frozen",61.54
+2020,"Fruit and berries, fresh and frozen",63.64
+2021,"Fruit and berries, fresh and frozen",62.08
+2022,"Fruit and berries, fresh and frozen",57.95
+1980,"Fruit and berries, prepared",29.53
+1981,"Fruit and berries, prepared",28.79
+1982,"Fruit and berries, prepared",28.17
+1983,"Fruit and berries, prepared",25.55
+1984,"Fruit and berries, prepared",25.64
+1985,"Fruit and berries, prepared",25.65
+1986,"Fruit and berries, prepared",25.11
+1987,"Fruit and berries, prepared",26.28
+1988,"Fruit and berries, prepared",33.68
+1989,"Fruit and berries, prepared",33.67
+1990,"Fruit and berries, prepared",35.18
+1991,"Fruit and berries, prepared",35.69
+1992,"Fruit and berries, prepared",35.39
+1993,"Fruit and berries, prepared",35.53
+1994,"Fruit and berries, prepared",37.88
+1995,"Fruit and berries, prepared",35.71
+1996,"Fruit and berries, prepared",36.43
+1997,"Fruit and berries, prepared",35.91
+1998,"Fruit and berries, prepared",36.74
+1999,"Fruit and berries, prepared",36.22
+2000,"Fruit and berries, prepared",34.68
+2001,"Fruit and berries, prepared",37.95
+2002,"Fruit and berries, prepared",41.71
+2003,"Fruit and berries, prepared",42.46
+2004,"Fruit and berries, prepared",40.23
+2005,"Fruit and berries, prepared",37.82
+2006,"Fruit and berries, prepared",41.98
+2007,"Fruit and berries, prepared",43.54
+2008,"Fruit and berries, prepared",42.12
+2009,"Fruit and berries, prepared",34.39
+2010,"Fruit and berries, prepared",35.72
+2011,"Fruit and berries, prepared",40.14
+2012,"Fruit and berries, prepared",38.5
+2013,"Fruit and berries, prepared",38.29
+2014,"Fruit and berries, prepared",41.43
+2015,"Fruit and berries, prepared",41.62
+2016,"Fruit and berries, prepared",36.12
+2017,"Fruit and berries, prepared",35.88
+2018,"Fruit and berries, prepared",35.18
+2019,"Fruit and berries, prepared",33.69
+2020,"Fruit and berries, prepared",33.25
+2021,"Fruit and berries, prepared",31.1
+2022,"Fruit and berries, prepared",30.51

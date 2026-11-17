@@ -29,8 +29,18 @@ no thousands separators. Files are "tidy": one observation per row.
 - `series`, `category`, `name` are free text and are shown to the user as written.
 - Extra columns are allowed and are passed through untouched.
 - A `(date, series)` pair, a `category` or a `name` may appear only once per file.
+- `lat` must be between -90 and 90, `lon` between -180 and 180.
+- In a `pie` or `bubble-map` file, `value` may not be negative.
 
-Only `line` is implemented so far.
+All three types are implemented.
+
+A pie chart shows at most six slices, in file order. With more rows than that,
+the frontend keeps the five biggest and adds the rest up into one "Other" slice.
+The file itself may have any number of rows.
+
+A bubble map draws one circle per row at (`lat`, `lon`). The circle's area is
+proportional to `value`, scaled so the largest value in the file gets the
+largest circle.
 
 ## Manifest
 
@@ -56,6 +66,7 @@ Only `line` is implemented so far.
 |---|---|---|
 | GET | `/api/viz/datasets` | The manifest entries (without `file`) |
 | GET | `/api/viz/datasets/{id}` | One manifest entry plus `rows`, the validated CSV rows as JSON |
+| GET | `/api/viz/datasets/{id}/views?offset=0&limit=10` | One page of the dataset's views (cards of the data overview): `{dataset, total, offset, views}`. `limit` is 1–50 |
 
 Errors: `404` for an unknown id, `500` with a readable `detail` when a file is
 missing or breaks the contract.
@@ -70,11 +81,34 @@ import VisualisationPanel from './visualisation/VisualisationPanel.jsx';
 <VisualisationPanel datasetId="farmland-use" />
 ```
 
+The data overview (every dataset as a card stack) is a separate screen; it
+takes no props:
+
+```jsx
+import DataOverview from './visualisation/DataOverview.jsx';
+
+<DataOverview />
+```
+
 ## Decisions
 
 - **The data lake holds tidy CSV files only**, in the shape described above.
   Raw source files (Excel reports etc.) stay outside the lake; scripts in
   `backend/scripts/` turn them into tidy CSVs.
+- **The bubble map is its own small map inside the panel**, not a layer on the
+  main app's map (issue #25). It works wherever the panel is placed and leaves
+  the main UI unchanged. Its background map is loaded from the same online
+  service as the main map.
+- **Bubble map: size and colour are scaled between the lowest and the highest
+  value**, not from zero (decided 2026-11-17). Each place gets a level from 5%
+  (lowest) to 100% (highest) in 1% steps; the level sets the circle's area and
+  its colour, light pink to dark red. Circles carry no name labels; the tooltip
+  names a place. This makes differences easy to see, at the cost of
+  exaggerating them, so the legend always shows the real lowest and highest
+  values.
+- **The data overview is its own screen**, separate from the simulation screen
+  (issue #27). It does not go into the simulation UI or replace part of it.
+  How users get to it from the main app is decided by Erik, in separate issues.
 
 ## Open questions for the team
 

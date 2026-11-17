@@ -1,5 +1,7 @@
-/* Scoped to .viz-panel so the host UI's styles are not affected. */
-.viz-panel {
+/* Scoped to .viz-panel (and .viz-overview, see overview.css) so the host UI's
+   styles are not affected. */
+.viz-panel,
+.viz-overview {
   --viz-surface: #ffffff;
   --viz-text: #09090b;
   --viz-text-muted: #71717a;
@@ -12,7 +14,13 @@
   --viz-series-2: #eb6834;
   --viz-series-3: #1baf7a;
   --viz-series-4: #eda100;
+  --viz-series-5: #e87ba4;
+  --viz-series-6: #008300;
+  /* Neutral, for a pie's grouped "Other" slice. */
+  --viz-other: #a1a1aa;
+}
 
+.viz-panel {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -48,4 +56,64 @@
 
 .viz-error {
   color: var(--viz-error);
+}
+
+/* Bubble map: the map fills the panel body; legend and tooltip float on top. */
+.viz-map {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.viz-map-canvas {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Top left: the zoom buttons are top right, the map credits bottom right. */
+.viz-map-legend {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  box-sizing: content-box;
+  padding: 6px 8px;
+  border: 1px solid var(--viz-axis);
+  border-radius: 6px;
+  background: var(--viz-surface);
+  pointer-events: none;
+}
+
+.viz-map-legend circle {
+  fill: none;
+  stroke: var(--viz-text-muted);
+}
+
+.viz-map-legend line {
+  stroke: var(--viz-axis);
+}
+
+.viz-map-legend text {
+  font-size: 11px;
+  fill: var(--viz-text-muted);
+}
+
+.viz-map-tooltip {
+  position: absolute;
+  transform: translate(12px, 12px);
+  display: grid;
+  gap: 2px;
+  padding: 6px 10px;
+  border: 1px solid var(--viz-axis);
+  border-radius: 6px;
+  background: var(--viz-surface);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.viz-map-tooltip-left {
+  transform: translate(calc(-100% - 12px), 12px);
 }

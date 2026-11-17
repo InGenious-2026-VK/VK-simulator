@@ -1,12 +1,6 @@
-import LineChartView from './LineChartView.jsx';
+import { CHARTS } from './charts.js';
 import { useDataset } from './useDataset.js';
 import './visualisation.css';
-
-// Chart type -> component. Add 'pie' and 'bubble-map' here; the backend
-// (backend/app/viz/contract.py) guarantees the columns each type needs.
-const CHARTS = {
-  line: LineChartView,
-};
 
 /**
  * The visualisation window. This is the one component the host UI renders;

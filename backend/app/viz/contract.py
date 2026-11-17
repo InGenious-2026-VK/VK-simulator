@@ -10,14 +10,32 @@ class ContractError(ValueError):
     """A dataset does not match the contract."""
 
 
-# chart type -> required columns, numeric columns, columns that identify a row
+# chart type -> required columns, numeric columns, columns that identify a row.
+# Optional "non_negative": numeric columns that may not go below zero.
 CHART_TYPES: dict[str, dict[str, tuple[str, ...]]] = {
     "line": {
         "columns": ("date", "series", "value"),
         "numeric": ("value",),
         "key": ("date", "series"),
     },
+    "pie": {
+        "columns": ("category", "value"),
+        "numeric": ("value",),
+        "key": ("category",),
+        # A slice is a share of the whole; a negative share cannot be drawn.
+        "non_negative": ("value",),
+    },
+    "bubble-map": {
+        "columns": ("name", "lat", "lon", "value"),
+        "numeric": ("lat", "lon", "value"),
+        "key": ("name",),
+        # A circle's size shows the value; a negative size cannot be drawn.
+        "non_negative": ("value",),
+    },
 }
+
+# Coordinates are WGS84 decimal degrees: column -> (lowest, highest) allowed.
+RANGES: dict[str, tuple[float, float]] = {"lat": (-90, 90), "lon": (-180, 180)}
 
 
 def validate(rows: list[dict[str, str]], chart_type: str) -> list[dict]:
@@ -49,6 +67,15 @@ def validate(rows: list[dict[str, str]], chart_type: str) -> list[dict]:
                 raise ContractError(
                     f"line {line}: '{col}' is not a number: {clean[col]!r}"
                 ) from None
+            if col in RANGES:
+                low, high = RANGES[col]
+                if not low <= clean[col] <= high:
+                    raise ContractError(
+                        f"line {line}: '{col}' must be between {low} and {high}: {clean[col]:g}"
+                    )
+        for col in spec.get("non_negative", ()):
+            if clean[col] < 0:
+                raise ContractError(f"line {line}: '{col}' is negative: {clean[col]:g}")
         key = tuple(clean[c] for c in spec["key"])
         if key in seen:
             raise ContractError(f"line {line}: duplicate {spec['key']} = {key}")

@@ -7,5 +7,31 @@
     "subtitle": "Area by land type, hectares",
     "unit": "ha",
     "source": "Jordbruksverket"
+  },
+  {
+    "id": "arable-land-use",
+    "type": "pie",
+    "file": "arable-land-use.csv",
+    "title": "Arable land in Östergötland by crop",
+    "subtitle": "Share of area, 2024",
+    "unit": "ha",
+    "source": "Jordbruksverket"
+  },
+  {
+    "id": "swedish-vegetables-public-kitchens",
+    "type": "bubble-map",
+    "file": "swedish-vegetables-public-kitchens.csv",
+    "title": "Swedish vegetables in public kitchens",
+    "subtitle": "Share of each municipality's fresh vegetable purchases with Swedish origin, by cost, 2023",
+    "unit": "%",
+    "source": "Jordbruksverket, SILO database"
+  },
+  {
+    "id": "food-consumption",
+    "type": "line",
+    "file": "food-consumption.csv",
+    "title": "Food consumption per person in Sweden",
+    "subtitle": "Kilograms (milk products: litres) per person and year, by food item",
+    "source": "Jordbruksverket"
   }
 ]
