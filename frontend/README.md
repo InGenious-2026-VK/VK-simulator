@@ -47,6 +47,15 @@ the backend first (see `../backend/README.md`, or use `../run.sh` /
 `../run.bat`). Without the backend, Home still renders, but sign-in fails with
 a "Is the backend running?" message.
 
+## Docker
+
+`Dockerfile` has two stages. The first builds the app with Node 22. The second
+serves `dist/` with nginx (`deploy/nginx.conf`), which falls back to
+`index.html` for the client-side routes and proxies `/api/` to the `backend`
+container. It allows uploads up to 2 GB and streams them without buffering.
+Build args: `VITE_API_BASE` (default `/api`) and `VITE_SHOW_DEMO_ACCOUNTS`
+(default `false`). Run it through the root `docker-compose.yml`.
+
 ## Deployment (Cloudflare)
 
 Deployed with **Wrangler static assets** — the built `dist/` is uploaded as a

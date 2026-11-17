@@ -45,10 +45,95 @@ All four windows are implemented: `frontend/` (React) talks to `backend/`
   - `foodchainiq-application-windows.md` — functional spec of the four windows
   - `api/README.md` — API reference · `api/openapi.yaml` — OpenAPI 3.1 spec
   - `api/dataset-metadata.schema.json` — the standard dataset metadata file ([example](documentation/api/examples/metadata.example.json))
-- `docker-compose.yml` — local PostgreSQL
+- `docker-compose.yml` + `.env.example` — full Docker deployment (PostgreSQL, backend, web)
 - `run.bat` / `run.sh` — one-command dev launchers
 
-## Run the platform
+## Deploy with Docker (full stack)
+
+`docker-compose.yml` runs the whole application. You need only Docker
+(Docker Desktop on Windows and macOS).
+
+| Service | What it is | Data |
+|---|---|---|
+| `db` | PostgreSQL 16 | volume `db-data` |
+| `backend` | FastAPI API (`backend/Dockerfile`) | uploaded files in volume `storage` |
+| `web` | nginx serving the built React app and proxying `/api` → `backend` (`frontend/Dockerfile`, `frontend/deploy/nginx.conf`) | — |
+
+1. Create your settings file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env`. At minimum set `POSTGRES_PASSWORD`, `JWT_SECRET` and
+   `ADMIN_PASSWORD`. You can generate a `JWT_SECRET` with:
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+   For a real deployment, also set `SEED_DEMO=false`.
+
+3. Build and start everything:
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+4. Open **http://localhost:8080** (or the port you set in `APP_PORT`) and sign
+   in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`. With `SEED_DEMO=true` the demo
+   accounts below work too.
+
+Start-up order is handled by health checks: `db` → `backend` (creates tables,
+seeds) → `web`. The browser only talks to `web`, so the API is same-origin and
+needs no CORS setup.
+
+Day-to-day commands:
+
+```bash
+docker compose logs -f backend
+```
+
+```bash
+docker compose ps
+```
+
+After pulling new code, rebuild and restart:
+
+```bash
+docker compose up -d --build
+```
+
+Stop everything; the volumes and their data are kept:
+
+```bash
+docker compose down
+```
+
+Stop everything **and delete all data** (database and uploads):
+
+```bash
+docker compose down -v
+```
+
+Notes:
+
+- Only `web` is published on all interfaces. The database is published on
+  `127.0.0.1:5432` (`DB_PORT`) so the dev launchers below can use it, and is
+  unreachable from other machines.
+- For internet-facing use, put a TLS-terminating reverse proxy (Caddy,
+  Traefik, nginx, a cloud load balancer) in front of `web` and set
+  `COOKIE_SECURE=true`.
+- If `JWT_SECRET` or `ADMIN_PASSWORD` still have their development defaults,
+  the backend logs a warning on every start.
+- Back up the `db-data` and `storage` volumes together. The database refers to
+  the uploaded files.
+
+## Run locally for development
+
+This runs the backend and frontend directly, with hot reload, and only the
+database in Docker. If you changed `POSTGRES_PASSWORD` in the root `.env`, set
+the matching `DATABASE_URL` in `backend/.env`.
 
 You need **Python 3.11+**, **Node 22** and **PostgreSQL 14+**. Docker is the
 easiest way to get PostgreSQL.
@@ -162,7 +247,7 @@ Then run the tests from `backend/`:
 pytest -q
 ```
 
-### Static deployment
+### Static deployment (Cloudflare)
 
 The Cloudflare deploy (`frontend/wrangler.jsonc`) serves only the static
 frontend. Sign-in and every window after Home need the backend, so host
