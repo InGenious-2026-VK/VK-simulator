@@ -10,10 +10,10 @@ a worked example in [`examples/metadata.example.json`](./examples/metadata.examp
 For the user-facing behaviour, see
 [`../foodchainiq-application-windows.md`](../foodchainiq-application-windows.md).
 
-> **Implementation status.** Endpoints marked **✅ live** exist in `backend/`
-> today. Endpoints marked **🛠 planned** are the specification for the Home /
-> Data Lake / Visualization windows and are not built yet. Live endpoints only
-> gain *optional* fields, so current clients keep working.
+> **Implementation status.** Every endpoint in this document is implemented
+> in `backend/` (FastAPI + PostgreSQL). The server also serves interactive docs
+> at `/docs`. The implementation differs from the original spec in a few
+> places, listed in [§12](#12-implementation-notes).
 
 ---
 
@@ -30,6 +30,7 @@ For the user-facing behaviour, see
 9. [Simulation](#9-simulation-window-4)
 10. [Admin](#10-admin)
 11. [Endpoint index](#11-endpoint-index)
+12. [Implementation notes](#12-implementation-notes)
 
 ---
 
@@ -85,7 +86,7 @@ The access token is a JWT valid for 15 minutes. The refresh token is stored in
 an `httpOnly`, `Secure`, `SameSite=Strict` cookie (`fciq_refresh`), lasts
 7 days, and rotates on every refresh.
 
-### `POST /auth/login` 🛠 planned
+### `POST /auth/login`
 
 ```json
 // request
@@ -111,19 +112,19 @@ an `httpOnly`, `Secure`, `SameSite=Strict` cookie (`fciq_refresh`), lasts
 Returns `401 invalid_credentials` on failure. After 5 failures in 15 minutes
 it returns `429 rate_limited`.
 
-### `POST /auth/refresh` 🛠 planned
+### `POST /auth/refresh`
 No body. It reads the `fciq_refresh` cookie and returns the same shape as
 login, with a new access token and a rotated cookie.
 
-### `POST /auth/logout` 🛠 planned
+### `POST /auth/logout`
 Revokes the refresh token and clears the cookie. Returns `204`.
 
-### `GET /auth/me` 🛠 planned
+### `GET /auth/me`
 Returns the current `User`, including `groups` and `storage`
 (`{ "used_bytes": 1288490188, "quota_bytes": 10737418240 }`). The Home
 window uses it to decide whether to show **To data lake**.
 
-### `GET /stats/public` 🛠 planned · no auth
+### `GET /stats/public` · no auth
 Teaser numbers for the Home page:
 `{ "public_datasets": 42, "categories": { "production": 11, "logistics": 7, … } }`.
 
@@ -131,7 +132,7 @@ Teaser numbers for the Home page:
 
 ## 3. Users & groups
 
-### `GET /groups` 🛠 planned
+### `GET /groups`
 Lists the groups the caller belongs to. Platform admins get all groups. The
 upload dialog uses it to fill the **Group** picker.
 
@@ -142,13 +143,13 @@ upload dialog uses it to fill the **Group** picker.
 ], "page": 1, "page_size": 25, "total": 2 }
 ```
 
-### `GET /groups/{group_id}/members` 🛠 planned
+### `GET /groups/{group_id}/members`
 Members of a group the caller belongs to.
 
-### `POST /groups/{group_id}/members` 🛠 planned · group admin
+### `POST /groups/{group_id}/members` · group admin
 Body `{ "user_id": "usr_…", "role": "member" | "admin" }`. Returns `201`.
 
-### `DELETE /groups/{group_id}/members/{user_id}` 🛠 planned · group admin
+### `DELETE /groups/{group_id}/members/{user_id}` · group admin
 Returns `204`. The removed member loses access to the group's datasets
 straight away.
 
@@ -191,7 +192,7 @@ straight away.
 `status` is one of `uploading`, `processing`, `ready`, `invalid` or `removed` (after an approved removal; removed datasets are hidden from listings).
 `removal_request`, when set, is `{ "id": "rr_…", "status": "pending" }`.
 
-### `GET /datasets` 🛠 planned
+### `GET /datasets`
 The Data Lake grid and list.
 
 | Query | Type | Description |
@@ -210,12 +211,12 @@ The Data Lake grid and list.
 
 Returns a paginated list of `Dataset` objects (without `files[].columns`).
 
-### `GET /datasets/{dataset_id}` 🛠 planned
+### `GET /datasets/{dataset_id}`
 The full `Dataset`, including the parsed metadata and each file's column
 profile. Used by the details pane. Returns `404` if the dataset is missing
 **or** not visible to the caller.
 
-### `POST /datasets` 🛠 planned — upload a dataset
+### `POST /datasets` — upload a dataset
 
 `multipart/form-data`:
 
@@ -257,25 +258,25 @@ Validation that happens **before anything is stored**:
 > Uploads over 100 MB should use resumable uploads (`POST /uploads`, tus
 > protocol). This is reserved for v1.1 and not specified further here.
 
-### `PATCH /datasets/{dataset_id}` 🛠 planned · owner
+### `PATCH /datasets/{dataset_id}` · owner
 Changes `title`, `description`, `keywords`, `visibility` and `group_id`.
 Changing visibility to `public` follows the same sensitivity rule. Returns the
 updated `Dataset`. A visibility change takes effect straight away for every
 other user.
 
-### `PUT /datasets/{dataset_id}/files` 🛠 planned · owner
+### `PUT /datasets/{dataset_id}/files` · owner
 Uploads a new version, using the same multipart parts as `POST /datasets`
 apart from `visibility`. `version` goes up by one. Existing selections keep
 the version they pinned.
 
-### `GET /datasets/{dataset_id}/files/{file_id}` 🛠 planned
-Downloads one file. Returns `302` to a short-lived signed object-storage URL.
-Downloads are audit-logged.
+### `GET /datasets/{dataset_id}/files/{file_id}`
+Downloads one file. The file is streamed directly from local storage with
+`Content-Disposition: attachment` (see §12). Downloads are audit-logged.
 
-### `GET /datasets/{dataset_id}/metadata` 🛠 planned
+### `GET /datasets/{dataset_id}/metadata`
 Returns the original metadata file as uploaded.
 
-### `GET /datasets/{dataset_id}/preview` 🛠 planned
+### `GET /datasets/{dataset_id}/preview`
 Shows the first rows of each tabular file, or the first features as GeoJSON.
 `?file_id=&limit=` (default 20, max 200).
 
@@ -291,7 +292,7 @@ Shows the first rows of each tabular file, or the first features as GeoJSON.
 Owners **request** removal and a platform admin decides (see §10). While the
 request is pending the dataset stays usable.
 
-### `POST /datasets/{dataset_id}/removal-requests` 🛠 planned · owner
+### `POST /datasets/{dataset_id}/removal-requests` · owner
 
 ```json
 // request
@@ -315,14 +316,14 @@ request is pending the dataset stays usable.
 Returns `403 forbidden` if the caller is not the owner, or
 `409 removal_already_pending`.
 
-### `GET /removal-requests` 🛠 planned
+### `GET /removal-requests`
 The caller's own requests (the *Removal requests* sidebar view).
 `?status=pending|approved|rejected|cancelled`.
 
-### `GET /removal-requests/{request_id}` 🛠 planned
+### `GET /removal-requests/{request_id}`
 One request.
 
-### `POST /removal-requests/{request_id}/cancel` 🛠 planned · requester
+### `POST /removal-requests/{request_id}/cancel` · requester
 Only allowed while the request is `pending`. Returns the request with
 `status: "cancelled"`.
 
@@ -356,8 +357,8 @@ Its key fields are listed below.
 | `files[].columns[]` | | `{ name, type, unit?, description?, role? }`. `type` ∈ `string`, `integer`, `number`, `boolean`, `date`, `datetime`, `geometry` |
 | `simulation` | | `{ role, mapping? }`: how the simulator uses the data (§9.1) |
 
-`GET /metadata/template` 🛠 planned returns a pre-filled template to edit.
-`POST /metadata/validate` 🛠 planned checks a metadata file (JSON body or
+`GET /metadata/template` returns a pre-filled template to edit.
+`POST /metadata/validate` checks a metadata file (JSON body or
 multipart `metadata`) without uploading anything:
 
 ```json
@@ -374,7 +375,7 @@ multipart `metadata`) without uploading anything:
 A selection is the set of datasets passed from the Data Lake to the
 Visualization and Simulation windows.
 
-### `POST /selections` 🛠 planned
+### `POST /selections`
 
 ```json
 // request
@@ -400,7 +401,7 @@ Rules: 1–20 datasets, each `ready` and visible to the caller
 (`409 dataset_not_ready` / `404`). The selection **pins** each dataset's
 current version.
 
-### `GET /selections/{selection_id}` 🛠 planned
+### `GET /selections/{selection_id}`
 Returns the selection. Access is checked again: datasets the caller can no
 longer see are moved to `"unavailable": [{ "id", "reason" }]`. Selections can
 be opened by anyone who can see all of their datasets, so a link can be shared
@@ -410,7 +411,7 @@ with colleagues.
 
 ## 8. Visualization (Window 3)
 
-### `GET /visualizations/summary?selection_id={id}` 🛠 planned
+### `GET /visualizations/summary?selection_id={id}`
 
 The server computes the summary and caches it per selection. Response
 (abridged):
@@ -467,11 +468,11 @@ The server computes the summary and caches it per selection. Response
 `choropleth`, `table`. The server picks charts from the column types and
 roles. The frontend renders them with the shared chart primitives.
 
-### `GET /datasets/{dataset_id}/summary` 🛠 planned
+### `GET /datasets/{dataset_id}/summary`
 The same `datasets[]` entry, for a single dataset (used by the Data Lake
 details pane).
 
-### `GET /datasets/{dataset_id}/geometry` 🛠 planned
+### `GET /datasets/{dataset_id}/geometry`
 GeoJSON `FeatureCollection` of the dataset's spatial features for map
 display. `?file_id=&simplify=<tolerance in degrees>&bbox=minx,miny,maxx,maxy&limit=`.
 Returns `404 no_geometry` if the dataset has no spatial component.
@@ -483,18 +484,18 @@ Returns `404 no_geometry` if the dataset has no spatial component.
 The current simulation API stays unchanged and gains optional dataset
 support.
 
-### `GET /health` ✅ live
+### `GET /health` · no auth
 `{ "status": "ok", "nodes": 41, "edges": 63, "total_demand_tpd": 512.4 }`
 
-### `GET /network` ✅ live · extended 🛠
-The baseline network (nodes, edges, coordinates). **Planned:** an optional
-`?selection_id=` returns the network *merged* with the selection (see §9.1),
+### `GET /network`
+The baseline network (nodes, edges, coordinates). No sign-in is needed for the
+baseline. With the optional `?selection_id=` (sign-in required) it returns the network *merged* with the selection (see §9.1),
 with `meta.sources` listing which dataset each node or edge came from.
 
-### `GET /presets` ✅ live
+### `GET /presets` · no auth
 Named example scenarios.
 
-### `GET /simulation/context?selection_id={id}` 🛠 planned
+### `GET /simulation/context?selection_id={id}`
 Shows the Simulation window how a selection maps onto the model, before any
 run:
 
@@ -515,16 +516,17 @@ run:
 }
 ```
 
-### `POST /simulate` ✅ live · extended 🛠
+### `POST /simulate`
 
-Runs a scenario. The live body is unchanged. Planned addition: an optional
-`selection_id`.
+Runs a scenario. Without `selection_id` it runs on the synthetic baseline and
+needs no sign-in. With `selection_id` it runs on the merged network and needs
+sign-in.
 
 ```jsonc
 {
   "name": "E4 closure, winter",
   "duration_days": 14,
-  "selection_id": "sel_3hq9",          // 🛠 optional: omit for the synthetic baseline
+  "selection_id": "sel_3hq9",          // optional: omit for the synthetic baseline
   "disruptions": [
     { "kind": "edge_closure",     "edge_id": "e4-nkpg-cold-to-lkpg-dc" },
     { "kind": "node_outage",      "node_id": "proc-norrkoping-mill", "capacity_factor": 0.0 },
@@ -537,8 +539,9 @@ Runs a scenario. The live body is unchanged. Planned addition: an optional
 
 `factor`, `capacity_factor` and `backup_factor` are **remaining fractions**
 (0 = gone, 1 = unaffected). The response is the existing `SimulationResult`
-(per-town impact plus a day-by-day timeline; see `backend/README.md`). The
-planned version adds:
+(per-town impact plus a day-by-day timeline; see `backend/README.md`). It also
+contains the following fields. `run_id` is `null` for anonymous runs, which are
+not stored.
 
 ```json
 { "...": "...",
@@ -547,9 +550,11 @@ planned version adds:
               "datasets": [{ "id": "ds_8f2k", "version": 3 }, { "id": "ds_p0p1", "version": 1 }] } }
 ```
 
-### `GET /simulations` / `GET /simulations/{run_id}` 🛠 planned
-History of the caller's runs (fills the "recent runs" list, currently sample
-data). Each run stores its scenario and the pinned dataset versions, so it can
+### `GET /simulations` / `GET /simulations/{run_id}`
+History of the caller's runs. It fills the "Recent runs" list in the
+Results panel. Items carry `summary` (`pct_demand_met`, `people_affected`,
+`worst_area`, `total_unmet_tpd`), and the single-run endpoint adds the full
+`result`. Each run stores its scenario and the pinned dataset versions, so it can
 be reproduced.
 
 ### 9.1 How datasets feed the model
@@ -598,43 +603,90 @@ Platform admins only (`role: "admin"`).
 
 Audit actions: `login`, `dataset.upload`, `dataset.update`,
 `dataset.visibility_change`, `dataset.download`, `removal.request`,
-`removal.decision`, `simulation.run`.
+`removal.cancel`, `removal.decision`, `simulation.run`, `user.invite`,
+`user.update`, `group.create`, `group.member_add`, `group.member_remove`.
+
+`GET /admin/removal-requests` takes `?status=pending|approved|rejected|cancelled|all`
+(default `pending`).
 
 ---
 
 ## 11. Endpoint index
 
-| Method | Path | Window | Status |
-|---|---|---|---|
-| POST | `/auth/login` | 1 Home | 🛠 |
-| POST | `/auth/refresh` | all | 🛠 |
-| POST | `/auth/logout` | all | 🛠 |
-| GET | `/auth/me` | all | 🛠 |
-| GET | `/stats/public` | 1 Home | 🛠 |
-| GET | `/groups` | 2 Data Lake | 🛠 |
-| GET / POST | `/groups/{id}/members` | 2 Data Lake | 🛠 |
-| DELETE | `/groups/{id}/members/{user_id}` | 2 Data Lake | 🛠 |
-| GET | `/datasets` | 2 Data Lake | 🛠 |
-| POST | `/datasets` | 2 Data Lake | 🛠 |
-| GET / PATCH | `/datasets/{id}` | 2 Data Lake | 🛠 |
-| PUT | `/datasets/{id}/files` | 2 Data Lake | 🛠 |
-| GET | `/datasets/{id}/files/{file_id}` | 2 Data Lake | 🛠 |
-| GET | `/datasets/{id}/metadata` | 2 Data Lake | 🛠 |
-| GET | `/datasets/{id}/preview` | 2 Data Lake | 🛠 |
-| POST | `/datasets/{id}/removal-requests` | 2 Data Lake | 🛠 |
-| GET | `/removal-requests` · `/removal-requests/{id}` | 2 Data Lake | 🛠 |
-| POST | `/removal-requests/{id}/cancel` | 2 Data Lake | 🛠 |
-| GET | `/metadata/template` | 2 Data Lake | 🛠 |
-| POST | `/metadata/validate` | 2 Data Lake | 🛠 |
-| POST | `/selections` | 2 → 3 | 🛠 |
-| GET | `/selections/{id}` | 3, 4 | 🛠 |
-| GET | `/visualizations/summary` | 3 Visualization | 🛠 |
-| GET | `/datasets/{id}/summary` | 2, 3 | 🛠 |
-| GET | `/datasets/{id}/geometry` | 3, 4 | 🛠 |
-| GET | `/health` | — | ✅ |
-| GET | `/network` | 4 Simulation | ✅ (+🛠 `selection_id`) |
-| GET | `/presets` | 4 Simulation | ✅ |
-| GET | `/simulation/context` | 4 Simulation | 🛠 |
-| POST | `/simulate` | 4 Simulation | ✅ (+🛠 `selection_id`) |
-| GET | `/simulations` · `/simulations/{run_id}` | 4 Simulation | 🛠 |
-| * | `/admin/...` | Admin | 🛠 |
+| Method | Path | Window |
+|---|---|---|
+| POST | `/auth/login` | 1 Home |
+| POST | `/auth/refresh` | all |
+| POST | `/auth/logout` | all |
+| GET | `/auth/me` | all |
+| GET | `/stats/public` | 1 Home |
+| GET | `/groups` | 2 Data Lake |
+| GET / POST | `/groups/{id}/members` | 2 Data Lake |
+| DELETE | `/groups/{id}/members/{user_id}` | 2 Data Lake |
+| GET | `/datasets` | 2 Data Lake |
+| POST | `/datasets` | 2 Data Lake |
+| GET / PATCH | `/datasets/{id}` | 2 Data Lake |
+| PUT | `/datasets/{id}/files` | 2 Data Lake |
+| GET | `/datasets/{id}/files/{file_id}` | 2 Data Lake |
+| GET | `/datasets/{id}/metadata` | 2 Data Lake |
+| GET | `/datasets/{id}/preview` | 2 Data Lake |
+| POST | `/datasets/{id}/removal-requests` | 2 Data Lake |
+| GET | `/removal-requests` · `/removal-requests/{id}` | 2 Data Lake |
+| POST | `/removal-requests/{id}/cancel` | 2 Data Lake |
+| GET | `/metadata/template` | 2 Data Lake |
+| POST | `/metadata/validate` | 2 Data Lake |
+| POST | `/selections` | 2 → 3 |
+| GET | `/selections/{id}` | 3, 4 |
+| GET | `/visualizations/summary` | 3 Visualization |
+| GET | `/datasets/{id}/summary` | 2, 3 |
+| GET | `/datasets/{id}/geometry` | 3, 4 |
+| GET | `/health` | — |
+| GET | `/network` | 4 Simulation |
+| GET | `/presets` | 4 Simulation |
+| GET | `/simulation/context` | 4 Simulation |
+| POST | `/simulate` | 4 Simulation |
+| GET | `/simulations` · `/simulations/{run_id}` | 4 Simulation |
+| * | `/admin/...` | Admin |
+
+---
+
+## 12. Implementation notes
+
+Where the running backend differs from, or adds to, the original
+specification:
+
+- **Storage.** Files are stored on local disk under `STORAGE_DIR`
+  (`storage/datasets/<id>/v<n>/`), not in object storage. Metadata goes in
+  PostgreSQL. As a result, file downloads are streamed directly (`200`) and
+  there is no `302` to a signed URL.
+- **Baseline simulation is public.** `GET /network`, `GET /presets` and
+  `POST /simulate` without a `selection_id` need no sign-in, so the synthetic
+  demo keeps working. Anything involving a selection does need sign-in.
+- **Ingestion runs in-process** as a FastAPI background task, straight after
+  the `202` response. The client polls `GET /datasets/{id}` until `status` is
+  `ready` or `invalid`.
+- **Readable formats.** CSV/TSV, XLSX (first sheet), JSON and GeoJSON are
+  profiled, previewed, charted and usable as simulation input. GeoPackage,
+  zipped Shapefile and Parquet are accepted and stored, but not profiled; the
+  dataset becomes `ready` with a note in `status_reason`. Point geometry is
+  derived from `lat`/`lon` columns, or from columns with role
+  `latitude`/`longitude`.
+- **`geometry?simplify=`** snaps vertices to a grid of that many degrees and
+  drops repeated vertices. It is not a Douglas–Peucker simplification.
+- **`municipalities_covered`** counts the seats of Östergötland's 13
+  municipalities that fall inside the selection's combined bounding box.
+- **Summary extras.** The visualization summary also returns
+  `overview.municipalities` (names), `unavailable` (dropped datasets), and,
+  per dataset, `notes`, `geometry_type`, `owner`, `license`, `source` and
+  `temporal`. `charts[].kind` can also be `line_map`.
+- **Context extras.** `GET /simulation/context` also returns
+  `network_size`, `unavailable`, `edges_added` and `records_skipped`, and each
+  input carries the dataset `title`.
+- **Groups and users.** `POST /groups/{id}/members` accepts `email` as well as
+  `user_id`. There is no email service, so `POST /admin/users` takes an
+  optional `password`; without one, the response includes a generated
+  `initial_password`. `PATCH /admin/users/{id}` can also reset `password`.
+- **Validation errors** from request parsing (bad JSON body, wrong types)
+  return `422 validation_error` with `details.errors[]`.
+- **Not implemented yet:** resumable uploads (`POST /uploads`) and dataset
+  "Report" links.

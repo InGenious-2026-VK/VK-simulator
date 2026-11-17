@@ -7,8 +7,9 @@ info:
     API for the four FoodChainIQ windows: Home (auth), Data Lake (datasets),
     Visualization (summaries) and Simulation (scenario runs).
 
-    Operations tagged `x-status: live` exist in `backend/` today; `planned`
-    operations are specification only. Human-readable reference:
+    Every operation is implemented in `backend/` (FastAPI + PostgreSQL); the
+    running server also serves its own generated docs at `/docs`.
+    Human-readable reference and implementation notes:
     `documentation/api/README.md`.
 servers:
   - url: http://localhost:8000/api
@@ -34,7 +35,7 @@ paths:
     post:
       tags: [Auth]
       summary: Sign in with email and password
-      x-status: planned
+      x-status: live
       security: []
       requestBody:
         required: true
@@ -60,7 +61,7 @@ paths:
     post:
       tags: [Auth]
       summary: Exchange the refresh cookie for a new access token
-      x-status: planned
+      x-status: live
       security:
         - refreshCookie: []
       responses:
@@ -74,14 +75,14 @@ paths:
     post:
       tags: [Auth]
       summary: Revoke the refresh token
-      x-status: planned
+      x-status: live
       responses:
         '204': { description: Signed out }
   /auth/me:
     get:
       tags: [Auth]
       summary: Current user
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: The signed-in user
@@ -93,7 +94,7 @@ paths:
     get:
       tags: [Auth]
       summary: Public catalogue teaser numbers for the Home page
-      x-status: planned
+      x-status: live
       security: []
       responses:
         '200':
@@ -113,7 +114,7 @@ paths:
     get:
       tags: [Groups]
       summary: Groups the caller belongs to (all groups for admins)
-      x-status: planned
+      x-status: live
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
@@ -136,7 +137,7 @@ paths:
     get:
       tags: [Groups]
       summary: List members of a group
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: Members
@@ -152,7 +153,7 @@ paths:
     post:
       tags: [Groups]
       summary: Add a member (group admin)
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -180,7 +181,7 @@ paths:
     delete:
       tags: [Groups]
       summary: Remove a member (group admin)
-      x-status: planned
+      x-status: live
       responses:
         '204': { description: Removed }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -190,7 +191,7 @@ paths:
     get:
       tags: [Datasets]
       summary: List datasets visible to the caller (Data Lake grid)
-      x-status: planned
+      x-status: live
       parameters:
         - name: scope
           in: query
@@ -257,7 +258,7 @@ paths:
     post:
       tags: [Datasets]
       summary: Upload a dataset (data files + one standard metadata file)
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -300,7 +301,7 @@ paths:
     get:
       tags: [Datasets]
       summary: Dataset details (metadata + file column profiles)
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: Dataset
@@ -311,7 +312,7 @@ paths:
     patch:
       tags: [Datasets]
       summary: Edit descriptive fields or visibility (owner)
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -340,7 +341,7 @@ paths:
     put:
       tags: [Datasets]
       summary: Upload a new version of the dataset's files (owner)
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -370,13 +371,14 @@ paths:
         schema: { type: string }
     get:
       tags: [Datasets]
-      summary: Download a file (redirect to a signed URL; audit-logged)
-      x-status: planned
+      summary: Download a file (streamed from local storage; audit-logged)
+      x-status: live
       responses:
-        '302':
-          description: Redirect to short-lived signed object-storage URL
-          headers:
-            Location: { schema: { type: string, format: uri } }
+        '200':
+          description: The file, with Content-Disposition attachment
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
         '404': { $ref: '#/components/responses/NotFound' }
   /datasets/{dataset_id}/metadata:
     parameters:
@@ -384,7 +386,7 @@ paths:
     get:
       tags: [Datasets]
       summary: The original metadata file
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: metadata.json as uploaded
@@ -398,7 +400,7 @@ paths:
     get:
       tags: [Datasets]
       summary: First rows / features of a file
-      x-status: planned
+      x-status: live
       parameters:
         - name: file_id
           in: query
@@ -429,7 +431,7 @@ paths:
     get:
       tags: [Visualization]
       summary: Visual summary of one dataset
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: Summary
@@ -443,7 +445,7 @@ paths:
     get:
       tags: [Visualization]
       summary: GeoJSON features for map display
-      x-status: planned
+      x-status: live
       parameters:
         - name: file_id
           in: query
@@ -480,7 +482,7 @@ paths:
     post:
       tags: [Removal requests]
       summary: Request removal of an own dataset
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -503,7 +505,7 @@ paths:
     get:
       tags: [Removal requests]
       summary: The caller's removal requests
-      x-status: planned
+      x-status: live
       parameters:
         - name: status
           in: query
@@ -529,7 +531,7 @@ paths:
     get:
       tags: [Removal requests]
       summary: One removal request
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: Request
@@ -543,7 +545,7 @@ paths:
     post:
       tags: [Removal requests]
       summary: Cancel a pending request (requester)
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: Cancelled
@@ -557,7 +559,7 @@ paths:
     get:
       tags: [Metadata]
       summary: Download a pre-filled metadata.json template
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: Template
@@ -568,7 +570,7 @@ paths:
     post:
       tags: [Metadata]
       summary: Validate a metadata file without uploading data
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -603,7 +605,7 @@ paths:
     post:
       tags: [Selections]
       summary: Save the Data Lake selection (handed to Visualization and Simulation)
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -632,7 +634,7 @@ paths:
     get:
       tags: [Selections]
       summary: Get a selection (access re-checked)
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: Selection
@@ -646,7 +648,7 @@ paths:
     get:
       tags: [Visualization]
       summary: Visual summary of a selection (Window 3)
-      x-status: planned
+      x-status: live
       parameters:
         - $ref: '#/components/parameters/SelectionIdQueryRequired'
       responses:
@@ -680,7 +682,8 @@ paths:
     get:
       tags: [Simulation]
       summary: Baseline network, optionally merged with a selection
-      description: '`selection_id` is planned; without it the live behaviour is unchanged.'
+      description: 'No auth for the baseline; `selection_id` requires sign-in.'
+      security: [{}, { bearerAuth: [] }]
       x-status: live
       parameters:
         - $ref: '#/components/parameters/SelectionIdQuery'
@@ -695,6 +698,7 @@ paths:
       tags: [Simulation]
       summary: Named example scenarios
       x-status: live
+      security: []
       responses:
         '200':
           description: Presets
@@ -713,7 +717,7 @@ paths:
     get:
       tags: [Simulation]
       summary: How a selection maps onto the simulation model
-      x-status: planned
+      x-status: live
       parameters:
         - $ref: '#/components/parameters/SelectionIdQueryRequired'
       responses:
@@ -727,7 +731,8 @@ paths:
     post:
       tags: [Simulation]
       summary: Run a disruption scenario
-      description: '`selection_id` in the body is planned; omit it for the synthetic baseline (live behaviour).'
+      description: 'No auth for the synthetic baseline; `selection_id` requires sign-in. Runs by signed-in users are stored (`run_id`).'
+      security: [{}, { bearerAuth: [] }]
       x-status: live
       requestBody:
         required: true
@@ -746,7 +751,7 @@ paths:
     get:
       tags: [Simulation]
       summary: The caller's run history
-      x-status: planned
+      x-status: live
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
@@ -772,7 +777,7 @@ paths:
     get:
       tags: [Simulation]
       summary: One stored run (scenario, pinned dataset versions, result)
-      x-status: planned
+      x-status: live
       responses:
         '200':
           description: Run
@@ -786,11 +791,14 @@ paths:
     get:
       tags: [Admin]
       summary: Removal request queue
-      x-status: planned
+      x-status: live
       parameters:
         - name: status
           in: query
-          schema: { $ref: '#/components/schemas/RemovalStatus' }
+          schema:
+            type: string
+            enum: [pending, approved, rejected, cancelled, all]
+            default: pending
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
       responses:
@@ -813,7 +821,7 @@ paths:
     post:
       tags: [Admin]
       summary: Approve or reject a removal request
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -836,7 +844,7 @@ paths:
     get:
       tags: [Admin]
       summary: List users
-      x-status: planned
+      x-status: live
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
@@ -856,7 +864,7 @@ paths:
     post:
       tags: [Admin]
       summary: Invite a user
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -883,7 +891,7 @@ paths:
     patch:
       tags: [Admin]
       summary: Change role, quota or disable a user
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -904,7 +912,7 @@ paths:
     post:
       tags: [Admin]
       summary: Create a group
-      x-status: planned
+      x-status: live
       requestBody:
         required: true
         content:
@@ -925,7 +933,7 @@ paths:
     get:
       tags: [Admin]
       summary: Audit log
-      x-status: planned
+      x-status: live
       parameters:
         - { name: actor_id, in: query, schema: { type: string } }
         - { name: dataset_id, in: query, schema: { type: string } }
@@ -1386,20 +1394,19 @@ components:
         duration_days: { type: integer, minimum: 1, default: 14 }
         selection_id:
           type: string
-          description: Planned. Run against the network merged with this selection.
+          description: Run against the network merged with this selection (sign-in required).
         disruptions:
           type: array
           items: { $ref: '#/components/schemas/Disruption' }
     SimulationResult:
       description: >
-        Live response from backend/app/models.py (per-town impact and day-by-day
-        timeline). Planned additions: run_id and inputs.
+        Response from backend/app/models.py (per-town impact and day-by-day
+        timeline), plus run_id (null for anonymous runs) and inputs.
       type: object
       additionalProperties: true
       properties:
-        run_id: { type: string, description: Planned }
+        run_id: { type: [string, 'null'] }
         inputs:
-          description: Planned
           type: object
           properties:
             selection_id: { type: string }
@@ -1425,7 +1432,7 @@ components:
           additionalProperties: true
           properties:
             sources:
-              description: Planned. Which dataset each node/edge came from.
+              description: Which dataset each node/edge came from (merged networks).
               type: object
               additionalProperties: { type: string }
         disclaimer: { type: string }

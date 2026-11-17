@@ -25,56 +25,126 @@ flowchart LR
     V -- "To simulation" --> S["4 · Simulation<br/>scenario workspace"]
 ```
 
-| # | Window | What you do there | Status |
+| # | Window | Route | What you do there |
 |---|---|---|---|
-| 1 | **Home** | Read about the project and sign in. Once you are signed in, a **To data lake** button appears. | planned |
-| 2 | **Data Lake** | A home page in the style of Google Drive. Browse the datasets you can access, select one or more, upload new ones (several data files plus one standard metadata file, kept **private**, shared with a **group**, or **public**), and request removal of your own datasets. | planned |
-| 3 | **Visualization** | A visual summary of the selected datasets: coverage map, field profiles, charts and a simulation-readiness check. | planned |
-| 4 | **Simulation** | The scenario workspace, run on the selected datasets. | **live** (on the synthetic baseline); dataset input planned |
+| 1 | **Home** | `/` | Read about the project and sign in. Once you are signed in, a **To data lake** button appears. |
+| 2 | **Data Lake** | `/datalake` | A dataset browser in the style of Google Drive. Search and filter the datasets you can access and select one or more. Upload new ones (several data files plus one standard `metadata.json`) and keep each **private**, share it with a **group**, or make it **public**. Request removal of your own datasets; admins approve or reject requests. |
+| 3 | **Visualization** | `/visualize?selection=…` | A visual summary of the selection: KPIs, a coverage map, automatic charts, field profiles, cross-dataset checks and simulation readiness. |
+| 4 | **Simulation** | `/simulate?selection=…` | The scenario workspace, running on the baseline network merged with the selected datasets. Each selected dataset is also a map layer. |
+
+All four windows are implemented: `frontend/` (React) talks to `backend/`
+(FastAPI + PostgreSQL). Uploaded files are stored on disk in
+`backend/storage/`.
 
 ## Structure
 
+- `frontend/` — the web app (React 18 + Vite + React Router + MapLibre GL). See `frontend/README.md`.
+- `backend/` — the API (FastAPI, SQLAlchemy + PostgreSQL, networkx simulation engine). See `backend/README.md`.
 - `documentation/` — concept, specifications and API
-  - `ostergotland-food-resilience-platform-concept.md` — concept & architecture (data layers, stakeholders, governance, roadmap)
-  - `foodchainiq-application-windows.md` — functional spec of the four windows and the user flow
-  - `api/README.md` — API reference (auth, data lake, selections, visualization, simulation)
-  - `api/openapi.yaml` — OpenAPI 3.1 spec for the same API
-  - `api/dataset-metadata.schema.json` — JSON Schema for the standard dataset metadata file ([example](documentation/api/examples/metadata.example.json))
-- `Implementation/` — the web application (React + Vite + MapLibre GL). Today it contains the Simulation window.
-- `backend/` — the Python service (FastAPI + networkx). Today it contains the
-  simulation engine, which models supply-chain disruptions and their effect on
-  people. The data lake, auth and visualization endpoints are specified in
-  `documentation/api/` and are not built yet.
+  - `ostergotland-food-resilience-platform-concept.md` — concept & architecture
+  - `foodchainiq-application-windows.md` — functional spec of the four windows
+  - `api/README.md` — API reference · `api/openapi.yaml` — OpenAPI 3.1 spec
+  - `api/dataset-metadata.schema.json` — the standard dataset metadata file ([example](documentation/api/examples/metadata.example.json))
+- `docker-compose.yml` — local PostgreSQL
+- `run.bat` / `run.sh` — one-command dev launchers
 
-## Start here
+## Run the platform
 
-Read `documentation/ostergotland-food-resilience-platform-concept.md` for the
-concept, then `documentation/foodchainiq-application-windows.md` for how the
-application works, and `documentation/api/README.md` for the API.
+You need **Python 3.11+**, **Node 22** and **PostgreSQL 14+**. Docker is the
+easiest way to get PostgreSQL.
 
-### Run the platform
+**Quick start.** On Windows, double-click **`run.bat`**. On macOS or Linux, run
+`./run.sh`. Either script starts PostgreSQL with Docker Compose (if Docker is
+installed), creates the Python venv and installs dependencies on first run,
+then starts the backend and frontend.
 
-**Windows, quick start:** double-click **`run.bat`** in the repo root. It
-creates the Python venv and installs dependencies on first run, then starts both
-servers (each in its own window) and opens the app.
+**Manual.** Start in this order:
 
-**Manual (any OS) — two parts.** The map viewer talks to the simulation backend
-over `/api` (Vite proxies it). Start the backend first:
+1. Start the database:
 
+   ```bash
+   docker compose up -d db
+   ```
+
+   You can use your own PostgreSQL instead. Copy `backend/.env.example` to
+   `backend/.env` and set `DATABASE_URL`.
+
+2. Start the backend. Run each of these commands from the repo root.
+
+   ```bash
+   cd backend
+   ```
+
+   ```bash
+   python -m venv .venv
+   ```
+
+   Activate the venv. On macOS or Linux:
+
+   ```bash
+   source .venv/bin/activate
+   ```
+
+   On Windows, run `.venv\Scripts\activate` instead.
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+   ```bash
+   uvicorn app.main:app --reload --port 8000
+   ```
+
+   On first start the backend creates the tables and seeds an admin. It also
+   seeds demo users, groups and five synthetic datasets, unless you set
+   `SEED_DEMO=false`.
+
+3. Start the frontend in another terminal:
+
+   ```bash
+   cd frontend
+   ```
+
+   ```bash
+   npm install
+   ```
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open http://localhost:5173 and sign in.
+
+### Demo accounts (seeded when `SEED_DEMO=true`)
+
+| Email | Password | Role |
+|---|---|---|
+| `admin@foodchainiq.local` | `admin1234` | Platform admin (approves removal requests). Set `ADMIN_EMAIL` / `ADMIN_PASSWORD` to change it. |
+| `planner@foodchainiq.local` | `planner1234` | User, admin of the *Länsstyrelsen Östergötland* group, member of *Vreta Kluster producers* |
+| `producer@foodchainiq.local` | `producer1234` | User, admin of the *Vreta Kluster producers* group |
+
+Change these before exposing the app anywhere.
+
+### Tests
+
+Run the backend tests against a throwaway database (default
+`foodchainiq_test`; override it with `TEST_DATABASE_URL`). First create the
+test database:
+
+```bash
+createdb -h localhost -U foodchainiq foodchainiq_test
 ```
-cd backend
-python -m venv .venv && .venv\Scripts\activate      # source .venv/bin/activate on macOS/Linux
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+
+Then run the tests from `backend/`:
+
+```bash
+pytest -q
 ```
 
-Then, in another terminal, the frontend:
+### Static deployment
 
-```
-cd Implementation
-npm install
-npm run dev
-```
-
-The viewer still runs without the backend — you just lose the scenario
-simulator. See `backend/README.md` for the model and API.
+The Cloudflare deploy (`frontend/wrangler.jsonc`) serves only the static
+frontend. Sign-in and every window after Home need the backend, so host
+`backend/` and its PostgreSQL somewhere, then build the frontend with
+`VITE_API_BASE` (see `frontend/README.md`). **If Cloudflare auto-deploys from
+Git, change the build's root directory from `Implementation` to `frontend`.**

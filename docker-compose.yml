@@ -1,0 +1,23 @@
+# Local PostgreSQL for the FoodChainIQ backend.
+#   docker compose up -d db
+# The credentials match backend/app/config.py's default DATABASE_URL:
+#   postgresql+psycopg://foodchainiq:foodchainiq@localhost:5432/foodchainiq
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: foodchainiq
+      POSTGRES_PASSWORD: foodchainiq
+      POSTGRES_DB: foodchainiq
+    ports:
+      - "5432:5432"
+    volumes:
+      - foodchainiq-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U foodchainiq"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  foodchainiq-db:

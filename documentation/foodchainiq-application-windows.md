@@ -4,10 +4,9 @@
 Companion to `ostergotland-food-resilience-platform-concept.md` (concept &
 architecture) and `api/README.md` (API reference).
 
-> **Status.** Window 4 (Simulation) exists today as the GIS workspace in
-> `Implementation/`. Windows 1–3 (Home, Data Lake, Visualization), the login
-> and the dataset-aware simulation are **specified here and not yet built**.
-> Everything below is the target behaviour.
+> **Status.** All four windows are implemented: `frontend/` (React) and
+> `backend/` (FastAPI + PostgreSQL, with uploaded files on local disk). Where
+> the implementation simplifies this spec, see `api/README.md` §12.
 
 ---
 
@@ -260,7 +259,7 @@ Data comes from `GET /api/visualizations/summary?selection_id={id}`.
 
 ## 5. Window 4 — Simulation
 
-The **existing GIS scenario workspace** (`Implementation/`: Layers ·
+The **existing GIS scenario workspace** (`frontend/`: Layers ·
 Simulation + Map · Results · Timeline), extended to run on the selected
 datasets.
 
