@@ -53,10 +53,31 @@ All four windows are implemented: `frontend/` (React) talks to `backend/`
 You need **Python 3.11+**, **Node 22** and **PostgreSQL 14+**. Docker is the
 easiest way to get PostgreSQL.
 
-**Quick start.** On Windows, double-click **`run.bat`**. On macOS or Linux, run
-`./run.sh`. Either script starts PostgreSQL with Docker Compose (if Docker is
-installed), creates the Python venv and installs dependencies on first run,
-then starts the backend and frontend.
+**Quick start: one command starts everything.**
+
+On Windows, double-click **`run.bat`**. On macOS or Linux, run:
+
+```bash
+./run.sh
+```
+
+Either launcher:
+
+1. checks that Python 3.10+, Node.js and npm are installed, and that ports
+   8000 and 5173 are free;
+2. starts PostgreSQL with `docker compose up -d db`, if Docker is running.
+   Otherwise it uses the database in `backend/.env`;
+3. creates the Python venv and installs backend and frontend dependencies on
+   first run, and again whenever `requirements.txt` or `package-lock.json`
+   changes;
+4. waits for the database, starts the backend and waits until
+   `/api/health` answers;
+5. starts the frontend and opens http://localhost:5173 in your browser.
+
+To stop the app, press Ctrl+C in the terminal (`run.sh`) or close the two
+server windows (`run.bat`). The database container keeps running; stop it with
+`docker compose stop db`. Set `NO_BROWSER=1` to skip opening the browser, or
+`NO_DOCKER=1` (`run.sh` only) to leave Docker alone.
 
 **Manual.** Start in this order:
 
