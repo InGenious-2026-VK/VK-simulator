@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foodchainiq.example/schemas/dataset-metadata/1.0.json",
+  "title": "FoodChainIQ dataset metadata",
+  "description": "Standard metadata file (metadata.json) uploaded with every FoodChainIQ dataset. See documentation/api/README.md §6.",
+  "type": "object",
+  "required": ["schema_version", "title", "description", "category", "source", "license", "sensitivity", "files"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "title": { "type": "string", "minLength": 3, "maxLength": 200 },
+    "description": { "type": "string", "minLength": 10, "maxLength": 5000 },
+    "category": {
+      "description": "Platform data layer the dataset belongs to.",
+      "enum": ["production", "processing", "logistics", "energy", "water", "population", "demand", "vulnerability", "other"]
+    },
+    "keywords": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 50 },
+      "maxItems": 30,
+      "uniqueItems": true
+    },
+    "source": {
+      "type": "object",
+      "required": ["organization"],
+      "additionalProperties": false,
+      "properties": {
+        "organization": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "collected_at": { "type": "string", "format": "date" },
+        "method": { "type": "string", "description": "How the data was collected or derived." }
+      }
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX licence identifier (e.g. CC-BY-4.0, CC0-1.0) or 'proprietary'."
+    },
+    "contact": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      }
+    },
+    "sensitivity": {
+      "description": "Data classification. 'restricted' datasets can never be given public visibility.",
+      "enum": ["open", "internal", "restricted"]
+    },
+    "spatial": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "crs": { "type": "string", "pattern": "^EPSG:[0-9]+$", "default": "EPSG:4326" },
+        "bbox": {
+          "type": "array",
+          "description": "[min_lon, min_lat, max_lon, max_lat] in the dataset CRS.",
+          "items": { "type": "number" },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "region": { "type": "string", "examples": ["Östergötland", "Linköping kommun"] },
+        "geometry_type": { "enum": ["point", "line", "polygon", "mixed", "none"] }
+      }
+    },
+    "temporal": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" },
+        "resolution": { "enum": ["static", "hour", "day", "week", "month", "quarter", "year"] }
+      }
+    },
+    "files": {
+      "type": "array",
+      "description": "One entry per uploaded data file. Names must match the uploaded file names exactly.",
+      "minItems": 1,
+      "maxItems": 50,
+      "items": { "$ref": "#/$defs/file" }
+    },
+    "simulation": { "$ref": "#/$defs/simulation" }
+  },
+  "$defs": {
+    "file": {
+      "type": "object",
+      "required": ["name", "format"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "format": { "enum": ["csv", "xlsx", "geojson", "gpkg", "shapefile", "parquet", "json"] },
+        "description": { "type": "string" },
+        "encoding": { "type": "string", "default": "utf-8" },
+        "delimiter": { "type": "string", "maxLength": 1, "description": "CSV only." },
+        "columns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/column" }
+        }
+      }
+    },
+    "column": {
+      "type": "object",
+      "required": ["name", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "enum": ["string", "integer", "number", "boolean", "date", "datetime", "geometry"] },
+        "unit": { "type": "string", "examples": ["t/day", "tonnes", "people", "km", "MW"] },
+        "description": { "type": "string" },
+        "role": {
+          "description": "Optional semantic hint for profiling and charts.",
+          "enum": ["id", "name", "category", "measure", "time", "latitude", "longitude", "geometry", "municipality_code"]
+        }
+      }
+    },
+    "simulation": {
+      "type": "object",
+      "required": ["role"],
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "description": "How the simulator uses this dataset (README §9.1).",
+          "enum": ["production", "processing", "logistics", "energy", "population", "demand", "reference"]
+        },
+        "mapping": {
+          "type": "object",
+          "description": "Maps network fields (keys) to column names in the dataset (values). 'file' picks which file to read when there are several.",
+          "properties": {
+            "file": { "type": "string" }
+          },
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -14,6 +14,9 @@ __pycache__/
 *.pyc
 
 # Raw source datasets (large). Derived, clipped extracts live in
-# Implementation/public/data/ and are committed. See
-# Implementation/scripts/extract-population-density.mjs
+# frontend/public/data/ and are committed. See
+# frontend/scripts/extract-population-density.mjs
 /data/
+
+# Uploaded dataset files (backend STORAGE_DIR default)
+backend/storage/

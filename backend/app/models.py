@@ -42,6 +42,8 @@ class Scenario(BaseModel):
     name: Optional[str] = None
     disruptions: list[Disruption] = Field(default_factory=list)
     duration_days: int = Field(default=14, ge=1, le=120)
+    # Run against the baseline merged with a Data Lake selection (sign-in required).
+    selection_id: Optional[str] = None
 
 
 class Preset(BaseModel):
@@ -109,3 +111,6 @@ class SimulationResult(BaseModel):
     nodes: list[NodeImpact]
     edges: list[EdgeFlow]
     timeline: list[TimelinePoint]
+    # Set when the run is stored (signed-in callers): id + pinned dataset versions.
+    run_id: Optional[str] = None
+    inputs: Optional[dict] = None
