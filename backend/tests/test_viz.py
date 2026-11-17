@@ -220,3 +220,77 @@ def test_every_shipped_dataset_meets_the_contract(monkeypatch):
     assert datasets
     for meta in datasets:
         assert lake.load_dataset(meta["id"])["rows"]
+
+
+# --- views: a dataset cut into cards for the data overview -------------------
+
+def _line_csv(series_count, years=(2020, 2021)):
+    lines = ["date,series,value"]
+    for s in range(series_count):
+        lines += [f"{y},S{s},{s + 1}" for y in years]
+    return "\n".join(lines) + "\n"
+
+
+def test_views_of_line_dataset_overview_then_one_per_series(temp_lake):
+    temp_lake(_line_csv(6))
+    body = client.get("/api/viz/datasets/d/views").json()
+    assert body["total"] == 7
+    assert body["dataset"]["title"] == "Demo"
+    first = body["views"][0]
+    assert first["title"] == "Top 4 of 6 series"
+    assert {r["series"] for r in first["rows"]} == {"S2", "S3", "S4", "S5"}
+    assert [v["title"] for v in body["views"][1:]] == ["S0", "S1", "S2", "S3", "S4", "S5"]
+    assert [v["index"] for v in body["views"]] == list(range(7))
+
+
+def test_views_are_paged(temp_lake):
+    temp_lake(_line_csv(25))
+    page = client.get("/api/viz/datasets/d/views?offset=10&limit=10").json()
+    assert page["total"] == 26
+    assert page["offset"] == 10
+    assert [v["index"] for v in page["views"]] == list(range(10, 20))
+    last = client.get("/api/viz/datasets/d/views?offset=20&limit=10").json()
+    assert [v["index"] for v in last["views"]] == list(range(20, 26))
+
+
+def test_views_page_size_is_limited(temp_lake):
+    temp_lake(_line_csv(2))
+    assert client.get("/api/viz/datasets/d/views?limit=500").status_code == 422
+
+
+def test_views_of_pie_dataset_page_through_the_small_categories(temp_lake):
+    rows = "\n".join(f"C{i},{100 - i}" for i in range(14))
+    temp_lake(f"category,value\n{rows}\n", chart_type="pie")
+    views = client.get("/api/viz/datasets/d/views").json()["views"]
+    assert [v["title"] for v in views] == [
+        "All categories",
+        "Categories 6–11 by size",
+        "Categories 12–14 by size",
+    ]
+    assert [r["category"] for r in views[1]["rows"]] == ["C5", "C6", "C7", "C8", "C9", "C10"]
+
+
+def test_views_of_bubble_map_rank_places(temp_lake):
+    rows = "\n".join(f"P{i},58.{i},15.{i},{i}" for i in range(13))
+    temp_lake(f"name,lat,lon,value\n{rows}\n", chart_type="bubble-map")
+    views = client.get("/api/viz/datasets/d/views").json()["views"]
+    assert [v["title"] for v in views] == ["All places", "Places ranked 1–10", "Places ranked 11–13"]
+    assert views[1]["rows"][0]["name"] == "P12"
+
+
+def test_views_of_unknown_dataset_is_404(temp_lake):
+    temp_lake(_line_csv(1))
+    assert client.get("/api/viz/datasets/nope/views").status_code == 404
+
+
+def test_every_view_of_every_shipped_dataset_meets_the_contract(monkeypatch):
+    from app.viz.views import build_views
+
+    monkeypatch.delenv("VIZ_DATA_DIR", raising=False)
+    for meta in lake.list_datasets():
+        data = lake.load_dataset(meta["id"])
+        views = build_views(data)
+        assert views
+        for view in views:
+            raw = [{k: str(v) for k, v in r.items()} for r in view["rows"]]
+            validate(raw, data["type"])

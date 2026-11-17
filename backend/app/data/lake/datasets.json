@@ -25,5 +25,13 @@
     "subtitle": "Share of each municipality's fresh vegetable purchases with Swedish origin, by cost, 2023",
     "unit": "%",
     "source": "Jordbruksverket, SILO database"
+  },
+  {
+    "id": "food-consumption",
+    "type": "line",
+    "file": "food-consumption.csv",
+    "title": "Food consumption per person in Sweden",
+    "subtitle": "Kilograms (milk products: litres) per person and year, by food item",
+    "source": "Jordbruksverket"
   }
 ]

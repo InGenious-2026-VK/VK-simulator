@@ -168,11 +168,13 @@ examples to copy.
 
 1. `backend/app/viz/contract.py`: add the type and its columns to `CHART_TYPES`.
 2. `Implementation/src/visualisation/`: write the component (like
-   `PieChartView.jsx`) and add it to `CHARTS` in `VisualisationPanel.jsx`.
+   `PieChartView.jsx`) and add it to `CHARTS` in `charts.js`.
 3. Add an example dataset (see "Add a dataset" above) and put its id in
    `EXAMPLES` in `dev.jsx`, so it shows on the test page.
-4. Add tests in `backend/tests/test_viz.py`.
-5. Update this guide and the data contract.
+4. Optional: give it views for the data overview (see below). Without them
+   the overview shows the whole dataset on a single card.
+5. Add tests in `backend/tests/test_viz.py`.
+6. Update this guide and the data contract.
 
 ### Put a chart in the main app
 
@@ -183,10 +185,33 @@ that place:
 <VisualisationPanel datasetId="farmland-use" />
 ```
 
+### The data overview (card stacks)
+
+`DataOverview.jsx` shows every dataset in the lake as a stack of cards, in a
+grid with as many columns as fit (two on a laptop). Each card is one **view**:
+a small piece of the dataset that one chart can show readably, such as one
+line per food item. Mouse wheel, arrow keys or the ‹ › buttons turn the cards.
+
+- Test page: `http://localhost:5173/visualisation.html?overview`
+- Backend: `backend/app/viz/views.py` cuts a dataset into views;
+  `GET /api/viz/datasets/{id}/views?offset=0&limit=10` serves them a page at a
+  time. The frontend loads 10, then the next 10 when three are left
+  (`useViewStack.js`).
+- Look: the stack's tilt, card offsets and animation speed are CSS variables at
+  the top of `overview.css`.
+- Maps: only the top card draws a live map, because browsers allow only about
+  16 WebGL maps at once.
+- To give a chart type views, add a function to `VIEW_BUILDERS` in `views.py`.
+  It gets the validated rows and returns a list of
+  `{"title", "subtitle", "rows"}`. Every view's rows must still meet the
+  type's contract (a test checks this for every shipped dataset).
+
 ## Words used here
 
 - **Data lake**: the folder where the data files are kept.
 - **Manifest**: `datasets.json`, the list of what is in that folder.
+- **View**: one card of the data overview: a slice of a dataset small enough
+  for one chart.
 - **Tidy table**: one measurement per row (not one column per year).
 - **Contract**: the agreed column names per chart type.
 - **Backend / frontend**: the Python program that serves data / the web page

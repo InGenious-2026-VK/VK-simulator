@@ -1,5 +1,7 @@
-/* Scoped to .viz-panel so the host UI's styles are not affected. */
-.viz-panel {
+/* Scoped to .viz-panel (and .viz-overview, see overview.css) so the host UI's
+   styles are not affected. */
+.viz-panel,
+.viz-overview {
   --viz-surface: #ffffff;
   --viz-text: #09090b;
   --viz-text-muted: #71717a;
@@ -16,7 +18,9 @@
   --viz-series-6: #008300;
   /* Neutral, for a pie's grouped "Other" slice. */
   --viz-other: #a1a1aa;
+}
 
+.viz-panel {
   display: flex;
   flex-direction: column;
   width: 100%;

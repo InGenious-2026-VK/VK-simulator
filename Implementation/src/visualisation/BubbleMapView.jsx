@@ -30,8 +30,10 @@ function roundBelow(max) {
  * rows: [{ name, lat, lon, value }]; unit is appended to values.
  *
  * It is its own small map inside the panel, not a layer on the main app's map.
+ * wheelZoom: false leaves the mouse wheel to the page around the map
+ * (the data overview's card stacks use it to turn cards); the buttons still zoom.
  */
-export default function BubbleMapView({ rows, unit = '' }) {
+export default function BubbleMapView({ rows, unit = '', wheelZoom = true }) {
   const container = useRef(null);
   const [hover, setHover] = useState(null); // { x, y, name, value, flip }
   const [failed, setFailed] = useState(false);
@@ -60,7 +62,9 @@ export default function BubbleMapView({ rows, unit = '' }) {
         maxZoom: 10,
       },
       // Scrolling the page must not zoom the map by accident: zoom needs Ctrl + scroll.
-      cooperativeGestures: true,
+      // On an overview card the wheel turns cards instead, so it never zooms.
+      cooperativeGestures: wheelZoom,
+      scrollZoom: wheelZoom,
       dragRotate: false,
       pitchWithRotate: false,
       attributionControl: { compact: true },
@@ -135,7 +139,7 @@ export default function BubbleMapView({ rows, unit = '' }) {
     map.on('mouseleave', LAYER, () => setHover(null));
 
     return () => map.remove();
-  }, [rows, max]);
+  }, [rows, max, wheelZoom]);
 
   if (failed) {
     return (
