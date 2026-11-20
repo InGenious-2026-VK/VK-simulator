@@ -53,6 +53,19 @@ class User(Base):
     disabled: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = _ts()
 
+    # Account approval: active | pending (self-registered, awaiting an admin) | rejected
+    status: Mapped[str] = mapped_column(
+        String(16), default="active", server_default="active", index=True
+    )
+    organization: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    registration_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    self_registered: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    reviewed_by_id: Mapped[Optional[str]] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    reviewed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    review_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
     memberships: Mapped[list["GroupMember"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )

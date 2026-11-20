@@ -42,7 +42,7 @@ For the user-facing behaviour, see
 `grp_…`, `rr_…`, `run_…`).
 
 **Authentication.** Every endpoint except `/health`, `/auth/login`,
-`/auth/refresh` and `/stats/public` needs
+`/auth/register`, `/auth/config`, `/auth/refresh` and `/stats/public` needs
 `Authorization: Bearer <access_token>`.
 
 **Pagination.** List endpoints take `page` (1-based, default 1) and
@@ -109,7 +109,36 @@ an `httpOnly`, `Secure`, `SameSite=Strict` cookie (`fciq_refresh`), lasts
 }
 ```
 
-Returns `401 invalid_credentials` on failure. After 5 failures in 15 minutes
+Returns `401 invalid_credentials` on failure. After 5 failures in 15 minut
+
+### `POST /auth/register`
+
+Self-registration. What happens depends on the server's `REGISTRATION_MODE`,
+which `GET /auth/config` reports as `{ "registration": "approval" | "open" | "closed" }`:
+
+- `approval` (default): the account is created as `pending` and can't sign in
+  until a platform admin approves it (`/admin/registrations`).
+- `open`: the account is `active` at once.
+- `closed`: `403 registration_closed`.
+
+```json
+// request
+{ "email": "anna.lind@example.org", "display_name": "Anna Lind",
+  "password": "at-least-8-chars", "organization": "Region Östergötland",
+  "note": "Why I need access (optional)" }
+// 201
+{ "status": "pending", "message": "Thanks — an administrator will review your registration." }
+```
+
+Errors: `409 user_exists`, `422 validation_error` (invalid email, password
+shorter than 8 or longer than 72 bytes, empty name).
+
+Signing in with the right password to an account that isn't approved returns
+`403 pending_approval`, or `403 registration_rejected` if an admin rejected
+it. A wrong password still returns `401 invalid_credentials`. `/auth/me` and
+the admin user list include each user's `status` (`active` | `pending` |
+`rejected`).
+es
 it returns `429 rate_limited`.
 
 ### `POST /auth/refresh`
@@ -596,15 +625,17 @@ Platform admins only (`role: "admin"`).
 |---|---|---|
 | GET | `/admin/removal-requests?status=pending` | Queue of removal requests |
 | POST | `/admin/removal-requests/{request_id}/decision` | `{ "decision": "approve" \| "reject", "note": "…" }` |
-| GET | `/admin/users` · POST `/admin/users` | List / invite users (`{ email, display_name, role }`) |
+| GET | `/admin/registrations?status=pending` | Self-registered accounts: `pending` (default), `approved`, `rejected` or `all` |
+| POST | `/admin/registrations/{user_id}/decision` | `{ "decision": "approve" \| "reject", "note": "…" }`; a rejected account can still be approved later |
+| GET | `/admin/users` · POST `/admin/users` | List (`?status=active\|pending\|rejected`) / invite users (`{ email, display_name, role }`) |
 | PATCH | `/admin/users/{user_id}` | Change role, quota, or disable |
 | POST | `/admin/groups` | Create a group `{ name, description }` |
 | GET | `/admin/audit-log` | `?actor_id=&dataset_id=&action=&from=&to=` |
 
 Audit actions: `login`, `dataset.upload`, `dataset.update`,
 `dataset.visibility_change`, `dataset.download`, `removal.request`,
-`removal.cancel`, `removal.decision`, `simulation.run`, `user.invite`,
-`user.update`, `group.create`, `group.member_add`, `group.member_remove`.
+`removal.cancel`, `removal.decision`, `simulation.run`, `user.register`,
+`user.registration`, `user.invite`, `user.update`, `group.create`, `group.member_add`, `group.member_remove`.
 
 `GET /admin/removal-requests` takes `?status=pending|approved|rejected|cancelled|all`
 (default `pending`).
@@ -616,6 +647,7 @@ Audit actions: `login`, `dataset.upload`, `dataset.update`,
 | Method | Path | Window |
 |---|---|---|
 | POST | `/auth/login` | 1 Home |
+| POST | `/auth/register` · GET `/auth/config` | 1 Home |
 | POST | `/auth/refresh` | all |
 | POST | `/auth/logout` | all |
 | GET | `/auth/me` | all |

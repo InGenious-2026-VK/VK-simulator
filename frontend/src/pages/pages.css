@@ -71,7 +71,7 @@ code {
   background: none;
   padding: 0;
   font: inherit;
-  color: var(--c3);
+  color: var(--brand-blue);
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -301,6 +301,7 @@ code {
 }
 .field input,
 .field select,
+.field textarea,
 .edit-vis select,
 .edit-vis textarea,
 .sort select,
@@ -313,12 +314,14 @@ code {
   font-size: 13px;
   background: var(--background);
 }
+.field textarea,
 .edit-vis textarea {
   height: auto;
   padding: 8px 10px;
   resize: vertical;
 }
 .field input:focus,
+.field textarea:focus,
 .edit-vis textarea:focus {
   outline: 2px solid var(--ring);
   outline-offset: 1px;
@@ -536,6 +539,24 @@ code {
 .footer-logo {
   height: 20px;
   width: auto;
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+.field em {
+  font-style: normal;
+  font-weight: 400;
+}
+.login-switch {
+  margin: 0;
+  text-align: center;
 }
 .login-logo {
   display: block;

@@ -1,11 +1,13 @@
-"""Window 1 — Home: sign in / refresh / sign out / me, and public stats."""
+"""Window 1 — Home: register / sign in / refresh / sign out / me, and public stats."""
 
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
+from typing import Optional
+
 from fastapi import APIRouter, Depends, Request, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -20,6 +22,7 @@ from ..security import (
     consume_refresh_token,
     create_access_token,
     current_user,
+    hash_password,
     issue_refresh_token,
     revoke_refresh_token,
     verify_password,
@@ -71,10 +74,73 @@ def login(body: LoginBody, response: Response, db: Session = Depends(get_db)) ->
     if not ok:
         db.commit()
         raise ApiError(401, "invalid_credentials", "Wrong email or password.")
+    # Only reached with the right password, so this reveals nothing to a guesser.
+    if user.status == "pending":
+        db.commit()
+        raise ApiError(403, "pending_approval",
+                       "Your registration is waiting for an administrator to approve it.")
+    if user.status != "active":
+        db.commit()
+        raise ApiError(403, "registration_rejected",
+                       "Your registration was not approved. Contact an administrator.")
     audit(db, user, "login")
     out = _token_response(db, response, user)
     db.commit()
     return out
+
+
+@router.get("/auth/config")
+def auth_config() -> dict:
+    """What the sign-in dialog may offer: registration is "approval", "open" or "closed"."""
+    return {"registration": _registration_mode()}
+
+
+def _registration_mode() -> str:
+    mode = settings.registration_mode
+    return mode if mode in {"approval", "open", "closed"} else "approval"
+
+
+class RegisterBody(BaseModel):
+    email: EmailStr
+    display_name: str = Field(min_length=1, max_length=200)
+    password: str = Field(min_length=8, max_length=72)
+    organization: Optional[str] = Field(None, max_length=200)
+    note: Optional[str] = Field(None, max_length=1000)
+
+
+@router.post("/auth/register", status_code=201)
+def register(body: RegisterBody, db: Session = Depends(get_db)) -> dict:
+    """Self-registration. With REGISTRATION_MODE=approval the account stays
+    `pending` (it cannot sign in) until a platform admin approves it."""
+    mode = _registration_mode()
+    if mode == "closed":
+        raise ApiError(403, "registration_closed",
+                       "Self-registration is turned off. Ask an administrator for an account.")
+    if len(body.password.encode()) > 72:
+        raise ApiError(422, "validation_error", "Password is too long (max 72 bytes).")
+    email = str(body.email).strip().lower()
+    if db.scalar(select(User).where(func.lower(User.email) == email)):
+        raise ApiError(409, "user_exists", "An account with that email already exists.")
+    user = User(
+        email=email,
+        display_name=body.display_name.strip(),
+        password_hash=hash_password(body.password),
+        role="user",
+        quota_bytes=settings.default_quota_bytes,
+        status="pending" if mode == "approval" else "active",
+        organization=(body.organization or "").strip() or None,
+        registration_note=(body.note or "").strip() or None,
+        self_registered=True,
+    )
+    db.add(user)
+    db.flush()
+    audit(db, user, "user.register", user_id=user.id, email=email, status=user.status)
+    db.commit()
+    return {
+        "status": user.status,
+        "message": "Thanks — an administrator will review your registration."
+        if user.status == "pending" else "Your account is ready. You can sign in now.",
+    }
 
 
 @router.post("/auth/refresh")

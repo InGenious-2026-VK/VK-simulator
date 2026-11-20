@@ -9,6 +9,7 @@ import { CATEGORIES, CATEGORY_META, FORMATS, VISIBILITY_META, catColor, formatBy
 import UploadDialog from './datalake/UploadDialog.jsx';
 import DetailsPane from './datalake/DetailsPane.jsx';
 import { AdminQueueView, RemovalRequestsView } from './datalake/RequestsViews.jsx';
+import RegistrationsView from './datalake/RegistrationsView.jsx';
 
 const VIEWS = [
   { id: 'all', label: 'All datasets' },
@@ -126,7 +127,7 @@ export default function DataLakePage() {
       .catch(() => {});
   }, [params]);
 
-  const isListView = !['removals', 'admin'].includes(view);
+  const isListView = !['removals', 'admin', 'registrations'].includes(view);
 
   useEffect(() => {
     if (!isListView) return undefined;
@@ -228,7 +229,14 @@ export default function DataLakePage() {
   }, [toast]);
 
   const views = useMemo(
-    () => (user.role === 'admin' ? [...VIEWS, { id: 'admin', label: 'Admin · removal queue' }] : VIEWS),
+    () =>
+      user.role === 'admin'
+        ? [
+            ...VIEWS,
+            { id: 'admin', label: 'Admin · removal queue' },
+            { id: 'registrations', label: 'Admin · registrations' },
+          ]
+        : VIEWS,
     [user.role]
   );
   const storage = user.storage ?? { used_bytes: 0, quota_bytes: 1 };
@@ -434,6 +442,8 @@ export default function DataLakePage() {
             </>
           ) : view === 'removals' ? (
             <RemovalRequestsView onChanged={onDatasetChanged} />
+          ) : view === 'registrations' ? (
+            <RegistrationsView onChanged={onDatasetChanged} />
           ) : (
             <AdminQueueView onChanged={onDatasetChanged} />
           )}

@@ -1,4 +1,4 @@
-"""Platform admin: removal decisions, users, groups, audit log."""
+"""Platform admin: removal decisions, registrations, users, groups, audit log."""
 
 from __future__ import annotations
 
@@ -57,9 +57,64 @@ def decide(request_id: str, body: Decision, admin: User = Depends(require_admin)
 
 
 @router.get("/users")
-def users(paging=Depends(page_params), _: User = Depends(require_admin),
-          db: Session = Depends(get_db)) -> dict:
-    return paginate(db, select(User).order_by(User.email), paging, lambda u: serialize_user(db, u))
+def users(status: Optional[str] = None, paging=Depends(page_params),
+          _: User = Depends(require_admin), db: Session = Depends(get_db)) -> dict:
+    q = select(User).order_by(User.email)
+    if status:
+        q = q.where(User.status == status)
+    return paginate(db, q, paging, lambda u: serialize_user(db, u))
+
+
+# ---------------------------------------------------------------- registrations
+
+
+def serialize_registration(db: Session, u: User) -> dict:
+    reviewer = db.get(User, u.reviewed_by_id) if u.reviewed_by_id else None
+    return {
+        "id": u.id,
+        "email": u.email,
+        "display_name": u.display_name,
+        "organization": u.organization,
+        "note": u.registration_note,
+        "status": "approved" if u.status == "active" else u.status,
+        "created_at": u.created_at,
+        "reviewed_by": user_ref(reviewer),
+        "reviewed_at": u.reviewed_at,
+        "review_note": u.review_note,
+    }
+
+
+@router.get("/registrations")
+def registrations(status: Literal["pending", "approved", "rejected", "all"] = "pending",
+                  paging=Depends(page_params), _: User = Depends(require_admin),
+                  db: Session = Depends(get_db)) -> dict:
+    """Self-registered accounts. `approved` = active accounts an admin approved."""
+    q = select(User).where(User.self_registered.is_(True)).order_by(User.created_at.desc())
+    if status == "approved":
+        q = q.where(User.status == "active")
+    elif status != "all":
+        q = q.where(User.status == status)
+    return paginate(db, q, paging, lambda u: serialize_registration(db, u))
+
+
+@router.post("/registrations/{user_id}/decision")
+def decide_registration(user_id: str, body: Decision, admin: User = Depends(require_admin),
+                        db: Session = Depends(get_db)) -> dict:
+    u = db.get(User, user_id)
+    if u is None or not u.self_registered:
+        raise not_found("registration", user_id)
+    if u.status == "active":
+        raise ApiError(409, "not_pending", "The account is already approved.")
+    if u.status == "rejected" and body.decision == "reject":
+        raise ApiError(409, "not_pending", "The registration is already rejected.")
+    u.status = "active" if body.decision == "approve" else "rejected"
+    u.reviewed_by_id = admin.id
+    u.reviewed_at = now()
+    u.review_note = body.note
+    audit(db, admin, "user.registration", user_id=u.id, email=u.email,
+          decision="approved" if u.status == "active" else "rejected", note=body.note)
+    db.commit()
+    return serialize_registration(db, u)
 
 
 class Invite(BaseModel):
