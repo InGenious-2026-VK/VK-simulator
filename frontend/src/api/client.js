@@ -122,6 +122,9 @@ export async function logout() {
 }
 
 export const getMe = () => request('/auth/me');
+export const getAuthConfig = () => request('/auth/config', { auth: false });
+/** Self-registration: `{ email, display_name, password, organization?, note? }`. */
+export const register = (body) => request('/auth/register', { method: 'POST', body, auth: false });
 export const getPublicStats = () => request('/stats/public', { auth: false });
 
 // ---------------------------------------------------------------- Window 2: data lake
@@ -167,6 +170,10 @@ export const getSelection = (id) => request(`/selections/${id}`);
 export const adminRemovalQueue = (status = 'pending') => request(`/admin/removal-requests${qs({ status })}`);
 export const adminDecide = (id, decision, note) =>
   request(`/admin/removal-requests/${id}/decision`, { method: 'POST', body: { decision, note } });
+export const adminRegistrations = (status = 'pending') =>
+  request(`/admin/registrations${qs({ status, page_size: 100 })}`);
+export const adminDecideRegistration = (userId, decision, note) =>
+  request(`/admin/registrations/${userId}/decision`, { method: 'POST', body: { decision, note } });
 
 // ---------------------------------------------------------------- Window 3: visualization
 

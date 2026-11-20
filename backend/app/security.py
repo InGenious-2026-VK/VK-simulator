@@ -73,7 +73,7 @@ def consume_refresh_token(db: Session, token: str) -> User:
         raise ApiError(401, "unauthenticated", "Your session has expired. Please sign in again.")
     row.revoked = True
     user = db.get(User, row.user_id)
-    if user is None or user.disabled:
+    if not can_sign_in(user):
         raise ApiError(401, "unauthenticated", "Account unavailable.")
     return user
 
@@ -85,6 +85,11 @@ def revoke_refresh_token(db: Session, token: str) -> None:
 
 
 # ---------------------------------------------------------------- dependencies
+
+
+def can_sign_in(user: User | None) -> bool:
+    """Approved (active) and not disabled."""
+    return user is not None and not user.disabled and user.status == "active"
 
 
 def _user_from_request(request: Request, db: Session) -> User | None:
@@ -101,7 +106,7 @@ def _user_from_request(request: Request, db: Session) -> User | None:
     if payload.get("typ") != "access":
         raise ApiError(401, "unauthenticated", "Invalid access token.")
     user = db.get(User, payload.get("sub"))
-    if user is None or user.disabled:
+    if not can_sign_in(user):
         raise ApiError(401, "unauthenticated", "Account unavailable.")
     return user
 

@@ -57,6 +57,9 @@ class Settings:
     admin_email: str = os.environ.get("ADMIN_EMAIL", "admin@foodchainiq.local")
     admin_password: str = os.environ.get("ADMIN_PASSWORD", "admin1234")
     seed_demo: bool = _bool("SEED_DEMO", True)
+    # Self-registration: "approval" (an admin approves each account), "open"
+    # (accounts are active at once) or "closed" (admins create accounts).
+    registration_mode: str = os.environ.get("REGISTRATION_MODE", "approval").strip().lower()
 
     max_upload_bytes: int = _int("MAX_UPLOAD_BYTES", 2 * 1024**3)
     max_files_per_dataset: int = _int("MAX_FILES_PER_DATASET", 50)

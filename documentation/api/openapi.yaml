@@ -56,7 +56,67 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/TokenResponse' }
         '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: Right password, but the account is `pending_approval` or `registration_rejected`.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
         '429': { $ref: '#/components/responses/RateLimited' }
+  /auth/config:
+    get:
+      tags: [Auth]
+      summary: Public sign-in settings (whether self-registration is offered)
+      x-status: live
+      security: []
+      responses:
+        '200':
+          description: Registration mode set by REGISTRATION_MODE on the server.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  registration: { type: string, enum: [approval, open, closed] }
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register an account (pending admin approval unless REGISTRATION_MODE=open)
+      x-status: live
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, display_name, password]
+              properties:
+                email: { type: string, format: email }
+                display_name: { type: string, minLength: 1, maxLength: 200 }
+                password: { type: string, format: password, minLength: 8, maxLength: 72 }
+                organization: { type: string, maxLength: 200 }
+                note: { type: string, maxLength: 1000, description: Why the person needs access }
+      responses:
+        '201':
+          description: Registered. `pending` accounts cannot sign in until approved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, enum: [pending, active] }
+                  message: { type: string }
+        '403':
+          description: '`registration_closed`: self-registration is turned off.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422':
+          description: '`validation_error`: invalid email, password or name.'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
   /auth/refresh:
     post:
       tags: [Auth]
@@ -840,6 +900,60 @@ paths:
               schema: { $ref: '#/components/schemas/RemovalRequest' }
         '403': { $ref: '#/components/responses/Forbidden' }
         '409': { $ref: '#/components/responses/Conflict' }
+  /admin/registrations:
+    get:
+      tags: [Admin]
+      summary: Self-registered accounts awaiting (or after) review
+      x-status: live
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [pending, approved, rejected, all], default: pending }
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Paginated registrations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: '#/components/schemas/Registration' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/registrations/{user_id}/decision:
+    parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [Admin]
+      summary: Approve or reject a registration (a rejected one can be approved later)
+      x-status: live
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision]
+              properties:
+                decision: { type: string, enum: [approve, reject] }
+                note: { type: string }
+      responses:
+        '200':
+          description: Decided
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Registration' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
   /admin/users:
     get:
       tags: [Admin]
@@ -1107,6 +1221,20 @@ components:
             used_bytes: { type: integer }
             quota_bytes: { type: integer }
         disabled: { type: boolean }
+        status: { type: string, enum: [active, pending, rejected] }
+    Registration:
+      type: object
+      properties:
+        id: { type: string, example: usr_41ab }
+        email: { type: string, format: email }
+        display_name: { type: string }
+        organization: { type: [string, 'null'] }
+        note: { type: [string, 'null'] }
+        status: { type: string, enum: [pending, approved, rejected] }
+        created_at: { type: string, format: date-time }
+        reviewed_by: { oneOf: [{ $ref: '#/components/schemas/UserRef' }, { type: 'null' }] }
+        reviewed_at: { type: [string, 'null'], format: date-time }
+        review_note: { type: [string, 'null'] }
     TokenResponse:
       type: object
       required: [access_token, token_type, expires_in, user]
@@ -1465,4 +1593,4 @@ components:
 
     AuditAction:
       type: string
-      enum: [login, dataset.upload, dataset.update, dataset.visibility_change, dataset.download, removal.request, removal.decision, simulation.run]
+      enum: [login, dataset.upload, dataset.update, dataset.visibility_change, dataset.download, removal.request, removal.decision, simulation.run, user.register, user.registration]

@@ -53,6 +53,7 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@foodchainiq.local}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin1234}
       SEED_DEMO: ${SEED_DEMO:-true}
+      REGISTRATION_MODE: ${REGISTRATION_MODE:-approval}
       MAX_UPLOAD_BYTES: ${MAX_UPLOAD_BYTES:-2147483648}
       DEFAULT_QUOTA_BYTES: ${DEFAULT_QUOTA_BYTES:-10737418240}
       # The browser talks to `web` (same origin), so CORS is only needed for
