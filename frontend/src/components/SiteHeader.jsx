@@ -3,20 +3,13 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { Button } from './ui.jsx';
 import LoginDialog from './LoginDialog.jsx';
+import Logo from './Logo.jsx';
 
 /** Brand mark shared by every window. */
 export function Brand({ to = '/' }) {
   return (
     <Link to={to} className="fciq-brand" aria-label="FoodChainIQ home">
-      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="5" cy="17" r="2.6" fill="#0d9488" />
-        <circle cx="12" cy="7" r="2.6" fill="#f97316" />
-        <circle cx="19" cy="15" r="2.6" fill="#1e4e6e" />
-        <path d="M5 17 12 7l7 8" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      </svg>
-      <strong>
-        FoodChain<span>IQ</span>
-      </strong>
+      <Logo />
     </Link>
   );
 }

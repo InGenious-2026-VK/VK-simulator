@@ -13,12 +13,19 @@
   --accent-foreground: #18181b;
   --border: #e4e4e7;
   --input: #e4e4e7;
-  --ring: #a1a1aa;
-  --primary: #18181b;
-  --primary-foreground: #fafafa;
+  --ring: #7aa7d4;
+  --primary: var(--brand-navy);
+  --primary-hover: #0b3a66;
+  --primary-foreground: #ffffff;
   --secondary: #f4f4f5;
   --secondary-foreground: #18181b;
   --destructive: #e7000b;
+
+  /* Brand palette — sampled from the FoodChainIQ logo */
+  --brand-navy: #011e3b;
+  --brand-blue: #0061ac;
+  --brand-green: #4ca72b;
+  --brand-green-dark: #066530;
 
   /* Domain palette — supply-chain node types & flows */
   --c1: #f97316; /* processing */

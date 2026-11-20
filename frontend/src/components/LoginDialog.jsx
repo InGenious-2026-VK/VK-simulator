@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { Button } from './ui.jsx';
 import { IconX } from './icons.jsx';
+import Logo from './Logo.jsx';
 
 // Seeded demo accounts (backend SEED_DEMO) are listed in dev builds only.
 const SHOW_DEMO = import.meta.env.DEV || import.meta.env.VITE_SHOW_DEMO_ACCOUNTS === 'true';
@@ -53,6 +54,7 @@ export default function LoginDialog() {
   return (
     <div className="modal-scrim" onMouseDown={(e) => e.target === e.currentTarget && setLoginOpen(false)}>
       <form className="modal login-modal" onSubmit={submit} aria-labelledby="login-title">
+        <Logo className="login-logo" />
         <div className="modal-head">
           <h2 id="login-title">Sign in to FoodChainIQ</h2>
           <Button icon aria-label="Close" onClick={() => setLoginOpen(false)}>

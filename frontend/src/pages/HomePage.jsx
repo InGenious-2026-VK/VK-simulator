@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import SiteHeader from '../components/SiteHeader.jsx';
+import Logo from '../components/Logo.jsx';
 import { Button } from '../components/ui.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { getPublicStats } from '../api/client.js';
@@ -150,7 +151,10 @@ export default function HomePage() {
         </section>
       </main>
       <footer className="site-footer">
-        <span>FoodChainIQ · Östergötland food system resilience</span>
+        <span className="footer-brand">
+          <Logo className="footer-logo" />
+          <span>Östergötland food system resilience</span>
+        </span>
         <span className="muted">Prototype — baseline and demo data are synthetic.</span>
       </footer>
     </div>
