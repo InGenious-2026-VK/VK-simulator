@@ -137,15 +137,18 @@ code {
   text-decoration: none;
   color: var(--foreground);
 }
-.fciq-brand strong {
-  font-size: 15px;
-  letter-spacing: -0.02em;
+.fciq-logo {
+  display: block;
+  height: 30px;
+  width: auto;
 }
-.fciq-brand strong span {
-  color: var(--c1);
+.appbar .fciq-logo {
+  height: 24px;
 }
-.appbar .fciq-brand strong {
-  font-size: 13.5px;
+@media (max-width: 480px) {
+  .fciq-logo {
+    height: 24px;
+  }
 }
 .appbar-link {
   font-size: 12.5px;
@@ -394,7 +397,7 @@ code {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--c2);
+  color: var(--brand-green-dark);
 }
 .hero h1 {
   font-size: clamp(28px, 4vw, 44px);
@@ -523,6 +526,22 @@ code {
   padding: 18px 24px;
   border-top: 1px solid var(--border);
   font-size: 12px;
+  align-items: center;
+}
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.footer-logo {
+  height: 20px;
+  width: auto;
+}
+.login-logo {
+  display: block;
+  height: 32px;
+  width: auto;
+  margin: 0 auto 14px;
 }
 
 /* ---------- Data Lake ---------- */
