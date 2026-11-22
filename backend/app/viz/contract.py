@@ -1,0 +1,84 @@
+"""The visualisation data contract: which columns each chart type needs.
+
+Described for humans in documentation/visualisation-data-contract.md.
+"""
+
+from __future__ import annotations
+
+
+class ContractError(ValueError):
+    """A dataset does not match the contract."""
+
+
+# chart type -> required columns, numeric columns, columns that identify a row.
+# Optional "non_negative": numeric columns that may not go below zero.
+CHART_TYPES: dict[str, dict[str, tuple[str, ...]]] = {
+    "line": {
+        "columns": ("date", "series", "value"),
+        "numeric": ("value",),
+        "key": ("date", "series"),
+    },
+    "pie": {
+        "columns": ("category", "value"),
+        "numeric": ("value",),
+        "key": ("category",),
+        # A slice is a share of the whole; a negative share cannot be drawn.
+        "non_negative": ("value",),
+    },
+    "bubble-map": {
+        "columns": ("name", "lat", "lon", "value"),
+        "numeric": ("lat", "lon", "value"),
+        "key": ("name",),
+        # A circle's size shows the value; a negative size cannot be drawn.
+        "non_negative": ("value",),
+    },
+}
+
+# Coordinates are WGS84 decimal degrees: column -> (lowest, highest) allowed.
+RANGES: dict[str, tuple[float, float]] = {"lat": (-90, 90), "lon": (-180, 180)}
+
+
+def validate(rows: list[dict[str, str]], chart_type: str) -> list[dict]:
+    """Check rows (as read from CSV, all strings) and convert numeric columns.
+
+    Returns new rows; raises ContractError naming the first problem found.
+    """
+    if chart_type not in CHART_TYPES:
+        raise ContractError(f"unknown chart type '{chart_type}'")
+    spec = CHART_TYPES[chart_type]
+
+    if not rows:
+        raise ContractError("dataset has no rows")
+    missing = [c for c in spec["columns"] if c not in rows[0]]
+    if missing:
+        raise ContractError(f"missing column(s): {', '.join(missing)}")
+
+    out = []
+    seen = set()
+    for line, row in enumerate(rows, start=2):  # line 1 is the header
+        clean = dict(row)
+        for col in spec["columns"]:
+            if clean[col] is None or str(clean[col]).strip() == "":
+                raise ContractError(f"line {line}: '{col}' is empty")
+        for col in spec["numeric"]:
+            try:
+                clean[col] = float(clean[col])
+            except ValueError:
+                raise ContractError(
+                    f"line {line}: '{col}' is not a number: {clean[col]!r}"
+                ) from None
+            if col in RANGES:
+                low, high = RANGES[col]
+                if not low <= clean[col] <= high:
+                    raise ContractError(
+                        f"line {line}: '{col}' must be between {low} and {high}: {clean[col]:g}"
+                    )
+        for col in spec.get("non_negative", ()):
+            if clean[col] < 0:
+                raise ContractError(f"line {line}: '{col}' is negative: {clean[col]:g}")
+        key = tuple(clean[c] for c in spec["key"])
+        if key in seen:
+            raise ContractError(f"line {line}: duplicate {spec['key']} = {key}")
+        seen.add(key)
+        out.append(clean)
+    return out

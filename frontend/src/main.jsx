@@ -4,13 +4,14 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, RequireAuth } from './auth/AuthContext.jsx';
 import HomePage from './pages/HomePage.jsx';
 import DataLakePage from './pages/DataLakePage.jsx';
+import OverviewPage from './pages/OverviewPage.jsx';
 import VisualizationPage from './pages/VisualizationPage.jsx';
 import SimulationPage from './pages/SimulationPage.jsx';
 import './index.css';
 import './App.css';
 import './pages/pages.css';
 
-// The four FoodChainIQ windows (documentation/foodchainiq-application-windows.md).
+// The five FoodChainIQ windows (documentation/foodchainiq-application-windows.md).
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
@@ -22,6 +23,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             element={
               <RequireAuth>
                 <DataLakePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/overview"
+            element={
+              <RequireAuth>
+                <OverviewPage />
               </RequireAuth>
             }
           />

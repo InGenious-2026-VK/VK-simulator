@@ -4,7 +4,7 @@
 Companion to `ostergotland-food-resilience-platform-concept.md` (concept &
 architecture) and `api/README.md` (API reference).
 
-> **Status.** All four windows are implemented: `frontend/` (React) and
+> **Status.** All five windows are implemented: `frontend/` (React) and
 > `backend/` (FastAPI + PostgreSQL, with uploaded files on local disk). Where
 > the implementation simplifies this spec, see `api/README.md` §12.
 
@@ -12,7 +12,7 @@ architecture) and `api/README.md` (API reference).
 
 ## 1. Overview
 
-FoodChainIQ is organised as four main windows. You move through them in order,
+FoodChainIQ is organised as five main windows. You move through them in order,
 and each window passes its context (who you are, which datasets you picked) on
 to the next:
 
@@ -20,13 +20,16 @@ to the next:
 flowchart LR
     H["1 · Home<br/>(project website + login)"]
     D["2 · Data Lake<br/>(browse · upload · select)"]
-    V["3 · Visualization<br/>(summary of selection)"]
-    S["4 · Simulation<br/>(scenario workspace)"]
+    O["3 · Data overview<br/>(charts of selection)"]
+    V["4 · Visualization<br/>(summary of selection)"]
+    S["5 · Simulation<br/>(scenario workspace)"]
 
     H -- "To data lake<br/>(signed in only)" --> D
-    D -- "To Visualization<br/>(≥ 1 dataset selected)" --> V
+    D -- "To Overview<br/>(≥ 1 dataset selected)" --> O
+    O -- "To Visualization" --> V
     V -- "To simulation" --> S
-    V -. "Back to data lake" .-> D
+    O -. "Back to data lake" .-> D
+    V -. "Back to overview" .-> O
     S -. "Change datasets" .-> D
 ```
 
@@ -34,18 +37,19 @@ flowchart LR
 |---|---|---|---|---|
 | 1 | Home | `/` | Everyone | Present the project; sign in |
 | 2 | Data Lake | `/datalake` | Signed-in users | Browse, upload, select, request removal of datasets |
-| 3 | Visualization | `/visualize?selection={id}` | Signed-in users | Summarise the selected datasets visually |
-| 4 | Simulation | `/simulate?selection={id}` | Signed-in users | Run disruption scenarios using the selected datasets |
+| 3 | Data overview | `/overview?selection={id}` | Signed-in users | Show the selected datasets as stacks of charts |
+| 4 | Visualization | `/visualize?selection={id}` | Signed-in users | Summarise the selected datasets visually |
+| 5 | Simulation | `/simulate?selection={id}` | Signed-in users | Run disruption scenarios using the selected datasets |
 
 ### The dataset selection
 
-The thread through windows 2 → 3 → 4 is a **selection**: an ordered list of
-dataset IDs. When the user clicks **To Visualization**, the frontend saves
+The thread through windows 2 → 3 → 4 → 5 is a **selection**: an ordered list of
+dataset IDs. When the user clicks **To Overview**, the frontend saves
 the selection on the server (`POST /api/selections`) and gets back a
-`selection_id`. That ID goes in the URL of windows 3 and 4. This means that:
+`selection_id`. That ID goes in the URL of windows 3, 4 and 5. This means that:
 
 - a page refresh or a shared link reopens the same set of datasets;
-- the visualization and the simulation always use exactly the same data;
+- the overview, the visualization and the simulation always use exactly the same data;
 - the server checks access again whenever a selection is opened. If you lose
   access to a dataset, it is dropped from your view with a notice.
 
@@ -109,7 +113,7 @@ A file-browser home page in the style of Google Drive, where the files are
 │   requests    │      PUBLIC             GROUP  (removal pending)         │
 │               │                                                          │
 │ Storage used  ├──────────────────────────────────────────────────────────┤
-│ 1.2 / 10 GB   │ 2 selected · Clear                  [ To Visualization ] │
+│ 1.2 / 10 GB   │ 2 selected · Clear                      [ To Overview ] │
 └───────────────┴──────────────────────────────────────────────────────────┘
 ```
 
@@ -137,11 +141,11 @@ A file-browser home page in the style of Google Drive, where the files are
   shift-click selects a range.
 - The selection is kept while the user switches sidebar views or changes
   filters. The bottom action bar shows the count and a **Clear** link.
-- The **To Visualization** button is enabled when at least one dataset with
+- The **To Overview** button is enabled when at least one dataset with
   status `ready` is selected. Datasets that are `processing` or `invalid`
   cannot be selected.
 - Clicking it calls `POST /api/selections` and opens
-  `/visualize?selection={id}`.
+  `/overview?selection={id}`.
 
 ### 3.3 Adding a dataset
 
@@ -202,11 +206,34 @@ is audited.
       leave it out, with a notice.
 - [ ] An upload with no metadata file, or more than one, is rejected before
       any data file is stored.
-- [ ] **To Visualization** is disabled while nothing is selected.
+- [ ] **To Overview** is disabled while nothing is selected.
 
 ---
 
-## 4. Window 3 — Visualization
+## 3A. Window 3 — Data overview
+
+The selected datasets as charts, one **card stack** per dataset, so the user
+can look at the numbers themselves before the summary in Window 4. Built in
+`frontend/src/visualisation/`; the details are in
+`visualisation-guide.md` and `visualisation-data-contract.md`.
+
+- **Data.** `GET /api/viz/selections/{id}/datasets` lists the selected
+  datasets that can be drawn. A dataset can be drawn when one of its files has
+  the columns of a chart type: `date, series, value` (line chart),
+  `category, value` (pie chart) or `name, lat, lon, value` (bubble map).
+- **Cards.** Each card is one small chart (a *view*): for example one line per
+  food item, or ten places at a time. Mouse wheel, arrow keys or the ‹ ›
+  buttons turn the cards. `GET /api/viz/datasets/{id}/views` serves them a
+  page at a time.
+- **Skipped datasets.** Datasets that cannot be drawn, were removed or are no
+  longer shared are listed in a notice. They stay in the selection, so
+  Windows 4 and 5 still use them.
+- **Header.** **Back to data lake** keeps the selection; **To Visualization →**
+  opens Window 4 with the same selection.
+
+---
+
+## 4. Window 4 — Visualization
 
 A dashboard that summarises **the selected datasets visually**, so the user
 can check them before committing them to a simulation.
@@ -216,7 +243,7 @@ can check them before committing them to a simulation.
 Data comes from `GET /api/visualizations/summary?selection_id={id}`.
 
 - **Header.** The selection's dataset chips (removable, which creates a new
-  selection), a **Back to data lake** link and the primary **To simulation →**
+  selection), a **Back to overview** link and the primary **To simulation →**
   button.
 - **Overview KPIs.** Number of datasets, total records, total features with
   geometry, combined time span, and coverage of Östergötland's 13
@@ -257,7 +284,7 @@ Data comes from `GET /api/visualizations/summary?selection_id={id}`.
 
 ---
 
-## 5. Window 4 — Simulation
+## 5. Window 5 — Simulation
 
 The **existing GIS scenario workspace** (`frontend/`: Layers ·
 Simulation + Map · Results · Timeline), extended to run on the selected

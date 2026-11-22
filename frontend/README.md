@@ -1,6 +1,6 @@
 # FoodChainIQ frontend
 
-The FoodChainIQ web app: four windows connected by React Router (see
+The FoodChainIQ web app: five windows connected by React Router (see
 `../documentation/foodchainiq-application-windows.md`).
 
 | Route | Window | Code |
@@ -10,7 +10,7 @@ The FoodChainIQ web app: four windows connected by React Router (see
 | `/visualize?selection=…` | **Visualization**: KPIs, coverage map, charts, field profiles, checks, simulation readiness | `src/pages/VisualizationPage.jsx` |
 | `/simulate?selection=…` | **Simulation**: the GIS scenario workspace on the merged network, with each dataset as a map layer. Without `selection` it runs on the synthetic baseline. | `src/pages/SimulationPage.jsx` → `src/components/SimulationWorkspace.jsx` |
 
-Windows 2–4 need a signed-in user. Signed-out visitors are sent to Home
+Windows 2–5 need a signed-in user. Signed-out visitors are sent to Home
 with the sign-in form open. Sessions use an in-memory access token plus an
 httpOnly refresh cookie (`src/auth/AuthContext.jsx`, `src/api/client.js`).
 On a 401 the client refreshes the session silently and retries once.
@@ -85,7 +85,7 @@ Settings → Build**, connect the Git repo):
 **The `name` in `wrangler.jsonc` must match your Cloudflare project name** — edit
 it if your project isn't called `vk-simulator`.
 
-The static build has no `/api` backend. To make sign-in and windows 2–4
+The static build has no `/api` backend. To make sign-in and windows 2–5
 work:
 
 1. Deploy `../backend` with a PostgreSQL database and a persistent volume for
@@ -130,22 +130,25 @@ They mark where future backend work plugs in (see
 
 ## Structure
 
-- `src/main.jsx`: router and auth provider, with the four routes
+- `src/main.jsx`: router and auth provider, with the five routes
 - `src/auth/AuthContext.jsx`: session state, `RequireAuth`
 - `src/api/client.js`: fetch wrappers for every endpoint (auth, datasets,
   selections, visualization, simulation, admin), plus token refresh
 - `src/pages/`
-  - `HomePage.jsx`, `DataLakePage.jsx`, `VisualizationPage.jsx`, `SimulationPage.jsx`
+  - `HomePage.jsx`, `DataLakePage.jsx`, `OverviewPage.jsx`, `VisualizationPage.jsx`, `SimulationPage.jsx`
   - `datalake/UploadDialog.jsx`: files → validate → sharing
   - `datalake/DetailsPane.jsx`: metadata, files, preview, visibility, removal
   - `datalake/RequestsViews.jsx`: your removal requests; the admin queue
   - `categories.js`: category, visibility and format display metadata
-  - `pages.css`: styles for windows 1–3
+  - `pages.css`: styles for windows 1–4
+- `src/visualisation/`: the data overview's card stacks and charts (line, pie,
+  bubble map), with their own API calls and CSS. See
+  `../documentation/visualisation-guide.md`.
 - `src/components/`
   - `SiteHeader.jsx` (brand, nav, user menu), `LoginDialog.jsx`
   - `CoverageMap.jsx`: MapLibre map of datasets' geometry
   - `dataCharts.jsx`: data-driven time series, bar and histogram charts
-  - `SimulationWorkspace.jsx`: the Window 4 orchestrator. It handles panel
+  - `SimulationWorkspace.jsx`: the Window 5 orchestrator. It handles panel
     collapse, focus and compare state, layer order (built-in layers plus
     selected-dataset layers), and the bridge from the shock controls to
     `useSimulation`.

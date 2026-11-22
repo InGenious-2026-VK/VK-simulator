@@ -117,7 +117,7 @@ export default function DataLakePage() {
 
   useEffect(() => setPage(1), [view, debouncedQ, category, format, visibility, sort]);
 
-  // Coming back from Visualization keeps the selection.
+  // Coming back from Overview or Visualization keeps the selection.
   useEffect(() => {
     const sid = params.get('selection');
     if (!sid) return;
@@ -198,11 +198,11 @@ export default function DataLakePage() {
     lastClicked.current = index;
   };
 
-  const toVisualization = async () => {
+  const toOverview = async () => {
     setBusy(true);
     try {
       const sel = await api.createSelection([...selected.keys()]);
-      navigate(`/visualize?selection=${sel.id}`);
+      navigate(`/overview?selection=${sel.id}`);
     } catch (e) {
       setToast({ kind: 'error', text: e.message });
       setBusy(false);
@@ -487,8 +487,8 @@ export default function DataLakePage() {
           </>
         )}
         <div className="spacer" />
-        <Button variant="primary" disabled={!selected.size || busy} onClick={toVisualization}>
-          {busy ? 'Preparing…' : 'To Visualization →'}
+        <Button variant="primary" disabled={!selected.size || busy} onClick={toOverview}>
+          {busy ? 'Preparing…' : 'To Overview →'}
         </Button>
       </div>
       )}

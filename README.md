@@ -16,23 +16,25 @@ supply chain, from everyday regional planning to total-defence and wartime
 continuity planning. It is being developed in the InGenious 2026 programme
 (Linköping University) with Vreta Kluster.
 
-## The four windows
+## The five windows
 
 ```mermaid
 flowchart LR
     H["1 · Home<br/>project website + login"] -- "To data lake" --> D["2 · Data Lake<br/>browse · upload · select"]
-    D -- "To Visualization" --> V["3 · Visualization<br/>summary of selected datasets"]
-    V -- "To simulation" --> S["4 · Simulation<br/>scenario workspace"]
+    D -- "To Overview" --> O["3 · Data overview<br/>charts of selected datasets"]
+    O -- "To Visualization" --> V["4 · Visualization<br/>summary of selected datasets"]
+    V -- "To simulation" --> S["5 · Simulation<br/>scenario workspace"]
 ```
 
 | # | Window | Route | What you do there |
 |---|---|---|---|
 | 1 | **Home** | `/` | Read about the project and sign in. Once you are signed in, a **To data lake** button appears. |
 | 2 | **Data Lake** | `/datalake` | A dataset browser in the style of Google Drive. Search and filter the datasets you can access and select one or more. Upload new ones (several data files plus one standard `metadata.json`) and keep each **private**, share it with a **group**, or make it **public**. Request removal of your own datasets; admins approve or reject requests. |
-| 3 | **Visualization** | `/visualize?selection=…` | A visual summary of the selection: KPIs, a coverage map, automatic charts, field profiles, cross-dataset checks and simulation readiness. |
-| 4 | **Simulation** | `/simulate?selection=…` | The scenario workspace, running on the baseline network merged with the selected datasets. Each selected dataset is also a map layer. |
+| 3 | **Data overview** | `/overview?selection=…` | The selected datasets as stacks of chart cards (line charts, pie charts, bubble maps). Turn the cards with the mouse wheel. Datasets whose files have no chart columns are listed and skipped. See `documentation/visualisation-guide.md`. |
+| 4 | **Visualization** | `/visualize?selection=…` | A visual summary of the selection: KPIs, a coverage map, automatic charts, field profiles, cross-dataset checks and simulation readiness. |
+| 5 | **Simulation** | `/simulate?selection=…` | The scenario workspace, running on the baseline network merged with the selected datasets. Each selected dataset is also a map layer. |
 
-All four windows are implemented: `frontend/` (React) talks to `backend/`
+All five windows are implemented: `frontend/` (React) talks to `backend/`
 (FastAPI + PostgreSQL). Uploaded files are stored on disk in
 `backend/storage/`.
 
@@ -42,7 +44,8 @@ All four windows are implemented: `frontend/` (React) talks to `backend/`
 - `backend/` — the API (FastAPI, SQLAlchemy + PostgreSQL, networkx simulation engine). See `backend/README.md`.
 - `documentation/` — concept, specifications and API
   - `ostergotland-food-resilience-platform-concept.md` — concept & architecture
-  - `foodchainiq-application-windows.md` — functional spec of the four windows
+  - `foodchainiq-application-windows.md` — functional spec of the five windows
+  - `visualisation-guide.md` · `visualisation-data-contract.md` — the data overview window and its chart data rules
   - `api/README.md` — API reference · `api/openapi.yaml` — OpenAPI 3.1 spec
   - `api/dataset-metadata.schema.json` — the standard dataset metadata file ([example](documentation/api/examples/metadata.example.json))
 - `docker-compose.yml` + `.env.example` — full Docker deployment (PostgreSQL, backend, web)

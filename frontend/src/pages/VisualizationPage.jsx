@@ -152,8 +152,8 @@ export default function VisualizationPage() {
       <SiteHeader />
       <div className="viz-head">
         <div className="viz-head-row">
-          <Link to={`/datalake?selection=${selectionId}`} className="back-link">
-            ← Back to data lake
+          <Link to={`/overview?selection=${selectionId}`} className="back-link">
+            ← Back to overview
           </Link>
           <h1>Visualization</h1>
           <div className="spacer" />

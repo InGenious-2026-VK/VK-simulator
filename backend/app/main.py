@@ -5,8 +5,9 @@ documentation/api/openapi.yaml. Window by window:
 
   1 Home           /auth/*, /stats/public
   2 Data Lake      /datasets*, /groups*, /removal-requests*, /metadata/*, /selections
-  3 Visualization  /visualizations/summary, /datasets/{id}/summary|geometry
-  4 Simulation     /network, /presets, /simulation/context, /simulate, /simulations*
+  3 Data overview  /viz/*
+  4 Visualization  /visualizations/summary, /datasets/{id}/summary|geometry
+  5 Simulation     /network, /presets, /simulation/context, /simulate, /simulations*
   Admin            /admin/*
 """
 
@@ -32,6 +33,7 @@ from .routers import (
     simulation,
 )
 from .seed import purge_removed, seed
+from .viz import api as viz
 
 
 @asynccontextmanager
@@ -71,5 +73,5 @@ app.add_middleware(
     expose_headers=["Location"],
 )
 
-for module in (auth, groups, datasets, removal, metadata_routes, selections, simulation, admin):
+for module in (auth, groups, datasets, removal, metadata_routes, selections, viz, simulation, admin):
     app.include_router(module.router, prefix="/api")

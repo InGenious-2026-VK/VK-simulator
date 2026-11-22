@@ -1491,3 +1491,22 @@ code {
 .appbar .user-chip > span:last-child {
   display: none;
 }
+
+/* ---------------------------------------------------------------- Data overview (window 3) */
+.overview-main {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+  padding: 18px 0 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.overview-main > .callout {
+  margin: 0 24px;
+}
+/* The page scrolls, not the overview inside it. */
+.overview-main .viz-overview {
+  height: auto;
+  overflow: visible;
+  padding-top: 8px;
+}

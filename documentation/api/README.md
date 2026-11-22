@@ -438,7 +438,7 @@ with colleagues.
 
 ---
 
-## 8. Visualization (Window 3)
+## 8. Visualization (Window 4)
 
 ### `GET /visualizations/summary?selection_id={id}`
 
@@ -508,7 +508,7 @@ Returns `404 no_geometry` if the dataset has no spatial component.
 
 ---
 
-## 9. Simulation (Window 4)
+## 9. Simulation (Window 5)
 
 The current simulation API stays unchanged and gains optional dataset
 support.
