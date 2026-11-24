@@ -55,14 +55,14 @@ export default function HomePage() {
       <main className="home">
         <section className="hero">
           <div className="hero-copy">
-            <span className="eyebrow">Östergötland · food supply chain resilience</span>
+            <span className="eyebrow">Food supply chain resilience</span>
             <h1>
-              See how food moves through the region — and what happens when it stops.
+              See how food moves through your region — and what happens when it stops.
             </h1>
             <p className="lead">
               FoodChainIQ brings production, processing, logistics, energy and population data into
-              one shared picture, so planners, producers and civil-defence actors can find the weak
-              links before a crisis does.
+              one shared picture, so planners, producers and civil-defence actors in any region can
+              find the weak links before a crisis does.
             </p>
             <div className="hero-actions">
               {user ? (
@@ -143,17 +143,16 @@ export default function HomePage() {
           <h2>Partners</h2>
           <p className="muted partners">
             Developed in the <strong>InGenious 2026</strong> programme (Linköping University) with{' '}
-            <strong>Vreta Kluster</strong>, for Östergötland's municipalities, Länsstyrelsen
-            Östergötland and the region's food producers. Aligned with Sweden's 2026 national supply
-            preparedness strategy and the regional food strategy <em>Från östgötsk jord till våra
-            bord</em>.
+            <strong>Vreta Kluster</strong>. Built for municipalities, county administrative boards,
+            food producers and preparedness actors in any region, and designed to support national
+            and regional supply-preparedness and food strategies.
           </p>
         </section>
       </main>
       <footer className="site-footer">
         <span className="footer-brand">
           <Logo className="footer-logo" />
-          <span>Östergötland food system resilience</span>
+          <span>Food system resilience</span>
         </span>
         <span className="muted">Prototype — baseline and demo data are synthetic.</span>
       </footer>
