@@ -175,12 +175,32 @@ upload dialog uses it to fill the **Group** picker.
 ### `GET /groups/{group_id}/members`
 Members of a group the caller belongs to.
 
-### `POST /groups/{group_id}/members` · group admin
-Body `{ "user_id": "usr_…", "role": "member" | "admin" }`. Returns `201`.
+How groups work: a dataset with visibility `group` is visible to every member
+of its group (plus its owner and platform admins). Each member is either a
+`member` or a group `admin`. Group admins manage the group's members; platform
+admins can manage every group. In the web app this is **Data Lake → My
+groups** (for everyone) and **Admin → Groups / Users** (for platform admins).
 
-### `DELETE /groups/{group_id}/members/{user_id}` · group admin
-Returns `204`. The removed member loses access to the group's datasets
-straight away.
+### `PATCH /groups/{group_id}` · group admin
+Body `{ "name"?: "…", "description"?: "…" }`. `409 group_exists` if the name
+is taken.
+
+### `POST /groups/{group_id}/members` · group admin
+Body `{ "user_id": "usr_…" }` or `{ "email": "…" }`, plus
+`"role": "member" | "admin"`. Returns `201`. Adding an existing member changes
+their role. Only approved (`active`) accounts can join
+(`409 user_not_active`).
+
+### `PATCH /groups/{group_id}/members/{user_id}` · group admin
+Body `{ "role": "member" | "admin" }`.
+
+### `DELETE /groups/{group_id}/members/{user_id}` · group admin, or yourself
+Returns `204`. Any member can remove themselves (leave). The removed member
+loses access to the group's datasets straight away; datasets they own stay
+theirs.
+
+A group always keeps at least one group admin: removing or demoting the last
+one returns `409 last_group_admin`, unless a platform admin does it.
 
 ---
 
@@ -627,15 +647,19 @@ Platform admins only (`role: "admin"`).
 | POST | `/admin/removal-requests/{request_id}/decision` | `{ "decision": "approve" \| "reject", "note": "…" }` |
 | GET | `/admin/registrations?status=pending` | Self-registered accounts: `pending` (default), `approved`, `rejected` or `all` |
 | POST | `/admin/registrations/{user_id}/decision` | `{ "decision": "approve" \| "reject", "note": "…" }`; a rejected account can still be approved later |
-| GET | `/admin/users` · POST `/admin/users` | List (`?status=active\|pending\|rejected`) / invite users (`{ email, display_name, role }`) |
-| PATCH | `/admin/users/{user_id}` | Change role, quota, or disable |
+| GET | `/admin/users` | List users; `?q=` searches name, email and organisation; `?status=active\|pending\|rejected` |
+| POST | `/admin/users` | Create a user `{ email, display_name, role, password?, organization?, quota_bytes? }` (active at once) |
+| PATCH | `/admin/users/{user_id}` | Change `display_name`, `email`, `organization`, `role`, `quota_bytes`, `disabled` or `password`. Disabling or resetting the password signs the user out. You can't demote or disable yourself (`409 self_lockout`) or the last active admin (`409 last_admin`) |
+| DELETE | `/admin/users/{user_id}?transfer_to=usr_…` | Delete a user. If they own datasets, `transfer_to` is required (otherwise `409 user_has_datasets` with `details.datasets`) |
 | POST | `/admin/groups` | Create a group `{ name, description }` |
+| DELETE | `/admin/groups/{group_id}` | Delete a group; datasets shared with it become private to their owners |
 | GET | `/admin/audit-log` | `?actor_id=&dataset_id=&action=&from=&to=` |
 
 Audit actions: `login`, `dataset.upload`, `dataset.update`,
 `dataset.visibility_change`, `dataset.download`, `removal.request`,
 `removal.cancel`, `removal.decision`, `simulation.run`, `user.register`,
-`user.registration`, `user.invite`, `user.update`, `group.create`, `group.member_add`, `group.member_remove`.
+`user.registration`, `user.invite`, `user.update`, `user.delete`, `group.create`, `group.update`, `group.delete`, `group.member_add`,
+`group.member_role`, `group.member_remove`.
 
 `GET /admin/removal-requests` takes `?status=pending|approved|rejected|cancelled|all`
 (default `pending`).
@@ -654,7 +678,8 @@ Audit actions: `login`, `dataset.upload`, `dataset.update`,
 | GET | `/stats/public` | 1 Home |
 | GET | `/groups` | 2 Data Lake |
 | GET / POST | `/groups/{id}/members` | 2 Data Lake |
-| DELETE | `/groups/{id}/members/{user_id}` | 2 Data Lake |
+| PATCH | `/groups/{id}` | 2 Data Lake |
+| PATCH / DELETE | `/groups/{id}/members/{user_id}` | 2 Data Lake |
 | GET | `/datasets` | 2 Data Lake |
 | POST | `/datasets` | 2 Data Lake |
 | GET / PATCH | `/datasets/{id}` | 2 Data Lake |

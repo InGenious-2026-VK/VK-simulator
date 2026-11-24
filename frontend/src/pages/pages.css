@@ -1491,3 +1491,130 @@ code {
 .appbar .user-chip > span:last-child {
   display: none;
 }
+
+/* ---------- groups & admin ---------- */
+.modal-wide {
+  width: min(760px, 100%);
+}
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.ds-table.plain tbody tr {
+  cursor: default;
+}
+.ds-table td.actions {
+  text-align: right;
+  width: 1%;
+}
+.ds-table select,
+.member-add select,
+.member-add input,
+.admin-search,
+.callout select {
+  height: 32px;
+  border: 1px solid var(--input);
+  border-radius: var(--r-sm);
+  padding: 0 8px;
+  font: inherit;
+  font-size: 12.5px;
+  background: var(--background);
+}
+.nowrap {
+  flex-wrap: nowrap;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.admin-search {
+  width: min(300px, 100%);
+}
+.member-add {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.member-add input,
+.member-add select:first-child {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.callout select {
+  margin-top: 8px;
+  width: 100%;
+}
+.group-members {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.groups-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+.group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.group-list button {
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--background);
+  font: inherit;
+  cursor: pointer;
+}
+.group-list button:hover {
+  background: var(--muted);
+}
+.group-list button.on {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 1px var(--brand-blue);
+}
+.group-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  background: var(--background);
+  min-width: 0;
+}
+.group-detail h3 {
+  font-size: 15px;
+}
+.group-detail p {
+  margin: 0;
+}
+.toast-close {
+  margin-left: 12px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+@media (max-width: 760px) {
+  .groups-layout {
+    grid-template-columns: 1fr;
+  }
+}

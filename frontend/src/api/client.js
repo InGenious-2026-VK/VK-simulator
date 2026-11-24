@@ -134,6 +134,15 @@ export const getDataset = (id) => request(`/datasets/${id}`);
 export const patchDataset = (id, body) => request(`/datasets/${id}`, { method: 'PATCH', body });
 export const getPreview = (id, params) => request(`/datasets/${id}/preview${qs(params)}`);
 export const listGroups = () => request('/groups?page_size=100');
+export const listGroupMembers = (groupId) => request(`/groups/${groupId}/members`);
+/** `member`: `{ email }` or `{ user_id }`, plus optional `role` (member | admin). */
+export const addGroupMember = (groupId, member) =>
+  request(`/groups/${groupId}/members`, { method: 'POST', body: member });
+export const setGroupMemberRole = (groupId, userId, role) =>
+  request(`/groups/${groupId}/members/${userId}`, { method: 'PATCH', body: { role } });
+export const removeGroupMember = (groupId, userId) =>
+  request(`/groups/${groupId}/members/${userId}`, { method: 'DELETE' });
+export const updateGroup = (groupId, body) => request(`/groups/${groupId}`, { method: 'PATCH', body });
 export const getMetadataTemplate = () => request('/metadata/template');
 export const validateMetadata = (meta) => request('/metadata/validate', { method: 'POST', body: meta });
 export const requestRemoval = (id, reason) =>
@@ -170,6 +179,13 @@ export const getSelection = (id) => request(`/selections/${id}`);
 export const adminRemovalQueue = (status = 'pending') => request(`/admin/removal-requests${qs({ status })}`);
 export const adminDecide = (id, decision, note) =>
   request(`/admin/removal-requests/${id}/decision`, { method: 'POST', body: { decision, note } });
+export const adminListUsers = (params) => request(`/admin/users${qs({ page_size: 100, ...params })}`);
+export const adminCreateUser = (body) => request('/admin/users', { method: 'POST', body });
+export const adminUpdateUser = (id, body) => request(`/admin/users/${id}`, { method: 'PATCH', body });
+export const adminDeleteUser = (id, transferTo) =>
+  request(`/admin/users/${id}${qs({ transfer_to: transferTo })}`, { method: 'DELETE' });
+export const adminCreateGroup = (body) => request('/admin/groups', { method: 'POST', body });
+export const adminDeleteGroup = (id) => request(`/admin/groups/${id}`, { method: 'DELETE' });
 export const adminRegistrations = (status = 'pending') =>
   request(`/admin/registrations${qs({ status, page_size: 100 })}`);
 export const adminDecideRegistration = (userId, decision, note) =>
