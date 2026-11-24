@@ -126,6 +126,7 @@ export const getAuthConfig = () => request('/auth/config', { auth: false });
 /** Self-registration: `{ email, display_name, password, organization?, note? }`. */
 export const register = (body) => request('/auth/register', { method: 'POST', body, auth: false });
 export const getPublicStats = () => request('/stats/public', { auth: false });
+export const sendContactMessage = (body) => request('/contact', { method: 'POST', body, auth: false });
 
 // ---------------------------------------------------------------- Window 2: data lake
 
@@ -186,6 +187,10 @@ export const adminDeleteUser = (id, transferTo) =>
   request(`/admin/users/${id}${qs({ transfer_to: transferTo })}`, { method: 'DELETE' });
 export const adminCreateGroup = (body) => request('/admin/groups', { method: 'POST', body });
 export const adminDeleteGroup = (id) => request(`/admin/groups/${id}`, { method: 'DELETE' });
+export const adminContactMessages = (status = 'open') =>
+  request(`/admin/contact-messages${qs({ status, page_size: 100 })}`);
+export const adminMarkContactMessage = (id, handled) =>
+  request(`/admin/contact-messages/${id}`, { method: 'PATCH', body: { handled } });
 export const adminRegistrations = (status = 'pending') =>
   request(`/admin/registrations${qs({ status, page_size: 100 })}`);
 export const adminDecideRegistration = (userId, decision, note) =>

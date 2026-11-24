@@ -14,7 +14,15 @@ const TABS = [
   { id: 'users', label: 'Users' },
   { id: 'groups', label: 'Groups' },
   { id: 'registrations', label: 'Registrations' },
+  { id: 'messages', label: 'Messages' },
 ];
+const TOPIC_LABEL = {
+  general: 'General',
+  demo: 'Demo / pilot',
+  pricing: 'Pricing',
+  support: 'Support',
+  privacy: 'Privacy',
+};
 const GB = 1024 ** 3;
 
 function Err({ error }) {
@@ -542,6 +550,71 @@ function GroupsTab({ notify }) {
   );
 }
 
+// ---------------------------------------------------------------- contact messages
+
+function MessagesTab({ notify }) {
+  const [status, setStatus] = useState('open');
+  const [items, setItems] = useState(null);
+  const [error, setError] = useState(null);
+
+  const load = useCallback(() => {
+    api
+      .adminContactMessages(status)
+      .then((d) => setItems(d.items))
+      .catch((e) => setError(e.message));
+  }, [status]);
+  useEffect(load, [load]);
+
+  const mark = async (m, handled) => {
+    try {
+      await api.adminMarkContactMessage(m.id, handled);
+      load();
+      notify(handled ? 'Marked as handled.' : 'Moved back to open.');
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  return (
+    <div className="requests">
+      <div className="row-gap">
+        <h2>Contact messages</h2>
+        <div className="spacer" />
+        <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Status filter">
+          <option value="open">Open</option>
+          <option value="handled">Handled</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+      <p className="muted">Messages sent from the public contact form. Reply by email, then mark them handled.</p>
+      <Err error={error} />
+      {items &&
+        (items.length === 0 ? (
+          <p className="muted empty">No messages.</p>
+        ) : (
+          <div className="messages">
+            {items.map((m) => (
+              <article key={m.id} className={`message${m.handled ? ' handled' : ''}`}>
+                <header className="row-gap">
+                  <strong>{m.name}</strong>
+                  <a href={`mailto:${m.email}?subject=${encodeURIComponent('Re: your message to FoodChainIQ')}`}>{m.email}</a>
+                  {m.organization && <span className="muted">· {m.organization}</span>}
+                  <Badge variant="info">{TOPIC_LABEL[m.topic] ?? m.topic}</Badge>
+                  <div className="spacer" />
+                  <span className="muted small">{formatDate(m.created_at)}</span>
+                  <Button size="sm" variant="outline" onClick={() => mark(m, !m.handled)}>
+                    {m.handled ? 'Reopen' : 'Mark handled'}
+                  </Button>
+                </header>
+                <p>{m.message}</p>
+              </article>
+            ))}
+          </div>
+        ))}
+    </div>
+  );
+}
+
 // ---------------------------------------------------------------- page
 
 export default function AdminPage() {
@@ -575,6 +648,7 @@ export default function AdminPage() {
           {tab === 'users' && <UsersTab notify={notify} />}
           {tab === 'groups' && <GroupsTab notify={notify} />}
           {tab === 'registrations' && <RegistrationsView onChanged={notify} />}
+          {tab === 'messages' && <MessagesTab notify={notify} />}
         </section>
       </div>
       {toast && (

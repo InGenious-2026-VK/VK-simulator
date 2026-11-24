@@ -32,10 +32,15 @@ export default function LoginDialog() {
 
   useEffect(() => {
     if (!loginOpen) return;
-    setMode('signin');
+    // setLoginOpen('register') opens straight on the registration form
+    const wantRegister = loginOpen === 'register';
+    setMode(wantRegister ? 'register' : 'signin');
     setError(null);
     getAuthConfig()
-      .then((c) => setRegistration(c.registration))
+      .then((c) => {
+        setRegistration(c.registration);
+        if (wantRegister && c.registration === 'closed') setMode('signin');
+      })
       .catch(() => setRegistration(null));
   }, [loginOpen]);
 
