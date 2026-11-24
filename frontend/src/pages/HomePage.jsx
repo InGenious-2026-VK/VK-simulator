@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SiteLayout from '../components/SiteLayout.jsx';
 import NetworkBackground from '../components/NetworkBackground.jsx';
+import HeroVisual from './site/HeroVisual.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { IcArrow, IcChart, IcCheck, IcDatabase, IcNetwork, IcPlay, IcShield, IcUsers } from './site/icons.jsx';
 
@@ -61,59 +62,6 @@ const QUESTIONS = [
 ];
 
 const AUDIENCES = ['Municipalities', 'County administrative boards', 'Food producers', 'Logistics operators', 'Civil defence & preparedness'];
-
-function ProductPreview() {
-  return (
-    <div className="mk-preview" aria-hidden="true">
-      <div className="mk-preview-bar">
-        <i />
-        <i />
-        <i />
-        <span>Scenario · Corridor closure</span>
-      </div>
-      <div className="mk-preview-body">
-        <svg viewBox="0 0 320 190" className="mk-preview-map">
-          <path d="M18 40 C80 8 170 18 238 30 S310 80 300 130 S220 186 150 178 S30 160 18 110 Z" fill="#eef5fc" stroke="#cfe0f2" />
-          {[
-            [60, 60, 140, 92], [140, 92, 230, 70], [140, 92, 120, 150], [120, 150, 220, 140], [230, 70, 220, 140], [60, 60, 70, 128], [70, 128, 120, 150],
-          ].map(([a, b, c, d], i) => (
-            <line key={i} x1={a} y1={b} x2={c} y2={d} stroke={i === 1 ? '#e7000b' : '#7aa7d4'} strokeWidth="2" strokeDasharray={i === 1 ? '5 4' : ''} />
-          ))}
-          {[
-            [60, 60, '#4ca72b'], [70, 128, '#4ca72b'], [140, 92, '#0061ac'], [120, 150, '#0061ac'], [230, 70, '#f59e0b'], [220, 140, '#ef4444'],
-          ].map(([x, y, c], i) => (
-            <g key={i}>
-              {(i === 4 || i === 5) && <circle cx={x} cy={y} r="16" fill={c} opacity=".16" className="mk-pulse" />}
-              <circle cx={x} cy={y} r="6" fill={c} stroke="#fff" strokeWidth="2" />
-            </g>
-          ))}
-          <circle r="3.5" fill="#011e3b" className="mk-dot mk-dot-a" />
-          <circle r="3.5" fill="#011e3b" className="mk-dot mk-dot-b" />
-        </svg>
-        <div className="mk-preview-kpis">
-          <div>
-            <small>Demand met</small>
-            <b>87%</b>
-          </div>
-          <div>
-            <small>Buffers left</small>
-            <b>3.2 d</b>
-          </div>
-          <div>
-            <small>At risk</small>
-            <b className="bad">2 towns</b>
-          </div>
-        </div>
-        <div className="mk-preview-timeline">
-          <span>Day 4 · 14:00</span>
-          <div>
-            <i />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function HomePage() {
   const { user, setLoginOpen } = useAuth();
@@ -179,7 +127,7 @@ export default function HomePage() {
               </li>
             </ul>
           </div>
-          <ProductPreview />
+          <HeroVisual />
         </div>
       </section>
 
