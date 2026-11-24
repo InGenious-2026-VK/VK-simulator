@@ -1611,6 +1611,16 @@ components:
       type: object
       additionalProperties: true
       properties:
+        town_timeline:
+          type: array
+          description: Per-town state at the end of each simulated day, used to play the run back.
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              people_affected: { type: array, items: { type: integer } }
+              buffer_days: { type: array, items: { type: number } }
+              severity: { type: array, items: { type: string, enum: [none, minor, moderate, severe, critical] } }
         run_id: { type: [string, 'null'] }
         inputs:
           type: object

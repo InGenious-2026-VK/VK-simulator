@@ -92,6 +92,15 @@ class TimelinePoint(BaseModel):
     buffer_reserve_pct: float  # regional local (retail + household) buffer left, % of day-0
 
 
+class TownTimeline(BaseModel):
+    """One town's state at the end of each simulated day (index 0 = day 1)."""
+
+    id: str
+    people_affected: list[int]  # people going short after buffers, per day
+    buffer_days: list[float]  # local buffer left, in days of demand
+    severity: list[str]  # severity band per day
+
+
 class RegionSummary(BaseModel):
     total_demand_tpd: float
     baseline_met_tpd: float
@@ -111,6 +120,8 @@ class SimulationResult(BaseModel):
     nodes: list[NodeImpact]
     edges: list[EdgeFlow]
     timeline: list[TimelinePoint]
+    # Per-town daily series, for playing the run back on the map.
+    town_timeline: list[TownTimeline] = []
     # Set when the run is stored (signed-in callers): id + pinned dataset versions.
     run_id: Optional[str] = None
     inputs: Optional[dict] = None

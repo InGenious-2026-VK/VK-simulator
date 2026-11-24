@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Button, Select } from './ui.jsx';
+import { useRef } from "react";
+import { Select } from "./ui.jsx";
 import {
   IconChevronsDown,
   IconChevronsUp,
@@ -7,161 +7,197 @@ import {
   IconPause,
   IconStepBack,
   IconStepFwd,
-  IconCalendar,
-} from './icons.jsx';
-import { TIMELINE_EVENTS, TIMELINE_TICKS } from '../data/workspaceMock.js';
+} from "./icons.jsx";
+import { SPEEDS } from "../scenario/usePlayback.js";
+import { HOURS_PER_DAY, formatClock } from "../scenario/playback.js";
 
-const SPEEDS = ['1×', '2×', '4×'];
-
-export default function TimelineBar({ collapsed, onCollapse, result }) {
-  const total = result ? result.duration_days : 730;
-  const [day, setDay] = useState(1);
-  const [playing, setPlaying] = useState(false);
-  const [speed, setSpeed] = useState('2×');
+/**
+ * Transport + scrubber for playing a run back hour by hour. The clock lives in
+ * the workspace (`playback`), so the map, charts and KPIs follow it.
+ */
+export default function TimelineBar({
+  collapsed,
+  onCollapse,
+  result,
+  playback,
+  frame,
+}) {
   const trackRef = useRef(null);
+  const { hour, end, playing, speed, step } = playback;
+  const enabled = Boolean(result && end);
+  const pct = enabled ? (hour / end) * 100 : 0;
+  const clock = formatClock(hour, end);
+  const days = result?.duration_days ?? 0;
 
-  useEffect(() => {
-    setDay(1);
-    setPlaying(false);
-  }, [result]);
-
-  useEffect(() => {
-    if (!playing) return undefined;
-    const mult = speed === '4×' ? 4 : speed === '2×' ? 2 : 1;
-    const stepDays = result ? 1 : 7;
-    const id = setInterval(() => {
-      setDay((d) => {
-        if (d >= total) {
-          setPlaying(false);
-          return total;
-        }
-        return Math.min(total, d + stepDays);
-      });
-    }, 400 / mult);
-    return () => clearInterval(id);
-  }, [playing, speed, total, result]);
-
-  const pct = ((day - 1) / Math.max(1, total - 1)) * 100;
-
-  const seek = (clientX) => {
+  const seekTo = (clientX) => {
+    if (!enabled) return;
     const r = trackRef.current.getBoundingClientRect();
     const p = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
-    setDay(Math.max(1, Math.round(1 + p * (total - 1))));
+    playback.setPlaying(false);
+    playback.seek(Math.round(p * end));
   };
 
-  const clock = () => {
-    if (result) {
-      const tp = result.timeline[Math.min(result.timeline.length - 1, day - 1)];
-      return (
-        <div className="tl-clock">
-          <span className="mono">day {day}</span>{' '}
-          <em>
-            · of {total} · {tp ? `${tp.people_affected.toLocaleString('sv-SE')} affected` : ''}
-          </em>
-        </div>
-      );
-    }
-    const d = new Date(2026, 0, 1);
-    d.setDate(d.getDate() + (day - 1));
-    const week = Math.floor((day - 1) / 7) + 1;
-    const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
-      d.getDate()
-    ).padStart(2, '0')}`;
-    return (
-      <div className="tl-clock">
-        <span className="mono">{iso}</span>{' '}
-        <em>· week {week} · baseline calendar</em>
-      </div>
-    );
-  };
+  const s = result?.region_summary;
+  const markers = enabled
+    ? [
+        s.first_shortfall_day && [
+          s.first_shortfall_day,
+          "#f59e0b",
+          `Shortfall · d${s.first_shortfall_day}`,
+        ],
+        s.first_buffer_failure_day && [
+          s.first_buffer_failure_day,
+          "#e7000b",
+          `Buffers fail · d${s.first_buffer_failure_day}`,
+        ],
+      ].filter(Boolean)
+    : [];
+  const tickCount = Math.min(days, 7);
 
   return (
-    <footer className={`timeline${collapsed ? ' collapsed' : ''}`}>
+    <footer className={`timeline${collapsed ? " collapsed" : ""}`}>
       <div className="tl-strip">
-        <button className="btn btn-ghost btn-icon" onClick={onCollapse} title="Collapse">
-          {collapsed ? <IconChevronsUp size={14} /> : <IconChevronsDown size={14} />}
+        <button
+          className="btn btn-ghost btn-icon"
+          onClick={onCollapse}
+          title={collapsed ? "Expand" : "Collapse"}
+        >
+          {collapsed ? (
+            <IconChevronsUp size={14} />
+          ) : (
+            <IconChevronsDown size={14} />
+          )}
         </button>
         <div className="tl-transport">
           <button
             className="btn btn-ghost btn-icon"
-            title="Step back"
-            onClick={() => setDay((d) => Math.max(1, d - (result ? 1 : 7)))}
+            title={step === "daily" ? "Back one day" : "Back one hour"}
+            disabled={!enabled}
+            onClick={() => playback.stepBy(-1)}
           >
             <IconStepBack size={15} />
           </button>
-          <button className="play" title={playing ? 'Pause' : 'Play'} onClick={() => setPlaying((p) => !p)}>
+          <button
+            className="play"
+            title={
+              !enabled
+                ? "Run a scenario to play it back"
+                : playing
+                  ? "Pause"
+                  : "Play"
+            }
+            aria-label={playing ? "Pause" : "Play"}
+            disabled={!enabled}
+            onClick={playback.togglePlay}
+          >
             {playing ? <IconPause size={13} /> : <IconPlay size={13} />}
           </button>
           <button
             className="btn btn-ghost btn-icon"
-            title="Step forward"
-            onClick={() => setDay((d) => Math.min(total, d + (result ? 1 : 7)))}
+            title={step === "daily" ? "Forward one day" : "Forward one hour"}
+            disabled={!enabled}
+            onClick={() => playback.stepBy(1)}
           >
             <IconStepFwd size={15} />
           </button>
         </div>
-        {clock()}
+        {enabled ? (
+          <div className="tl-clock" aria-live="off">
+            <span className="mono">
+              Day {clock.day} · {clock.time}
+            </span>{" "}
+            <em>
+              of {days} days ·{" "}
+              {frame
+                ? `${frame.region.people_affected.toLocaleString("sv-SE")} without food`
+                : ""}
+            </em>
+          </div>
+        ) : (
+          <div className="tl-clock">
+            <em>
+              Run a scenario, then press play to watch it unfold hour by hour.
+            </em>
+          </div>
+        )}
         <div className="spacer" />
         <Select
-          className="run-meta"
           style={{ height: 28 }}
           label="Step"
-          value={result ? 'daily' : 'weekly'}
+          value={step}
           options={[
-            { value: 'daily', label: 'Daily' },
-            { value: 'weekly', label: 'Weekly' },
+            { value: "hourly", label: "Hourly" },
+            { value: "daily", label: "Daily" },
           ]}
-          onChange={() => {}}
+          onChange={playback.setStep}
         />
         <Select
           style={{ height: 28 }}
           label="Speed"
-          value={speed}
-          options={SPEEDS.map((s) => ({ value: s, label: s }))}
-          onChange={setSpeed}
+          value={String(speed)}
+          options={SPEEDS.map((v) => ({ value: String(v), label: `${v}×` }))}
+          onChange={(v) => playback.setSpeed(Number(v))}
         />
-        <Button variant="outline" size="sm" className="run-meta">
-          <IconCalendar size={13} />
-          {result ? `${total}-day run` : 'Jan 2026 – Dec 2027'}
-        </Button>
       </div>
       <div className="tl-body">
         <div
-          className="track"
+          className={`track${enabled ? "" : " disabled"}`}
           ref={trackRef}
+          role="slider"
+          aria-label="Simulation time"
+          aria-valuemin={0}
+          aria-valuemax={end}
+          aria-valuenow={hour}
+          aria-valuetext={clock.label}
+          tabIndex={enabled ? 0 : -1}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") playback.stepBy(1);
+            if (e.key === "ArrowLeft") playback.stepBy(-1);
+            if (e.key === " ") {
+              e.preventDefault();
+              playback.togglePlay();
+            }
+          }}
           onPointerDown={(e) => {
-            seek(e.clientX);
-            const mv = (ev) => seek(ev.clientX);
+            seekTo(e.clientX);
+            const mv = (ev) => seekTo(ev.clientX);
             const up = () => {
-              window.removeEventListener('pointermove', mv);
-              window.removeEventListener('pointerup', up);
+              window.removeEventListener("pointermove", mv);
+              window.removeEventListener("pointerup", up);
             };
-            window.addEventListener('pointermove', mv);
-            window.addEventListener('pointerup', up);
+            window.addEventListener("pointermove", mv);
+            window.addEventListener("pointerup", up);
           }}
         >
           <div className="events">
-            {!result &&
-              TIMELINE_EVENTS.map(([p, c, label]) => (
-                <div className="ev" key={label} style={{ left: `${p}%` }}>
+            {markers.map(([day, c, label]) => {
+              const left = (((day - 1) * HOURS_PER_DAY) / end) * 100;
+              const edge = left < 8 ? " ev-start" : left > 92 ? " ev-end" : "";
+              return (
+                <div
+                  className={`ev${edge}`}
+                  key={label}
+                  style={{ left: `${left}%` }}
+                >
                   <i style={{ background: c }} />
                   <span>{label}</span>
                 </div>
-              ))}
+              );
+            })}
           </div>
           <div className="rail-bg" />
           <div className="rail-fill" style={{ width: `${pct}%` }} />
           <div className="playhead" style={{ left: `${pct}%` }} />
           <div className="ticks">
-            {(result
-              ? Array.from({ length: 6 }, (_, i) => `d${Math.round((i / 5) * total) || 1}`)
-              : TIMELINE_TICKS
-            ).map((t, i) => (
-              <div className="tick" key={i}>
-                <i />
-                <span>{t}</span>
-              </div>
-            ))}
+            {enabled &&
+              Array.from({ length: tickCount + 1 }, (_, i) =>
+                Math.round((i / tickCount) * days),
+              ).map((d, i) => (
+                <div className="tick" key={i}>
+                  <i />
+                  <span>{d === 0 ? "start" : `d${d}`}</span>
+                </div>
+              ))}
           </div>
         </div>
       </div>

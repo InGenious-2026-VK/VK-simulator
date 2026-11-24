@@ -27,6 +27,7 @@ from .models import (
     Scenario,
     SimulationResult,
     TimelinePoint,
+    TownTimeline,
 )
 from .network import Network, load_network
 
@@ -206,6 +207,10 @@ def simulate(scenario: Scenario, net: Network | None = None) -> SimulationResult
     last_shortfall: dict[str, float] = {}
     last_edge_flow: dict[str, float] = {}
     buf_exhausted: set[str] = set()
+    town_series = {
+        n.id: TownTimeline(id=n.id, people_affected=[], buffer_days=[], severity=[])
+        for n in demand_nodes
+    }
 
     # steady-state flow: constant disruption ⇒ the same solve every day
     sol = _solve_day(net, eff)
@@ -234,15 +239,23 @@ def simulate(scenario: Scenario, net: Network | None = None) -> SimulationResult
 
         day_people_without = 0
         for n in demand_nodes:
-            if not n.demand_tpd or shortfall[n.id] <= 1e-9:
-                continue
-            after_stock = shortfall[n.id] * (1.0 - from_stock / gap) if gap else 0.0
-            draw = min(after_stock, local_buf[n.id])
-            local_buf[n.id] -= draw
-            eff_unmet = after_stock - draw
-            day_people_without += round(n.population * eff_unmet / n.demand_tpd)
-            if local_buf[n.id] <= 1e-6:
-                buf_exhausted.add(n.id)
+            series = town_series[n.id]
+            town_without = 0
+            if n.demand_tpd and shortfall[n.id] > 1e-9:
+                after_stock = shortfall[n.id] * (1.0 - from_stock / gap) if gap else 0.0
+                draw = min(after_stock, local_buf[n.id])
+                local_buf[n.id] -= draw
+                eff_unmet = after_stock - draw
+                town_without = round(n.population * eff_unmet / n.demand_tpd)
+                day_people_without += town_without
+                if local_buf[n.id] <= 1e-6:
+                    buf_exhausted.add(n.id)
+            raw_frac = shortfall[n.id] / n.demand_tpd if n.demand_tpd else 0.0
+            series.people_affected.append(town_without)
+            series.buffer_days.append(
+                round(local_buf[n.id] / n.demand_tpd, 2) if n.demand_tpd else 0.0
+            )
+            series.severity.append(_town_severity(raw_frac, n.id in buf_exhausted))
 
         if gap > 1e-6 and first_shortfall_day is None:
             first_shortfall_day = day
@@ -295,7 +308,19 @@ def simulate(scenario: Scenario, net: Network | None = None) -> SimulationResult
         nodes=nodes,
         edges=edges,
         timeline=timeline,
+        town_timeline=list(town_series.values()),
     )
+
+
+_SEVERITY_ORDER = ["none", "minor", "moderate", "severe", "critical"]
+
+
+def _town_severity(raw_frac: float, exhausted: bool) -> str:
+    """Severity of a town's shortfall; one band worse once its buffer is gone."""
+    sev = _severity(raw_frac)
+    if exhausted:
+        sev = _SEVERITY_ORDER[min(len(_SEVERITY_ORDER) - 1, max(1, _SEVERITY_ORDER.index(sev) + 1))]
+    return sev
 
 
 def _node_impacts(
@@ -307,11 +332,8 @@ def _node_impacts(
         demand = n.demand_tpd
         raw_frac = last_shortfall.get(n.id, 0.0) / demand if demand else 0.0
 
-        sev = _severity(raw_frac)
-        if n.id in buf_exhausted:
-            # the town is actually going without now, not just drawing down reserves
-            order = ["none", "minor", "moderate", "severe", "critical"]
-            sev = order[min(len(order) - 1, max(1, order.index(sev) + 1))]
+        # the town is actually going without once its buffer is gone, not just drawing reserves
+        sev = _town_severity(raw_frac, n.id in buf_exhausted)
 
         out.append(
             NodeImpact(

@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import boundaryData from '../data/ostergotland-boundary.json';
 import { LAYER_PLUGINS } from '../layers/registry.js';
 import { mountLayer, EMPTY_FC } from '../layers/applyLayer.js';
-import { networkToFeatures, resultToFeatures } from '../scenario/simLayers.js';
+import { flowDotsAt, flowPaths, networkToFeatures, resultToFeatures } from '../scenario/simLayers.js';
 
 // Minimal light basemap — OpenStreetMap data as vector tiles via OpenFreeMap
 // (free, no API key). Terrain / satellite are raster fallbacks.
@@ -89,6 +89,7 @@ const SIM_LAYER_IDS = [
   'sim-impact-edge',
   'sim-net-node',
   'sim-impact-ring',
+  'sim-flow-dot',
 ];
 
 function restackLayers(map, layerOrder, handles) {
@@ -102,7 +103,7 @@ function restackLayers(map, layerOrder, handles) {
 }
 
 function setupSimLayers(map) {
-  for (const id of ['sim-net-edges', 'sim-net-nodes', 'sim-impact-edges', 'sim-impact-demand']) {
+  for (const id of ['sim-net-edges', 'sim-net-nodes', 'sim-impact-edges', 'sim-impact-demand', 'sim-flow-dots']) {
     if (!map.getSource(id)) map.addSource(id, { type: 'geojson', data: EMPTY_FC });
   }
 
@@ -162,9 +163,21 @@ function setupSimLayers(map) {
     paint: {
       'circle-radius': ['get', 'radius'],
       'circle-color': ['get', 'color'],
-      'circle-opacity': 0.22,
+      'circle-opacity': ['get', 'fill'],
       'circle-stroke-color': ['get', 'color'],
-      'circle-stroke-width': 2.5,
+      'circle-stroke-width': ['get', 'stroke'],
+    },
+  });
+  // shipments moving along the corridors during playback
+  map.addLayer({
+    id: 'sim-flow-dot',
+    type: 'circle',
+    source: 'sim-flow-dots',
+    paint: {
+      'circle-radius': 3.2,
+      'circle-color': ['get', 'color'],
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 1,
     },
   });
 
@@ -204,6 +217,9 @@ export default function MapView({
   simNetwork,
   simScenario,
   simResult,
+  frame = null,
+  clockRef = null,
+  playing = false,
   showNetwork = true,
   showImpact = true,
   impactOpacity = 100,
@@ -365,7 +381,7 @@ export default function MapView({
     map.getSource('sim-net-nodes').setData(nodesFC);
     map.getSource('sim-net-edges').setData(edgesFC);
 
-    const { demandFC, edgesFC: impactEdgesFC } = resultToFeatures(simResult);
+    const { demandFC, edgesFC: impactEdgesFC } = resultToFeatures(simResult, frame);
     map.getSource('sim-impact-demand').setData(demandFC);
     map.getSource('sim-impact-edges').setData(impactEdgesFC);
 
@@ -375,6 +391,7 @@ export default function MapView({
       'sim-net-node': showNetwork,
       'sim-impact-edge': showImpact && !!simResult,
       'sim-impact-ring': showImpact && !!simResult,
+      'sim-flow-dot': showImpact && !!simResult,
     };
     for (const [id, on] of Object.entries(vis)) {
       if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
@@ -384,12 +401,36 @@ export default function MapView({
       map.setPaintProperty('sim-net-edge-closed', 'line-opacity', 0.9 * (networkOpacity / 100));
     }
     if (map.getLayer('sim-impact-ring')) {
-      map.setPaintProperty('sim-impact-ring', 'circle-opacity', 0.22 * (impactOpacity / 100));
+      map.setPaintProperty('sim-impact-ring', 'circle-opacity', ['*', ['get', 'fill'], impactOpacity / 100]);
     }
     for (const id of SIM_LAYER_IDS) {
       if (map.getLayer(id)) map.moveLayer(id);
     }
-  }, [mapReady, simNetwork, simScenario, simResult, showNetwork, showImpact, impactOpacity, networkOpacity]);
+  }, [mapReady, simNetwork, simScenario, simResult, frame, showNetwork, showImpact, impactOpacity, networkOpacity]);
+
+  // Moving shipments: positions follow the continuous playback clock. While
+  // playing, a ~30 fps loop reads clockRef; when paused, draw once per change.
+  const paths = useMemo(() => flowPaths(simResult), [simResult]);
+  const frameHour = frame?.hour;
+  useEffect(() => {
+    const map = mapRef.current;
+    const src = map && mapReady ? map.getSource('sim-flow-dots') : null;
+    if (!src) return undefined;
+    const draw = () => src.setData(flowDotsAt(paths, clockRef?.current ?? 0));
+    draw();
+    if (!playing) return undefined;
+    let raf;
+    let last = 0;
+    const loop = (now) => {
+      if (now - last > 33) {
+        last = now;
+        draw();
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [mapReady, paths, playing, frameHour, clockRef]);
 
   useEffect(() => {
     const map = mapRef.current;

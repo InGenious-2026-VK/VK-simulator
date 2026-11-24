@@ -7,6 +7,8 @@ import ResultsPanel from './ResultsPanel.jsx';
 import TimelineBar from './TimelineBar.jsx';
 import ScenarioDialog from './ScenarioDialog.jsx';
 import { useSimulation } from '../scenario/useSimulation.js';
+import { usePlayback } from '../scenario/usePlayback.js';
+import { frameAt } from '../scenario/playback.js';
 import { LAYER_PLUGINS, initialVisibility } from '../layers/registry.js';
 import { LIVE_MODEL } from '../data/workspaceMock.js';
 
@@ -45,6 +47,12 @@ function loadBaseOrder() {
  */
 export default function SimulationWorkspace({ selectionId = null, context = null, datasetPlugins = [] }) {
   const sim = useSimulation(selectionId);
+  const playback = usePlayback(sim.result);
+  // The whole page (map, KPIs, charts, ranking) shows the run at the playback hour.
+  const frame = useMemo(
+    () => frameAt(sim.result, playback.hour, sim.network),
+    [sim.result, playback.hour, sim.network]
+  );
 
   const plugins = useMemo(() => [...LAYER_PLUGINS, ...datasetPlugins], [datasetPlugins]);
   const pluginById = useMemo(() => new Map(plugins.map((p) => [p.id, p])), [plugins]);
@@ -70,6 +78,11 @@ export default function SimulationWorkspace({ selectionId = null, context = null
   const [focus, setFocus] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Open the timeline when a run completes, so it can be played back.
+  useEffect(() => {
+    if (sim.result) setCollapsed((c) => ({ ...c, bottom: false }));
+  }, [sim.result]);
 
   // Persist layer order (of the built-in layers; dataset layers are per selection).
   useEffect(() => {
@@ -251,6 +264,7 @@ export default function SimulationWorkspace({ selectionId = null, context = null
             status={sim.status}
             hasResult={!!sim.result}
             summary={sim.result?.region_summary}
+            frame={frame}
             onSplitView={() => setCompareOpen(true)}
             onFocus={toggleFocus}
             simState={{
@@ -260,6 +274,9 @@ export default function SimulationWorkspace({ selectionId = null, context = null
               simNetwork: sim.network,
               simScenario: sim.scenario,
               simResult: sim.result,
+              frame,
+              clockRef: playback.clockRef,
+              playing: playback.playing,
               showNetwork,
               showImpact,
               networkOpacity,
@@ -274,6 +291,7 @@ export default function SimulationWorkspace({ selectionId = null, context = null
         <ResultsPanel
           mode={mode}
           result={sim.result}
+          frame={frame}
           network={sim.network}
           error={sim.networkError || sim.error}
           onRun={doRun}
@@ -288,6 +306,8 @@ export default function SimulationWorkspace({ selectionId = null, context = null
         collapsed={collapsed.bottom}
         onCollapse={() => setPanel('bottom')}
         result={sim.result}
+        playback={playback}
+        frame={frame}
       />
 
       <ScenarioDialog

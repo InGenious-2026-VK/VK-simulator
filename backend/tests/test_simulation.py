@@ -68,3 +68,22 @@ def test_deterministic(net):
     a = simulate(scenario, net)
     b = simulate(scenario, net)
     assert a.model_dump() == b.model_dump()
+
+
+@pytest.mark.parametrize("preset", PRESETS, ids=lambda p: p.id)
+def test_town_timeline_matches_region_timeline(preset, net):
+    """The per-town daily series (used to play a run back) adds up to the region series."""
+    res = simulate(preset.scenario, net)
+    days = preset.scenario.duration_days
+    towns = {t.id: t for t in res.town_timeline}
+    demand = [n for n in res.nodes if n.type == "demand"]
+    assert set(towns) == {n.id for n in demand}
+    for t in towns.values():
+        assert len(t.people_affected) == len(t.buffer_days) == len(t.severity) == days
+        # buffers only ever deplete
+        assert all(a >= b for a, b in zip(t.buffer_days, t.buffer_days[1:]))
+    for i, point in enumerate(res.timeline):
+        assert sum(t.people_affected[i] for t in towns.values()) == point.people_affected
+    # the last day's severity is the end-of-run severity shown on the map
+    for n in demand:
+        assert towns[n.id].severity[-1] == n.severity
