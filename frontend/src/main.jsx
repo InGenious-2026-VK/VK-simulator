@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage.jsx';
 import DataLakePage from './pages/DataLakePage.jsx';
 import VisualizationPage from './pages/VisualizationPage.jsx';
 import SimulationPage from './pages/SimulationPage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 import './index.css';
 import './App.css';
 import './pages/pages.css';
@@ -38,6 +39,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             element={
               <RequireAuth>
                 <SimulationPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <RequireAuth>
+                <AdminPage />
               </RequireAuth>
             }
           />

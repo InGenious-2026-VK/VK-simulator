@@ -308,6 +308,8 @@ def serialize_user(db: Session, u: User, with_storage: bool = True) -> dict:
         "groups": groups,
         "disabled": u.disabled,
         "status": u.status,
+        "organization": u.organization,
+        "created_at": u.created_at,
     }
     if with_storage:
         out["storage"] = {"used_bytes": used_bytes(db, u), "quota_bytes": u.quota_bytes}

@@ -191,6 +191,30 @@ paths:
                       items:
                         type: array
                         items: { $ref: '#/components/schemas/Group' }
+  /groups/{group_id}:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+    patch:
+      tags: [Groups]
+      summary: Rename or re-describe a group (group admin)
+      x-status: live
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string, minLength: 2, maxLength: 200 }
+                description: { type: string, maxLength: 2000 }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Group' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
   /groups/{group_id}/members:
     parameters:
       - $ref: '#/components/parameters/GroupId'
@@ -238,13 +262,32 @@ paths:
         in: path
         required: true
         schema: { type: string }
+    patch:
+      tags: [Groups]
+      summary: Change a member's group role (group admin)
+      x-status: live
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [member, admin] }
+      responses:
+        '200': { description: Updated }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
     delete:
       tags: [Groups]
-      summary: Remove a member (group admin)
+      summary: Remove a member (group admin), or leave the group (yourself)
+      description: The last group admin can't be removed or demoted except by a platform admin (409 last_group_admin).
       x-status: live
       responses:
         '204': { description: Removed }
         '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
 
   # ---------------------------------------------------------------- Datasets
   /datasets:
@@ -1004,7 +1047,7 @@ paths:
         schema: { type: string }
     patch:
       tags: [Admin]
-      summary: Change role, quota or disable a user
+      summary: Edit a user (name, email, organisation, role, quota, disabled, password)
       x-status: live
       requestBody:
         required: true
@@ -1013,15 +1056,40 @@ paths:
             schema:
               type: object
               properties:
+                display_name: { type: string }
+                email: { type: string, format: email }
+                organization: { type: [string, 'null'] }
                 role: { $ref: '#/components/schemas/UserRole' }
                 quota_bytes: { type: integer }
                 disabled: { type: boolean }
+                password: { type: string, format: password, minLength: 8, maxLength: 72 }
       responses:
         '200':
           description: Updated
           content:
             application/json:
               schema: { $ref: '#/components/schemas/User' }
+        '409':
+          description: '`user_exists`, `self_lockout` or `last_admin`'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [Admin]
+      summary: Delete a user
+      x-status: live
+      parameters:
+        - name: transfer_to
+          in: query
+          description: User who takes over the deleted user's datasets. Required if they own any.
+          schema: { type: string }
+      responses:
+        '204': { description: Deleted }
+        '409':
+          description: '`user_has_datasets` (details.datasets = count), `self_lockout` or `last_admin`'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
   /admin/groups:
     post:
       tags: [Admin]
@@ -1043,6 +1111,16 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Group' }
+  /admin/groups/{group_id}:
+    parameters:
+      - $ref: '#/components/parameters/GroupId'
+    delete:
+      tags: [Admin]
+      summary: Delete a group (datasets shared with it become private)
+      x-status: live
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
   /admin/audit-log:
     get:
       tags: [Admin]
@@ -1593,4 +1671,4 @@ components:
 
     AuditAction:
       type: string
-      enum: [login, dataset.upload, dataset.update, dataset.visibility_change, dataset.download, removal.request, removal.decision, simulation.run, user.register, user.registration]
+      enum: [login, dataset.upload, dataset.update, dataset.visibility_change, dataset.download, removal.request, removal.decision, simulation.run, user.register, user.registration, user.invite, user.update, user.delete, group.create, group.update, group.delete, group.member_add, group.member_role, group.member_remove]

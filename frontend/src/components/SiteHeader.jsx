@@ -79,6 +79,7 @@ export default function SiteHeader({ children }) {
             Home
           </NavLink>
           <NavLink to="/datalake">Data Lake</NavLink>
+          {user.role === 'admin' && <NavLink to="/admin">Admin</NavLink>}
         </nav>
       )}
       <div className="site-header-slot">{children}</div>
