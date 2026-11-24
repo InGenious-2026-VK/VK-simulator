@@ -24,6 +24,7 @@ from .db import SessionLocal, init_db
 from .routers import (
     admin,
     auth,
+    contact,
     datasets,
     groups,
     metadata_routes,
@@ -71,5 +72,5 @@ app.add_middleware(
     expose_headers=["Location"],
 )
 
-for module in (auth, groups, datasets, removal, metadata_routes, selections, simulation, admin):
+for module in (auth, groups, datasets, removal, metadata_routes, selections, simulation, admin, contact):
     app.include_router(module.router, prefix="/api")

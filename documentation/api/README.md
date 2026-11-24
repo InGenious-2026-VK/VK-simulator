@@ -42,7 +42,7 @@ For the user-facing behaviour, see
 `grp_…`, `rr_…`, `run_…`).
 
 **Authentication.** Every endpoint except `/health`, `/auth/login`,
-`/auth/register`, `/auth/config`, `/auth/refresh` and `/stats/public` needs
+`/auth/register`, `/auth/config`, `/auth/refresh`, `/contact` and `/stats/public` needs
 `Authorization: Bearer <access_token>`.
 
 **Pagination.** List endpoints take `page` (1-based, default 1) and
@@ -656,6 +656,8 @@ Platform admins only (`role: "admin"`).
 | DELETE | `/admin/users/{user_id}?transfer_to=usr_…` | Delete a user. If they own datasets, `transfer_to` is required (otherwise `409 user_has_datasets` with `details.datasets`) |
 | POST | `/admin/groups` | Create a group `{ name, description }` |
 | DELETE | `/admin/groups/{group_id}` | Delete a group; datasets shared with it become private to their owners |
+| GET | `/admin/contact-messages?status=open` | Messages from the public contact form: `open` (default), `handled` or `all` |
+| PATCH | `/admin/contact-messages/{id}` | `{ "handled": true \| false }` |
 | GET | `/admin/audit-log` | `?actor_id=&dataset_id=&action=&from=&to=` |
 
 Audit actions: `login`, `dataset.upload`, `dataset.update`,
@@ -675,6 +677,7 @@ Audit actions: `login`, `dataset.upload`, `dataset.update`,
 |---|---|---|
 | POST | `/auth/login` | 1 Home |
 | POST | `/auth/register` · GET `/auth/config` | 1 Home |
+| POST | `/contact` | Public site — `{ name, email, organization?, topic, message }`, `topic` one of `general`, `demo`, `pricing`, `support`, `privacy`; `202`. At most 5 messages per sender per hour (`429 rate_limited`). |
 | POST | `/auth/refresh` | all |
 | POST | `/auth/logout` | all |
 | GET | `/auth/me` | all |

@@ -242,3 +242,21 @@ class AuditEvent(Base):
     target: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict)
 
     actor: Mapped[Optional[User]] = relationship()
+
+
+# ---------------------------------------------------------------- public site
+
+
+class ContactMessage(Base):
+    """A message sent from the public contact form."""
+
+    __tablename__ = "contact_messages"
+
+    id: Mapped[str] = _id("msg")
+    name: Mapped[str] = mapped_column(String(200))
+    email: Mapped[str] = mapped_column(String(320), index=True)
+    organization: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
+    topic: Mapped[str] = mapped_column(String(32), default="general")
+    message: Mapped[str] = mapped_column(Text)
+    handled: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    created_at: Mapped[datetime] = _ts()

@@ -7,9 +7,15 @@ import DataLakePage from './pages/DataLakePage.jsx';
 import VisualizationPage from './pages/VisualizationPage.jsx';
 import SimulationPage from './pages/SimulationPage.jsx';
 import AdminPage from './pages/AdminPage.jsx';
+import AboutPage from './pages/AboutPage.jsx';
+import PricingPage from './pages/PricingPage.jsx';
+import ContactPage from './pages/ContactPage.jsx';
+import PrivacyPage from './pages/PrivacyPage.jsx';
+import TermsPage from './pages/TermsPage.jsx';
 import './index.css';
 import './App.css';
 import './pages/pages.css';
+import './pages/site/site.css';
 
 // The four FoodChainIQ windows (documentation/foodchainiq-application-windows.md).
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -18,6 +24,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route
             path="/datalake"
             element={
