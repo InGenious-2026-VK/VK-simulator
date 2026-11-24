@@ -19,7 +19,8 @@ import {
 } from './charts.jsx';
 import { COMMODITY_LEGEND, COMPARE_INDICATORS } from '../data/workspaceMock.js';
 import { listRuns } from '../api/client.js';
-import { SEVERITY_COLOR } from '../scenario/severity.js';
+import { SEVERITY_COLOR, SEVERITY_LABEL } from '../scenario/severity.js';
+import { formatClock, townAt } from '../scenario/playback.js';
 
 function Kpi({ k, v, unit, delta, dir }) {
   return (
@@ -61,25 +62,35 @@ function Sample() {
 }
 
 /* ---------------- results (a completed run) ---------------- */
-function Results({ result }) {
+function Results({ result, frame }) {
   const s = result.region_summary;
+  const now = frame?.region;
   const demand = useMemo(
     () =>
       (result.nodes ?? [])
         .filter((n) => n.type === 'demand')
-        .map((n) => ({
-          name: n.name,
-          delta: n.demand_tpd ? -(n.unmet_fraction * 100) : 0,
-          suff: 1 - (n.unmet_fraction ?? 0),
-          people: n.people_affected,
-        }))
-        .sort((a, b) => a.delta - b.delta),
-    [result]
+        .map((n) => {
+          const t = townAt(frame, n);
+          return {
+            name: n.name,
+            population: n.population,
+            people: t.people_affected,
+            buffer: t.buffer_days,
+            severity: t.severity,
+            suff: 1 - (n.unmet_fraction ?? 0),
+          };
+        })
+        .sort((a, b) => b.people - a.people || a.buffer - b.buffer || a.suff - b.suff),
+    [result, frame]
   );
 
-  const supply = result.timeline.map((t) => Math.max(0, s.total_demand_tpd - t.unmet_tpd));
-  const demandLine = result.timeline.map(() => s.total_demand_tpd);
-  const suffPct = s.pct_demand_met;
+  // Daily series with a day-0 point, so the chart x-axis is "days since the shock".
+  const supply = [s.total_demand_tpd - (result.timeline[0]?.unmet_tpd ?? 0), ...result.timeline.map((t) => Math.max(0, s.total_demand_tpd - t.unmet_tpd))];
+  const demandLine = supply.map(() => s.total_demand_tpd);
+  const people = [0, ...result.timeline.map((t) => t.people_affected)];
+  const buffer = [100, ...result.timeline.map((t) => t.buffer_reserve_pct)];
+  const cursor = frame ? frame.t : null;
+  const when = frame ? formatClock(frame.hour, frame.end).label : `day ${result.duration_days}`;
 
   return (
     <>
@@ -87,34 +98,35 @@ function Results({ result }) {
         <div className="rhead">
           <h4>Scenario impact</h4>
           <div className="spacer" />
-          <span className="meta mono">vs baseline 2026</span>
+          <span className="meta mono">{frame && !frame.atEnd ? `at ${when}` : 'end of run'}</span>
         </div>
         <div className="kpis">
           <Kpi
             k="Demand met"
-            v={suffPct}
+            v={(now?.pct_demand_met ?? s.pct_demand_met).toFixed(1)}
             unit="%"
-            delta={`▼ ${(100 - suffPct).toFixed(1)} pp unmet`}
+            delta={`▼ ${(100 - (now?.pct_demand_met ?? s.pct_demand_met)).toFixed(1)} pp from supply`}
             dir="down"
           />
           <Kpi
-            k="People affected"
-            v={s.people_affected.toLocaleString('sv-SE')}
-            delta={s.worst_area ? `worst: ${s.worst_area}` : 'none'}
-            dir={s.people_affected ? 'down' : 'up'}
+            k="Without food now"
+            v={(now?.people_affected ?? 0).toLocaleString('sv-SE')}
+            delta={frame?.worst ? `worst: ${frame.worst.name}` : `end: ${s.people_affected.toLocaleString('sv-SE')} at risk`}
+            dir={now?.people_affected ? 'down' : 'up'}
+          />
+          <Kpi
+            k="Buffers left"
+            v={Math.round(now?.buffer_reserve_pct ?? 100)}
+            unit="%"
+            delta={s.first_buffer_failure_day ? `towns run out from d${s.first_buffer_failure_day}` : 'buffers hold'}
+            dir={s.first_buffer_failure_day ? 'down' : 'up'}
           />
           <Kpi
             k="Shortfall"
-            v={s.total_unmet_tpd}
+            v={(now?.unmet_tpd ?? s.total_unmet_tpd).toFixed(1)}
             unit="t/day"
             delta={`of ${s.total_demand_tpd} t/day`}
             dir="down"
-          />
-          <Kpi
-            k="Buffers fail"
-            v={s.first_buffer_failure_day ? `d${s.first_buffer_failure_day}` : '—'}
-            delta={s.first_shortfall_day ? `shortfall from d${s.first_shortfall_day}` : 'no shortfall'}
-            dir={s.first_buffer_failure_day ? 'down' : 'up'}
           />
         </div>
       </div>
@@ -130,6 +142,7 @@ function Results({ result }) {
         >
           <LineChart
             shock={null}
+            cursor={cursor}
             series={[
               { d: supply, c: '#1e4e6e', band: true },
               { d: demandLine, c: '#a1a1aa', w: 1.4, dash: '4 3' },
@@ -141,7 +154,7 @@ function Results({ result }) {
       <div className="rsection">
         <ChartBox
           title="People affected over time"
-          meta={`${result.duration_days} days`}
+          meta={frame ? `${(now?.people_affected ?? 0).toLocaleString('sv-SE')} now · ${when}` : `${result.duration_days} days`}
           legend={[
             ['People without food', '#e7000b'],
             ['Regional buffer left', '#a1a1aa'],
@@ -149,14 +162,10 @@ function Results({ result }) {
         >
           <LineChart
             shock={null}
+            cursor={cursor}
             series={[
-              { d: result.timeline.map((t) => t.people_affected), c: '#e7000b', band: true },
-              {
-                d: result.timeline.map((t) => t.buffer_reserve_pct),
-                c: '#a1a1aa',
-                w: 1.4,
-                dash: '4 3',
-              },
+              { d: people, c: '#e7000b', band: true },
+              { d: buffer, c: '#a1a1aa', w: 1.4, dash: '4 3' },
             ]}
           />
         </ChartBox>
@@ -213,32 +222,39 @@ function Results({ result }) {
 
       <div className="rsection">
         <div className="rhead">
-          <h4>Most affected municipalities</h4>
+          <h4>Municipalities</h4>
           <div className="spacer" />
-          <span className="meta">{demand.length} total</span>
+          <span className="meta mono">{frame && !frame.atEnd ? `at ${when}` : 'end of run'}</span>
         </div>
         <table className="rank">
           <thead>
             <tr>
               <th>Municipality</th>
-              <th className="num">Δ supply</th>
-              <th className="num">Sufficiency</th>
+              <th className="num">Without food</th>
+              <th className="num">Buffer left</th>
             </tr>
           </thead>
           <tbody>
             {demand.slice(0, 8).map((d) => (
               <tr key={d.name}>
-                <td>{d.name}</td>
-                <td className="num mono" style={{ color: d.delta < -15 ? '#b91c1c' : 'inherit' }}>
-                  {d.delta.toFixed(1)}%
+                <td>
+                  <span
+                    className="sev-dot"
+                    title={SEVERITY_LABEL[d.severity]}
+                    style={{ background: SEVERITY_COLOR[d.severity] }}
+                  />
+                  {d.name}
                 </td>
-                <td className="num" style={{ width: 82 }}>
-                  <span className="mono">{d.suff.toFixed(2)}</span>
+                <td className="num mono" style={{ color: d.people > 0 ? '#b91c1c' : 'inherit' }}>
+                  {d.people.toLocaleString('sv-SE')}
+                </td>
+                <td className="num" style={{ width: 90 }}>
+                  <span className="mono">{d.buffer.toFixed(1)} d</span>
                   <div className="minibar">
                     <i
                       style={{
-                        width: `${d.suff * 100}%`,
-                        background: d.suff < 0.45 ? '#e7000b' : d.suff < 0.7 ? '#f59e0b' : '#1e4e6e',
+                        width: `${Math.min(100, (d.buffer / 7) * 100)}%`,
+                        background: d.buffer < 1 ? '#e7000b' : d.buffer < 3 ? '#f59e0b' : '#1e4e6e',
                       }}
                     />
                   </div>
@@ -529,6 +545,7 @@ function RecentRuns() {
 export default function ResultsPanel({
   mode, // 'idle' | 'running' | 'results' | 'compare'
   result,
+  frame,
   network,
   error,
   onRun,
@@ -574,7 +591,7 @@ export default function ResultsPanel({
         <div className="pbody">
           {mode === 'compare' && <Compare onExit={onExitCompare} result={result} />}
           {mode === 'running' && <Running />}
-          {mode === 'results' && result && <Results result={result} />}
+          {mode === 'results' && result && <Results result={result} frame={frame} />}
           {mode === 'idle' && <Idle onRun={onRun} network={network} error={error} />}
         </div>
       </div>

@@ -588,8 +588,11 @@ sign-in.
 
 `factor`, `capacity_factor` and `backup_factor` are **remaining fractions**
 (0 = gone, 1 = unaffected). The response is the existing `SimulationResult`
-(per-town impact plus a day-by-day timeline; see `backend/README.md`). It also
-contains the following fields. `run_id` is `null` for anonymous runs, which are
+(per-town impact plus a day-by-day timeline; see `backend/README.md`), and
+`town_timeline`: for each town `{ id, people_affected[], buffer_days[],
+severity[] }`, one entry per simulated day (index 0 = end of day 1). The
+simulation window plays a run back hour by hour by interpolating between these
+daily values. It also contains the following fields. `run_id` is `null` for anonymous runs, which are
 not stored.
 
 ```json

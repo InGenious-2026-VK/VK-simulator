@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import MapView from './MapView.jsx';
 import { Badge } from './ui.jsx';
 import { Sparkline, synthSeries } from './charts.jsx';
+import { formatClock } from '../scenario/playback.js';
 import {
   IconHand,
   IconMarquee,
@@ -138,6 +139,7 @@ export default function MapPanel({
   status,
   hasResult,
   summary,
+  frame,
   onSplitView,
   onFocus,
   simState,
@@ -191,13 +193,17 @@ export default function MapPanel({
             <span>Simulating the region day-by-day…</span>
           </div>
         )}
-        {status === 'ready' && summary && (
+        {status === 'ready' && summary && frame && (
           <div className="status-card">
-            {summary.people_affected > 0 ? (
+            <span className="mono status-clock">{formatClock(frame.hour, frame.end).label}</span>
+            {frame.region.people_affected > 0 ? (
               <Badge variant="bad" dot>
-                {summary.worst_area
-                  ? `${summary.worst_area} worst hit`
-                  : `${summary.people_affected.toLocaleString('sv-SE')} people affected`}
+                {frame.region.people_affected.toLocaleString('sv-SE')} without food
+                {frame.worst ? ` · ${frame.worst.name} worst hit` : ''}
+              </Badge>
+            ) : frame.region.unmet_tpd > 0.05 ? (
+              <Badge variant="warn" dot>
+                Shortfall covered by buffers · {Math.round(frame.region.buffer_reserve_pct)}% left
               </Badge>
             ) : (
               <Badge variant="ok" dot>

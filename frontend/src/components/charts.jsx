@@ -11,7 +11,7 @@ export function makeRng(seed = 42) {
  * series: [{ d: number[], c: color, w?, dash?, band? }]
  * shock: [fromIndex, toIndex] shaded window, or null
  */
-export function LineChart({ series, w = 300, h = 88, shock = [9, 15] }) {
+export function LineChart({ series, w = 300, h = 88, shock = [9, 15], cursor = null }) {
   const n = series[0].d.length;
   const span = n > 1 ? n - 1 : 1;
   const x = (i) => (i / span) * (w - 4) + 2;
@@ -31,6 +31,12 @@ export function LineChart({ series, w = 300, h = 88, shock = [9, 15] }) {
       {grid}
       {shock && (
         <rect x={x(shock[0])} width={x(shock[1]) - x(shock[0])} y="0" height={h} fill="#e7000b" opacity=".05" />
+      )}
+      {cursor !== null && (
+        <g className="chart-cursor">
+          <rect x={x(cursor)} width={Math.max(0, x(n - 1) - x(cursor))} y="0" height={h} fill="#ffffff" opacity=".55" />
+          <line x1={x(cursor)} x2={x(cursor)} y1="0" y2={h} stroke="#011e3b" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        </g>
       )}
       {series.map((s, si) => {
         const p = s.d.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');

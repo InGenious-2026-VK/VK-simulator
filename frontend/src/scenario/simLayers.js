@@ -2,6 +2,7 @@
 //   sim-network  — the backend's supply-chain graph (nodes + corridors)
 //   sim-impact   — per-town severity + corridor utilisation after a run
 import { SEVERITY_COLOR } from './severity.js';
+import { townAt } from './playback.js';
 
 export const EMPTY_FC = { type: 'FeatureCollection', features: [] };
 
@@ -56,27 +57,37 @@ export function networkToFeatures(network, scenario) {
   return { nodesFC, edgesFC };
 }
 
-export function resultToFeatures(result) {
+/**
+ * Impact overlay. With a playback `frame`, towns show their state at that
+ * moment (severity, people going without); without one, the end of the run.
+ */
+export function resultToFeatures(result, frame = null) {
   if (!result) return { demandFC: EMPTY_FC, edgesFC: EMPTY_FC };
 
   const demandFC = {
     type: 'FeatureCollection',
     features: result.nodes
       .filter((n) => n.type === 'demand')
-      .map((n) => ({
-        type: 'Feature',
-        properties: {
-          id: n.id,
-          name: n.name,
-          severity: n.severity,
-          color: SEVERITY_COLOR[n.severity],
-          people: n.people_affected,
-          unmet: n.unmet_fraction,
-          // radius grows with population, ring with severity
-          radius: 8 + Math.sqrt(n.population) / 45,
-        },
-        geometry: { type: 'Point', coordinates: n.coords },
-      })),
+      .map((n) => {
+        const now = frame ? townAt(frame, n) : n;
+        const share = n.population ? Math.min(1, now.people_affected / n.population) : 0;
+        return {
+          type: 'Feature',
+          properties: {
+            id: n.id,
+            name: n.name,
+            severity: now.severity,
+            color: SEVERITY_COLOR[now.severity],
+            people: now.people_affected,
+            unmet: n.unmet_fraction,
+            // radius grows with population; the fill darkens as people go without
+            radius: 8 + Math.sqrt(n.population) / 45,
+            fill: 0.12 + 0.55 * Math.sqrt(share),
+            stroke: 1.5 + 3 * Math.sqrt(share),
+          },
+          geometry: { type: 'Point', coordinates: n.coords },
+        };
+      }),
   };
 
   const edgesFC = {
@@ -94,4 +105,43 @@ export function resultToFeatures(result) {
   };
 
   return { demandFC, edgesFC };
+}
+
+// ---------------------------------------------------------------- moving goods
+
+const HOURS_PER_HOP = 6; // a shipment crosses one corridor in ~6 simulated hours
+
+/** Corridors carrying food in the run, with how many "shipments" to draw on each. */
+export function flowPaths(result) {
+  if (!result) return [];
+  const edges = result.edges.filter((e) => !e.closed && e.flow_tpd > 0.05 && e.coords?.length === 2);
+  const max = Math.max(1, ...edges.map((e) => e.flow_tpd));
+  return edges.map((e) => ({
+    from: e.coords[0],
+    to: e.coords[1],
+    dots: Math.max(1, Math.min(4, Math.round((e.flow_tpd / max) * 4))),
+    mode: e.mode,
+    saturated: e.saturated,
+  }));
+}
+
+/** Shipment positions at continuous simulated hour `hour`. */
+export function flowDotsAt(paths, hour) {
+  const features = [];
+  for (const p of paths) {
+    for (let i = 0; i < p.dots; i++) {
+      const f = (((hour / HOURS_PER_HOP + i / p.dots) % 1) + 1) % 1;
+      features.push({
+        type: 'Feature',
+        properties: {
+          color: p.saturated ? '#b91c1c' : p.mode === 'rail' ? '#1e4e6e' : '#0f766e',
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [p.from[0] + (p.to[0] - p.from[0]) * f, p.from[1] + (p.to[1] - p.from[1]) * f],
+        },
+      });
+    }
+  }
+  return { type: 'FeatureCollection', features };
 }
