@@ -5,16 +5,6 @@ Actions. If both pass, the workflow SSHes into a DigitalOcean droplet, checks
 out the pushed commit, and runs `docker compose up -d --build`. Pull requests
 run the tests only.
 
-Release tags are deployed too, beside the latest version:
-
-| What | Where |
-|---|---|
-| `main` (latest) | `https://foodchainiq.se/` |
-| tag `v0.1.0` | `https://foodchainiq.se/v010/` |
-| tag `v1.2.3` | `https://foodchainiq.se/v123/` |
-
-See [Release versions](#release-versions) for the one-time server setup.
-
 Workflow file: [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml)
 
 ```
@@ -194,98 +184,6 @@ Because `APP_PORT` publishes on all interfaces, also close port 8080 to the
 outside. `ufw` (step 2) already blocks it unless you allowed it, but Docker
 can bypass `ufw` for published ports. To be safe, set
 `APP_PORT=127.0.0.1:8080` in `.env`.
-
-## Release versions
-
-Each release tag (`vMAJOR.MINOR.PATCH`) can run next to the latest version,
-at a path made of its digits: `v0.1.0` → `/v010/`. The workflow job
-`deploy-release` runs [`deploy/release.sh`](../deploy/release.sh) on the
-droplet, which:
-
-1. checks the tag out into `~/releases/<tag>` (a git worktree);
-2. on first deploy, creates `~/releases/<slug>.env` from your `.env`, with
-   its own `JWT_SECRET`;
-3. builds and starts it as a separate compose project (`foodchainiq-v010`)
-   using [`deploy/release/docker-compose.yml`](../deploy/release/docker-compose.yml),
-   on a local port (`127.0.0.1:9010`, the next release gets `9011`, …);
-4. waits for `/api/health`, then writes a Caddy route to
-   `/etc/caddy/releases/<slug>.caddy` and reloads Caddy.
-
-Each release has **its own database and uploaded files**, so accounts and
-datasets are not shared with the latest version or with other releases. On
-first start, a release seeds the admin account from its env file (and the
-demo data if `SEED_DEMO=true`). Each release also uses roughly another
-300–400 MB of RAM.
-
-The routes work for tags that were made before this setup existed. The
-release's web image is built with `deploy/release/web.Dockerfile`, which sets
-the path prefix. Caddy rewrites the sign-in cookie's path from `/api/` to
-`/<slug>/api/`.
-
-### One-time server setup (as root)
-
-Let the `deploy` user manage release routes and reload Caddy:
-
-```bash
-mkdir -p /etc/caddy/releases && chown deploy:deploy /etc/caddy/releases
-```
-
-```bash
-echo 'deploy ALL=(root) NOPASSWD: /usr/bin/systemctl reload caddy' > /etc/sudoers.d/deploy-caddy && chmod 440 /etc/sudoers.d/deploy-caddy && visudo -c
-```
-
-Change the site block in `/etc/caddy/Caddyfile` so release routes are checked
-first and everything else goes to the latest version:
-
-```
-foodchainiq.se {
-    tls /etc/caddy/origin.pem /etc/caddy/origin-key.pem
-    request_body {
-        max_size 100MB
-    }
-
-    import /etc/caddy/releases/*.caddy
-
-    handle {
-        reverse_proxy 127.0.0.1:8080
-    }
-}
-```
-
-```bash
-caddy validate --config /etc/caddy/Caddyfile && systemctl reload caddy
-```
-
-### Deploying a release
-
-- **A new tag** deploys by itself once it is pushed:
-
-  ```bash
-  git tag v0.2.0 && git push origin v0.2.0
-  ```
-
-- **A tag that already existed** (like `v0.1.0`): its own copy of the
-  workflow predates release deployment. Use GitHub → **Actions → CI/CD → Run
-  workflow** on `main`, and enter the tag in **release_tag**.
-
-The release tooling ships with `main`, so `main` must be deployed with it
-first.
-
-### Managing releases (on the droplet, as `deploy`)
-
-```bash
-cd ~/VK-simulator && deploy/release.sh --list
-```
-
-```bash
-cd ~/VK-simulator && deploy/release.sh --remove v0.1.0
-```
-
-`--remove` stops a release and removes its route, but keeps its database and
-files (Docker volumes `foodchainiq-v010_db-data` and `foodchainiq-v010_storage`).
-Delete those with `docker volume rm` once you are sure you don't need them.
-To change a release's settings, edit `~/releases/<slug>.env` and run
-`deploy/release.sh <tag>` again.
 
 ## Rollback
 
