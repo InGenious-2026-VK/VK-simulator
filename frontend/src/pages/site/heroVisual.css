@@ -1,0 +1,346 @@
+/* Animated product illustration (HeroVisual.jsx). Self-contained: defines
+   the few colour variables it needs so it works outside the site layout. */
+.hv {
+  --mk-ink: #0b1b33;
+  --mk-muted: #66758a;
+  --mk-line: #e3ebf5;
+  --mk-blue-50: #eaf3fc;
+  --mk-blue-600: #00528f;
+}
+.hv {
+  position: relative;
+  padding: 54px 12px 54px 12px;
+}
+.hv-glow {
+  position: absolute;
+  inset: 8% 4% 6% 10%;
+  border-radius: 40px;
+  background: radial-gradient(closest-side, rgb(0 97 172 / 0.22), transparent);
+  filter: blur(24px);
+}
+.hv-window {
+  position: relative;
+  background: rgb(255 255 255 / 0.96);
+  border: 1px solid #d6e4f3;
+  border-radius: 20px;
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.9) inset,
+    0 2px 6px rgb(11 27 51 / 0.05),
+    0 40px 80px -32px rgb(0 69 122 / 0.45);
+  overflow: hidden;
+}
+.hv-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--mk-line);
+  background: linear-gradient(180deg, #fbfdff, #f4f8fd);
+}
+.hv-lights {
+  display: flex;
+  gap: 6px;
+}
+.hv-lights i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d7e2ee;
+}
+.hv-tabs {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--mk-muted);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hv-tabs b {
+  color: var(--mk-ink);
+  font-weight: 600;
+}
+.hv-live {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mk-blue-600);
+  background: var(--mk-blue-50);
+  border: 1px solid #d3e5f7;
+  flex: none;
+}
+.hv-live i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--brand-green);
+  animation: hv-blink 1.6s ease-in-out infinite;
+}
+@keyframes hv-blink {
+  50% {
+    opacity: 0.3;
+  }
+}
+.hv-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+.hv-map {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e1ebf6;
+  aspect-ratio: 400 / 260;
+}
+.hv-map svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hv-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hv-pulse 2.6s ease-in-out infinite;
+}
+@keyframes hv-pulse {
+  50% {
+    transform: scale(1.35);
+    opacity: 0.55;
+  }
+}
+.hv-legend {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  display: flex;
+  gap: 10px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.9);
+  border: 1px solid #e1ebf6;
+  font-size: 10px;
+  color: var(--mk-muted);
+}
+.hv-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.hv-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.hv-legend i.farm {
+  background: var(--brand-green);
+}
+.hv-legend i.hub {
+  background: var(--brand-blue);
+}
+.hv-legend i.rail {
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--brand-navy);
+}
+.hv-legend i.closed {
+  width: 12px;
+  height: 0;
+  border-radius: 0;
+  border-top: 2px dashed #ef4444;
+}
+.hv-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.hv-kpi {
+  padding: 10px 12px 8px;
+  border-radius: 12px;
+  border: 1px solid #e1ebf6;
+  background: linear-gradient(180deg, #fff, #f9fbfe);
+}
+.hv-kpi small {
+  display: block;
+  font-size: 10.5px;
+  color: var(--mk-muted);
+  font-weight: 500;
+}
+.hv-kpi b {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mk-ink);
+  letter-spacing: -0.02em;
+  margin-top: 1px;
+}
+.hv-kpi b.bad {
+  color: #dc2626;
+}
+.hv-spark {
+  display: block;
+  width: 100%;
+  height: 20px;
+  margin-top: 4px;
+}
+.hv-timeline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 14px;
+  border-top: 1px solid var(--mk-line);
+  font-size: 12px;
+}
+.hv-play {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(180deg, #0a6fc2, var(--brand-blue));
+  box-shadow: 0 4px 10px -4px rgb(0 97 172 / 0.7);
+  flex: none;
+}
+.hv-play svg {
+  width: 10px;
+  height: 10px;
+  margin-left: 1px;
+}
+.hv-clock {
+  font-weight: 600;
+  color: var(--mk-ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hv-track {
+  position: relative;
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: #e6eff9;
+}
+.hv-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3d8bd0, var(--brand-blue));
+  animation: hv-progress 9s linear infinite;
+}
+.hv-fill::after {
+  content: '';
+  position: absolute;
+  right: -6px;
+  top: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--brand-blue);
+  box-shadow: 0 1px 3px rgb(11 27 51 / 0.2);
+}
+@keyframes hv-progress {
+  from {
+    width: 3%;
+  }
+  to {
+    width: 97%;
+  }
+}
+.hv-mark {
+  position: absolute;
+  top: -9px;
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  border-radius: 1px;
+}
+.hv-mark.warn {
+  background: #f59e0b;
+}
+.hv-mark.bad {
+  background: #ef4444;
+}
+.hv-speed {
+  font-weight: 600;
+  color: var(--mk-muted);
+}
+.hv-float {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 12px 12px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.97);
+  border: 1px solid #dbe7f4;
+  box-shadow: 0 24px 48px -20px rgb(0 69 122 / 0.45), 0 2px 6px rgb(11 27 51 / 0.06);
+  font-size: 12px;
+  animation: hv-float 6s ease-in-out infinite;
+}
+.hv-float b {
+  display: block;
+  color: var(--mk-ink);
+  font-size: 13px;
+}
+.hv-float small {
+  display: block;
+  color: var(--mk-muted);
+  font-size: 11.5px;
+}
+/* the cards overlap the window's edges only slightly, so nothing is hidden */
+.hv-float-a {
+  top: 0;
+  left: -28px;
+}
+.hv-float-b {
+  bottom: 0;
+  right: -20px;
+  animation-delay: -3s;
+}
+@keyframes hv-float {
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.hv-float-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  flex: none;
+}
+.hv-float-icon.bad {
+  color: #dc2626;
+  background: #fdecec;
+}
+.hv-float-icon.ok {
+  color: var(--brand-blue);
+  background: var(--mk-blue-50);
+}
+.hv-float-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hv-pulse,
+  .hv-live i,
+  .hv-fill,
+  .hv-float {
+    animation: none;
+  }
+  .hv-fill {
+    width: 42%;
+  }
+}

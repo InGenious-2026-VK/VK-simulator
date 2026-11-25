@@ -10,4 +10,8 @@ export const SITE = {
   domain: 'foodchainiq.se',
   legalUpdated: '2026-11-24',
   governingLaw: 'Sweden',
+  // Product demonstration on the home page. Set to an .mp4 file URL or a
+  // YouTube/Vimeo *embed* URL to play a recorded video; leave empty to show
+  // the animated preview instead.
+  demoVideoUrl: '',
 };

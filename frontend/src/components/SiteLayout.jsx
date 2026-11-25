@@ -3,21 +3,29 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext.jsx';
 import Logo from './Logo.jsx';
 import LoginDialog from './LoginDialog.jsx';
+import NetworkBackground from './NetworkBackground.jsx';
 import { UserMenu } from './SiteHeader.jsx';
 import { SITE } from '../content/site.js';
 
+const HomeIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5" />
+  </svg>
+);
+
 const NAV = [
-  { to: '/', label: 'Home', end: true },
+  { to: '/', label: 'Home', end: true, icon: HomeIcon },
   { to: '/about', label: 'About us' },
-  { to: '/pricing', label: 'Pricing' },
   { to: '/contact', label: 'Contact' },
 ];
 
-/** Header + footer for the public pages (home, about, pricing, contact, legal). */
-export default function SiteLayout({ children, transparentHeader = false }) {
+/**
+ * Shell for the public pages: white header, deep-blue gradient page with a
+ * moving supply-network backdrop, and the blue footer.
+ */
+export default function SiteLayout({ children }) {
   const { user, setLoginOpen } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
 
   // New page: start at the top, close the mobile menu.
@@ -26,15 +34,29 @@ export default function SiteLayout({ children, transparentHeader = false }) {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  const actions = user ? (
+    <>
+      <Link to="/datalake" className="mk-btn mk-btn-primary">
+        Open the app
+      </Link>
+      <UserMenu />
+    </>
+  ) : (
+    <>
+      <button type="button" className="mk-btn mk-btn-primary" onClick={() => setLoginOpen('register')}>
+        Create account
+      </button>
+      <button type="button" className="mk-btn mk-btn-outline" onClick={() => setLoginOpen(true)}>
+        Log in
+      </button>
+    </>
+  );
+
   return (
-    <div
-      className="site-page"
-      onScroll={(e) => {
-        const s = e.currentTarget.scrollTop > 8;
-        if (s !== scrolled) setScrolled(s);
-      }}
-    >
-      <header className={`mk-header${scrolled || !transparentHeader ? ' solid' : ''}${menuOpen ? ' open' : ''}`}>
+    <div className="site-page">
+      <NetworkBackground fixed color="214, 233, 250" accent="160, 220, 140" density={0.7} icons={10} />
+
+      <header className={`mk-header${menuOpen ? ' open' : ''}`}>
         <div className="mk-container mk-header-row">
           <Link to="/" className="mk-brand" aria-label={`${SITE.product} home`}>
             <Logo className="mk-logo" />
@@ -42,29 +64,12 @@ export default function SiteLayout({ children, transparentHeader = false }) {
           <nav className="mk-nav" aria-label="Main">
             {NAV.map((n) => (
               <NavLink key={n.to} to={n.to} end={n.end}>
+                {n.icon && <n.icon />}
                 {n.label}
               </NavLink>
             ))}
           </nav>
-          <div className="mk-actions">
-            {user ? (
-              <>
-                <Link to="/datalake" className="mk-btn mk-btn-primary">
-                  Open the app
-                </Link>
-                <UserMenu />
-              </>
-            ) : (
-              <>
-                <button type="button" className="mk-btn mk-btn-ghost" onClick={() => setLoginOpen(true)}>
-                  Sign in
-                </button>
-                <button type="button" className="mk-btn mk-btn-primary" onClick={() => setLoginOpen('register')}>
-                  Get started
-                </button>
-              </>
-            )}
-          </div>
+          <div className="mk-actions">{actions}</div>
           <button
             type="button"
             className="mk-burger"
@@ -84,20 +89,8 @@ export default function SiteLayout({ children, transparentHeader = false }) {
                 {n.label}
               </NavLink>
             ))}
-            {user ? (
-              <Link to="/datalake" className="mk-btn mk-btn-primary">
-                Open the app
-              </Link>
-            ) : (
-              <div className="mk-mobile-actions">
-                <button type="button" className="mk-btn mk-btn-outline" onClick={() => setLoginOpen(true)}>
-                  Sign in
-                </button>
-                <button type="button" className="mk-btn mk-btn-primary" onClick={() => setLoginOpen('register')}>
-                  Get started
-                </button>
-              </div>
-            )}
+            <Link to="/pricing">Pricing</Link>
+            <div className="mk-mobile-actions">{actions}</div>
           </div>
         )}
       </header>
@@ -107,32 +100,27 @@ export default function SiteLayout({ children, transparentHeader = false }) {
       <footer className="mk-footer">
         <div className="mk-container mk-footer-grid">
           <div className="mk-footer-brand">
-            <Logo className="mk-footer-logo" />
-            <p>Data, visualisation and simulation for resilient regional food systems.</p>
+            <h4>{SITE.product}</h4>
+            <p>Building resilient food supply chains through data-driven simulation.</p>
           </div>
           <div>
-            <h4>Product</h4>
-            <Link to="/#features">Features</Link>
-            <Link to="/#how">How it works</Link>
-            <Link to="/pricing">Pricing</Link>
-          </div>
-          <div>
-            <h4>Company</h4>
+            <h4>Platform</h4>
             <Link to="/about">About us</Link>
-            <Link to="/contact">Contact</Link>
-            <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+            <Link to="/pricing">Pricing</Link>
+            <Link to="/contact?topic=support">Help &amp; support</Link>
           </div>
           <div>
-            <h4>Legal</h4>
+            <h4>Information</h4>
+            <Link to="/contact">Contact us</Link>
             <Link to="/privacy">Privacy policy</Link>
             <Link to="/terms">Terms of service</Link>
           </div>
         </div>
         <div className="mk-container mk-footer-base">
           <span>
-            © {new Date().getFullYear()} {SITE.product}. {SITE.city}.
+            © {new Date().getFullYear()} {SITE.product}
           </span>
-          <span>Baseline and demo data in the prototype are synthetic.</span>
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
         </div>
       </footer>
       <LoginDialog />

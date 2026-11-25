@@ -11,7 +11,7 @@ export default function LegalPage({ kicker, title, intro, sections }) {
       </PageHero>
       <section className="mk-section mk-section-tight">
         <div className="mk-container mk-legal">
-          <nav className="mk-toc" aria-label="Contents">
+          <nav className="mk-card mk-toc" aria-label="Contents">
             <strong>Contents</strong>
             <ol>
               {sections.map((s) => (
@@ -21,7 +21,7 @@ export default function LegalPage({ kicker, title, intro, sections }) {
               ))}
             </ol>
           </nav>
-          <article className="mk-prose">
+          <article className="mk-card mk-legal-body mk-prose">
             {intro}
             {sections.map((s) => (
               <section key={s.id} id={s.id}>

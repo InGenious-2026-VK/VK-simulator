@@ -1,3 +1,4 @@
+import './heroVisual.css';
 // The hero illustration: a stylised FoodChainIQ workspace (map, KPIs,
 // playback) with two floating insight cards. Pure SVG + CSS, decorative only.
 
