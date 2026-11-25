@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import SiteLayout from '../components/SiteLayout.jsx';
 import PageHero from './site/PageHero.jsx';
@@ -20,6 +20,11 @@ export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', organization: '', topic: initialTopic, message: '', website: '' });
   const [state, setState] = useState({ status: 'idle', error: null }); // idle | sending | sent
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  // A link like /contact?topic=support picks the topic even when already on this page.
+  useEffect(() => {
+    setForm((f) => (f.topic === initialTopic ? f : { ...f, topic: initialTopic }));
+  }, [initialTopic]);
 
   const submit = async (e) => {
     e.preventDefault();

@@ -1,72 +1,131 @@
-import { useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SiteLayout from '../components/SiteLayout.jsx';
-import NetworkBackground from '../components/NetworkBackground.jsx';
-import HeroVisual from './site/HeroVisual.jsx';
+import Modal from '../components/Modal.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { IcArrow, IcChart, IcCheck, IcDatabase, IcNetwork, IcPlay, IcShield, IcUsers } from './site/icons.jsx';
+import { SITE } from '../content/site.js';
+import DemoThumbnail from './site/DemoThumbnail.jsx';
+import HeroVisual from './site/HeroVisual.jsx';
 
-const FEATURES = [
+const s = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
+
+const CARDS = [
   {
-    icon: IcDatabase,
-    title: 'Shared data lake',
-    body: 'Collect production, processing, logistics, energy and population data in one place. Every upload carries standard metadata, so others can trust and reuse it.',
+    title: 'Visualize',
+    body: 'Map supply chain actors, infrastructure and production lines.',
+    icon: (
+      <svg viewBox="0 0 24 24" {...s}>
+        <circle cx="6" cy="12" r="2.6" />
+        <circle cx="17.5" cy="6" r="2.6" />
+        <circle cx="17.5" cy="18" r="2.6" />
+        <path d="M8.3 10.8 15.2 7.2M8.3 13.2l6.9 3.6" />
+      </svg>
+    ),
+    art: (
+      <svg viewBox="0 0 80 64" aria-hidden="true">
+        {[[40, 32, 10, 6], [40, 32, 72, 10], [40, 32, 74, 50], [40, 32, 8, 54], [40, 32, 36, 2], [40, 32, 52, 62]].map(([a, b, c, d], i) => (
+          <line key={i} x1={a} y1={b} x2={c} y2={d} stroke="#9bc3e6" strokeWidth="1" />
+        ))}
+        {[[10, 6], [72, 10], [74, 50], [8, 54], [36, 2], [52, 62]].map(([x, y], i) => (
+          <circle key={i} cx={x} cy={y} r="2.4" fill="#6aa7dc" />
+        ))}
+        <circle cx="40" cy="32" r="13" fill="#e9f3fc" stroke="#3b82c4" strokeWidth="1.4" />
+        <circle cx="40" cy="28.5" r="3.6" fill="none" stroke="#1f6fb5" strokeWidth="1.4" />
+        <path d="M33.5 39c1-3.6 3.6-5 6.5-5s5.5 1.4 6.5 5" fill="none" stroke="#1f6fb5" strokeWidth="1.4" strokeLinecap="round" />
+      </svg>
+    ),
   },
   {
-    icon: IcChart,
-    title: 'Check before you rely on it',
-    body: 'Coverage maps, field profiles, automatic charts and cross-dataset checks show gaps and errors before your data feeds a decision.',
+    title: 'Identify',
+    body: 'Understand critical dependencies and potential vulnerabilities.',
+    icon: (
+      <svg viewBox="0 0 24 24" {...s}>
+        <path d="M12 3.5 5 6v5.5c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6z" />
+        <path d="M12 8.5v4.5M12 16v.2" />
+      </svg>
+    ),
+    art: (
+      <svg viewBox="0 0 80 64" aria-hidden="true">
+        <path d="M6 60h68" stroke="#9bc3e6" strokeWidth="1.4" />
+        {[[12, 40], [28, 28], [44, 16], [60, 6]].map(([x, y], i) => (
+          <rect key={i} x={x} y={y} width="11" height={60 - y} rx="1.5" fill="#fff" stroke="#3b82c4" strokeWidth="1.8" />
+        ))}
+        <path d="M58 36 70 57H46z" fill="#facc15" stroke="#0b2f57" strokeWidth="1.4" strokeLinejoin="round" />
+        <path d="M58 43v7M58 53.5v.2" stroke="#0b2f57" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
   },
   {
-    icon: IcNetwork,
-    title: 'Disruption simulation',
-    body: 'Close a corridor, cut power to a substation, lose half a harvest or ration fuel — and see how the supply network reroutes and where it breaks.',
-  },
-  {
-    icon: IcPlay,
-    title: 'Hour-by-hour playback',
-    body: 'Play a scenario back on the map: goods moving along corridors, buffers draining, and towns turning red as they run short.',
-  },
-  {
-    icon: IcUsers,
-    title: 'Built for collaboration',
-    body: 'Keep data private, share it with a group or publish it to everyone signed in. Group admins manage their own members.',
-  },
-  {
-    icon: IcShield,
-    title: 'Secure by design',
-    body: 'Approved accounts only, role-based access, sensitive datasets that can never be made public, and a full audit log.',
+    title: 'Simulate',
+    body: 'Explore what-if scenarios and their potential consequences.',
+    icon: (
+      <svg viewBox="0 0 24 24" {...s}>
+        <path d="M7 5v14l11-7z" />
+      </svg>
+    ),
+    art: (
+      <svg viewBox="0 0 80 64" aria-hidden="true" fill="none" stroke="#2563a8" strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round">
+        <path d="M36 6 60 18 36 30 12 18z" />
+        <path d="M12 28 36 40 60 28" />
+        <path d="M12 38 36 50 50 43" />
+        <path d="M64 42v16M56 50h16" />
+      </svg>
+    ),
   },
 ];
 
-const STEPS = [
-  {
-    title: 'Bring your data',
-    body: 'Upload datasets with a metadata file, or use what producers, municipalities and agencies have already shared.',
-  },
-  {
-    title: 'Check and combine',
-    body: 'Pick the datasets you need, review them on a map with charts and quality checks, and confirm they are ready to simulate.',
-  },
-  {
-    title: 'Simulate and act',
-    body: 'Run disruption scenarios on a network built from your selection, play them back, and export the results for planning.',
-  },
-];
+const LeafIcon = () => (
+  <svg viewBox="0 0 40 40" fill="none" stroke="#4ca72b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20 36V22" />
+    <path d="M20 22c-1-8-7-12-15-12 0 8 5 13 15 12z" />
+    <path d="M20 26c1-9 7-14 15-14 0 9-5 15-15 14z" />
+  </svg>
+);
 
-const QUESTIONS = [
-  'Which towns go short first if a main road or rail corridor closes?',
-  'How many days do local food buffers last in a fuel or power crisis?',
-  'Which facilities are single points of failure for the whole region?',
-  'Where would one extra cold store or depot add the most resilience?',
-];
-
-const AUDIENCES = ['Municipalities', 'County administrative boards', 'Food producers', 'Logistics operators', 'Civil defence & preparedness'];
+function DemoDialog({ onClose, onTry }) {
+  const url = SITE.demoVideoUrl;
+  const youtube = url && /youtube\.com|youtu\.be|vimeo\.com/.test(url);
+  return (
+    <Modal title="FoodChainIQ in action" wide onClose={onClose}>
+      {url ? (
+        youtube ? (
+          <div className="demo-video">
+            <iframe src={url} title="FoodChainIQ product demonstration" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+          </div>
+        ) : (
+          <div className="demo-video">
+            <video src={url} controls autoPlay playsInline />
+          </div>
+        )
+      ) : (
+        <>
+          <p className="muted">
+            A scenario playing back hour by hour: goods move along the corridors, a closed link forces rerouting, and
+            towns that run short light up.
+          </p>
+          <div className="demo-preview">
+            <HeroVisual />
+          </div>
+        </>
+      )}
+      <div className="modal-foot">
+        <div className="spacer" />
+        <button type="button" className="btn btn-outline" onClick={onClose}>
+          Close
+        </button>
+        <button type="button" className="btn btn-primary" onClick={onTry}>
+          Try it yourself
+        </button>
+      </div>
+    </Modal>
+  );
+}
 
 export default function HomePage() {
   const { user, setLoginOpen } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [demoOpen, setDemoOpen] = useState(false);
 
   // Arriving from a protected window while signed out → open the sign-in form.
   useEffect(() => {
@@ -78,154 +137,118 @@ export default function HomePage() {
     if (user && location.state?.from) navigate(location.state.from, { replace: true });
   }, [user, location.state, navigate]);
 
-  // /#features, /#how → scroll to that section
+  // /#demo, /#who → scroll to that section
   useEffect(() => {
     if (!location.hash) return;
     const el = document.getElementById(location.hash.slice(1));
     if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
   }, [location.hash]);
 
-  const primary = user ? (
-    <Link to="/datalake" className="mk-btn mk-btn-primary mk-btn-lg">
-      Open the app <IcArrow />
-    </Link>
-  ) : (
-    <button type="button" className="mk-btn mk-btn-primary mk-btn-lg" onClick={() => setLoginOpen('register')}>
-      Get started <IcArrow />
-    </button>
-  );
+  const tryIt = () => {
+    setDemoOpen(false);
+    if (user) navigate('/simulate');
+    else setLoginOpen('register');
+  };
 
   return (
-    <SiteLayout transparentHeader>
+    <SiteLayout>
       <section className="mk-hero">
-        <NetworkBackground />
-        <div className="mk-hero-fade" />
-        <div className="mk-container mk-hero-grid">
-          <div className="mk-hero-copy">
-            <span className="mk-pill">
-              <i /> Food supply chain resilience
-            </span>
-            <h1>
-              See how food moves through your region — <span className="mk-grad">and what happens when it stops.</span>
-            </h1>
-            <p className="mk-lead">
-              FoodChainIQ brings production, processing, logistics, energy and population data into one shared
-              picture, so planners, producers and preparedness teams can find the weak links before a crisis does.
-            </p>
-            <div className="mk-hero-actions">
-              {primary}
-              <a href="#how" className="mk-btn mk-btn-outline mk-btn-lg">
-                See how it works
-              </a>
-            </div>
-            <ul className="mk-hero-points">
-              <li>
-                <IcCheck /> Runs in the browser — nothing to install
-              </li>
-              <li>
-                <IcCheck /> Your data stays yours
-              </li>
-            </ul>
-          </div>
-          <HeroVisual />
-        </div>
-      </section>
-
-      <section className="mk-audience">
         <div className="mk-container">
-          <p>Built for the people who keep a region fed</p>
-          <ul>
-            {AUDIENCES.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ul>
+          <h1>
+            Understand your supply chain.
+            <span>Prepare for tomorrow.</span>
+          </h1>
         </div>
       </section>
 
-      <section className="mk-section" id="features">
+      <section className="mk-section mk-insight">
         <div className="mk-container">
           <div className="mk-section-head">
-            <span className="mk-kicker">Platform</span>
-            <h2>Everything you need to understand a regional food system</h2>
-            <p>From raw datasets to a playable disruption scenario — in one tool your whole network can use.</p>
+            <h2>Turn complex data into strategic insight</h2>
+            <p>FoodChainIQ helps you understand the relationships that shape regional food supply chains.</p>
           </div>
-          <div className="mk-features">
-            {FEATURES.map((f) => (
-              <article key={f.title} className="mk-card mk-feature">
-                <span className="mk-icon">
-                  <f.icon />
-                </span>
-                <h3>{f.title}</h3>
-                <p>{f.body}</p>
+          <div className="mk-pillars">
+            {CARDS.map((c) => (
+              <article key={c.title} className="mk-card mk-pillar">
+                <span className="mk-pillar-icon">{c.icon}</span>
+                <div className="mk-pillar-text">
+                  <h3>{c.title}</h3>
+                  <p>{c.body}</p>
+                </div>
+                <span className="mk-pillar-art">{c.art}</span>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="mk-section mk-section-tint" id="how">
+      <section className="mk-section mk-demo" id="demo">
         <div className="mk-container">
           <div className="mk-section-head">
-            <span className="mk-kicker">How it works</span>
-            <h2>From data to decisions in three steps</h2>
+            <span className="mk-chip">Product demonstration</span>
+            <h2>See FoodChainIQ in action</h2>
+            <p>Discover how to visualize supply chain networks, simulate disruptions, and identify potential vulnerabilities.</p>
           </div>
-          <ol className="mk-steps">
-            {STEPS.map((s, i) => (
-              <li key={s.title} className="mk-card">
-                <span className="mk-step-n">{i + 1}</span>
-                <h3>{s.title}</h3>
-                <p>{s.body}</p>
-              </li>
-            ))}
-          </ol>
+          <button type="button" className="demo-thumb" onClick={() => setDemoOpen(true)} aria-label="Play the product demonstration">
+            <DemoThumbnail />
+            <span className="demo-region">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <path d="M12 21s-6.5-6.1-6.5-11a6.5 6.5 0 0 1 13 0c0 4.9-6.5 11-6.5 11z" />
+                <circle cx="12" cy="10" r="2.3" />
+              </svg>
+              Östergötland
+            </span>
+            <span className="demo-play">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 5.5v13l10.5-6.5z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              </svg>
+            </span>
+          </button>
         </div>
       </section>
 
-      <section className="mk-section">
-        <div className="mk-container mk-split">
-          <div>
-            <span className="mk-kicker">Questions it answers</span>
-            <h2>Plan for the disruption before it happens</h2>
-            <p className="mk-muted">
-              Scenarios run on a network of farms, processors, storage, transport corridors, energy and towns, and
-              show who goes without — town by town, hour by hour.
-            </p>
-            <Link to="/about" className="mk-link">
-              Why we built FoodChainIQ <IcArrow />
-            </Link>
-          </div>
-          <ul className="mk-questions">
-            {QUESTIONS.map((q) => (
-              <li key={q} className="mk-card">
-                <span className="mk-q">?</span>
-                {q}
-              </li>
-            ))}
-          </ul>
+      <section className="mk-section mk-who" id="who">
+        <div className="mk-container">
+          <h2>Who we are</h2>
+          <p>
+            FoodChainIQ is driven by the ambition to make supply chains more transparent, understandable and resilient.
+            We develop data-driven solutions that help organizations gain a clearer picture of their supply-chain
+            networks, understand critical dependencies and anticipate potential disruptions.
+          </p>
         </div>
       </section>
 
-      <section className="mk-cta">
-        <NetworkBackground color="255, 255, 255" accent="160, 210, 255" density={0.6} />
-        <div className="mk-container mk-cta-inner">
-          <h2>Start mapping your region's food system</h2>
-          <p>Create an account, or talk to us about a pilot for your municipality or county.</p>
-          <div className="mk-hero-actions">
-            {user ? (
-              <Link to="/datalake" className="mk-btn mk-btn-white mk-btn-lg">
-                Open the app <IcArrow />
-              </Link>
-            ) : (
-              <button type="button" className="mk-btn mk-btn-white mk-btn-lg" onClick={() => setLoginOpen('register')}>
-                Create an account <IcArrow />
-              </button>
-            )}
-            <Link to="/contact" className="mk-btn mk-btn-ghost-white mk-btn-lg">
-              Contact us
-            </Link>
+      <section className="mk-section mk-section-tight">
+        <div className="mk-container">
+          <div className="mk-card mk-ready">
+            <span className="mk-ready-icon">
+              <LeafIcon />
+            </span>
+            <div className="mk-ready-text">
+              <h3>Ready to get started?</h3>
+              <p>Create an account and start exploring your food supply chain.</p>
+            </div>
+            <div className="mk-ready-actions">
+              {user ? (
+                <button type="button" className="mk-btn mk-btn-primary mk-btn-lg" onClick={() => navigate('/datalake')}>
+                  Open the app
+                </button>
+              ) : (
+                <>
+                  <button type="button" className="mk-btn mk-btn-primary mk-btn-lg" onClick={() => setLoginOpen('register')}>
+                    Create account
+                  </button>
+                  <button type="button" className="mk-btn mk-btn-outline mk-btn-lg" onClick={() => setLoginOpen(true)}>
+                    Log in
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </section>
+
+      {demoOpen && <DemoDialog onClose={() => setDemoOpen(false)} onTry={tryIt} />}
     </SiteLayout>
   );
 }

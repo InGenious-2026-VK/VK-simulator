@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from './ui.jsx';
 import { IconX } from './icons.jsx';
 
@@ -10,7 +11,8 @@ export default function Modal({ title, onClose, wide = false, children, footer }
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  return (
+  // Rendered into <body> so no page layer (sticky headers, stacking contexts) can cover it.
+  return createPortal(
     <div className="modal-scrim" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`modal${wide ? ' modal-wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
         <div className="modal-head">
@@ -22,6 +24,7 @@ export default function Modal({ title, onClose, wide = false, children, footer }
         {children}
         {footer && <div className="modal-foot">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
