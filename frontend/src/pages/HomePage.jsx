@@ -5,7 +5,6 @@ import Modal from '../components/Modal.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { SITE } from '../content/site.js';
 import DemoThumbnail from './site/DemoThumbnail.jsx';
-import HeroVisual from './site/HeroVisual.jsx';
 
 const s = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' };
 
@@ -82,31 +81,31 @@ const LeafIcon = () => (
   </svg>
 );
 
+function DemoFrame({ hasVideo, onPlay, children }) {
+  return hasVideo ? (
+    <button type="button" className="demo-thumb" onClick={onPlay} aria-label="Play the product demonstration">
+      {children}
+    </button>
+  ) : (
+    <div className="demo-thumb demo-thumb-static" role="img" aria-label="FoodChainIQ product demonstration preview">
+      {children}
+    </div>
+  );
+}
+
 function DemoDialog({ onClose, onTry }) {
   const url = SITE.demoVideoUrl;
   const youtube = url && /youtube\.com|youtu\.be|vimeo\.com/.test(url);
   return (
     <Modal title="FoodChainIQ in action" wide onClose={onClose}>
-      {url ? (
-        youtube ? (
-          <div className="demo-video">
-            <iframe src={url} title="FoodChainIQ product demonstration" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
-          </div>
-        ) : (
-          <div className="demo-video">
-            <video src={url} controls autoPlay playsInline />
-          </div>
-        )
+      {youtube ? (
+        <div className="demo-video">
+          <iframe src={url} title="FoodChainIQ product demonstration" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+        </div>
       ) : (
-        <>
-          <p className="muted">
-            A scenario playing back hour by hour: goods move along the corridors, a closed link forces rerouting, and
-            towns that run short light up.
-          </p>
-          <div className="demo-preview">
-            <HeroVisual />
-          </div>
-        </>
+        <div className="demo-video">
+          <video src={url} controls autoPlay playsInline />
+        </div>
       )}
       <div className="modal-foot">
         <div className="spacer" />
@@ -189,7 +188,8 @@ export default function HomePage() {
             <h2>See FoodChainIQ in action</h2>
             <p>Discover how to visualize supply chain networks, simulate disruptions, and identify potential vulnerabilities.</p>
           </div>
-          <button type="button" className="demo-thumb" onClick={() => setDemoOpen(true)} aria-label="Play the product demonstration">
+          {/* Clickable only once a video is set (SITE.demoVideoUrl); until then it's a still preview. */}
+          <DemoFrame hasVideo={Boolean(SITE.demoVideoUrl)} onPlay={() => setDemoOpen(true)}>
             <DemoThumbnail />
             <span className="demo-region">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -203,7 +203,7 @@ export default function HomePage() {
                 <path d="M8 5.5v13l10.5-6.5z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
               </svg>
             </span>
-          </button>
+          </DemoFrame>
         </div>
       </section>
 
