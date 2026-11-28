@@ -17,6 +17,7 @@ from .db import SessionLocal
 from .errors import ApiError
 from .metadata import parse_metadata
 from .orm import Dataset, DatasetFile, DatasetVersion, RemovalRequest, User, now
+from .scores import dataset_scores
 
 CHUNK = 1024 * 1024
 
@@ -264,6 +265,7 @@ def serialize_dataset(db: Session, ds: Dataset, user: User, detail: bool = False
         "simulation": {"role": (meta.get("simulation") or {}).get("role")}
         if meta.get("simulation") else None,
         "removal_request": {"id": rr.id, "status": rr.status} if rr else None,
+        "scores": dataset_scores(db, ds),
         "size_bytes": ds.size_bytes,
         "created_at": ds.created_at,
         "updated_at": ds.updated_at,

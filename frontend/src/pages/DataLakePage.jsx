@@ -10,6 +10,7 @@ import UploadDialog from './datalake/UploadDialog.jsx';
 import DetailsPane from './datalake/DetailsPane.jsx';
 import { AdminQueueView, RemovalRequestsView } from './datalake/RequestsViews.jsx';
 import MyGroupsView from './datalake/MyGroupsView.jsx';
+import { formatFeedback, formatRatings, SCORES_HELP } from './datalake/scores.js';
 
 const VIEWS = [
   { id: 'all', label: 'All datasets' },
@@ -369,6 +370,11 @@ export default function DataLakePage() {
                         <span className="muted small mono">
                           {ds.files.length} file{ds.files.length === 1 ? '' : 's'}
                         </span>
+                        {ds.scores && (
+                          <span className="muted small mono" title={`${formatRatings(ds.scores.ratings)}. ${SCORES_HELP}`}>
+                            ▶ {ds.scores.usage} · {formatFeedback(ds.scores.feedback)}
+                          </span>
+                        )}
                       </div>
                     </article>
                   ))}
@@ -384,6 +390,8 @@ export default function DataLakePage() {
                       <th>Visibility</th>
                       <th>Files</th>
                       <th>Size</th>
+                      <th title={SCORES_HELP}>Used</th>
+                      <th title={SCORES_HELP}>Feedback</th>
                       <th>Updated</th>
                     </tr>
                   </thead>
@@ -416,6 +424,10 @@ export default function DataLakePage() {
                         </td>
                         <td className="mono">{ds.files.map((f) => f.format).join(', ')}</td>
                         <td className="mono">{formatBytes(ds.size_bytes)}</td>
+                        <td className="mono">{ds.scores?.usage ?? 0}</td>
+                        <td className="mono" title={formatRatings(ds.scores?.ratings)}>
+                          {formatFeedback(ds.scores?.feedback)}
+                        </td>
                         <td>{formatDate(ds.updated_at)}</td>
                       </tr>
                     ))}

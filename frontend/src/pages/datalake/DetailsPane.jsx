@@ -3,6 +3,7 @@ import { Badge, Button } from '../../components/ui.jsx';
 import { IconDownload, IconX } from '../../components/icons.jsx';
 import * as api from '../../api/client.js';
 import { CATEGORY_META, VISIBILITY_META, catColor, formatBytes, formatDate } from '../categories.js';
+import { formatFeedback, formatRatings, SCORES_HELP } from './scores.js';
 
 /** Right-side pane: metadata, files, preview, sharing, removal request. */
 export default function DetailsPane({ datasetId, onClose, onChanged }) {
@@ -117,6 +118,19 @@ export default function DetailsPane({ datasetId, onClose, onChanged }) {
             </dd>
             <dt>Version</dt>
             <dd className="mono">v{ds.version}</dd>
+            {ds.scores && (
+              <>
+                <dt title={SCORES_HELP}>Used in</dt>
+                <dd>
+                  {ds.scores.usage} simulation run{ds.scores.usage === 1 ? '' : 's'}
+                </dd>
+                <dt title={SCORES_HELP}>Feedback</dt>
+                <dd>
+                  <span className="mono">{formatFeedback(ds.scores.feedback)}</span>{' '}
+                  <span className="muted small">({formatRatings(ds.scores.ratings)})</span>
+                </dd>
+              </>
+            )}
             <dt>Sensitivity</dt>
             <dd>{ds.sensitivity}</dd>
             <dt>Licence</dt>

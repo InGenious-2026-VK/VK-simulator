@@ -18,7 +18,7 @@ import {
   synthSeries,
 } from './charts.jsx';
 import { COMMODITY_LEGEND, COMPARE_INDICATORS } from '../data/workspaceMock.js';
-import { listRuns } from '../api/client.js';
+import { listRuns, rateRun } from '../api/client.js';
 import { SEVERITY_COLOR, SEVERITY_LABEL } from '../scenario/severity.js';
 import { formatClock, townAt } from '../scenario/playback.js';
 
@@ -59,6 +59,54 @@ function ChartBox({ title, meta, children, legend }) {
 
 function Sample() {
   return <Badge variant="warn" style={{ marginLeft: 'auto' }}>sample</Badge>;
+}
+
+/* ---------------- rating a run (dataset feedback score, #33) ---------------- */
+const RATINGS = [
+  ['up', '😊', 'Good result (+2 for each dataset used)'],
+  ['meh', '🤨', 'So-so result (−0.5 for each dataset used)'],
+  ['down', '😞', 'Poor result (−2 for each dataset used)'],
+];
+
+/** Three toggle buttons. Clicking the active one removes the rating. */
+function RateRun({ runId, initial = null, small = false }) {
+  const [rating, setRating] = useState(initial);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  useEffect(() => setRating(initial), [runId, initial]);
+
+  const choose = async (value) => {
+    const next = rating === value ? null : value;
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await rateRun(runId, next);
+      setRating(r.feedback);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <span className={`rate-run${small ? ' small' : ''}`} role="group" aria-label="Rate this result">
+      {RATINGS.map(([value, glyph, title]) => (
+        <button
+          key={value}
+          type="button"
+          className={`rate-btn${rating === value ? ' on' : ''}`}
+          title={title}
+          aria-pressed={rating === value}
+          disabled={busy}
+          onClick={() => choose(value)}
+        >
+          {glyph}
+        </button>
+      ))}
+      {error && <span className="rate-error" title={error}>!</span>}
+    </span>
+  );
 }
 
 /* ---------------- results (a completed run) ---------------- */
@@ -129,6 +177,15 @@ function Results({ result, frame }) {
             dir="down"
           />
         </div>
+        {result.run_id && result.inputs?.datasets?.length > 0 && (
+          <div className="rate-row">
+            <span>
+              How useful was this result?
+              <small>Your rating counts for the {result.inputs.datasets.length} dataset(s) used.</small>
+            </span>
+            <RateRun runId={result.run_id} />
+          </div>
+        )}
       </div>
 
       <div className="rsection">
@@ -533,6 +590,9 @@ function RecentRuns() {
               </td>
               <td className="num mono" style={{ color: 'var(--muted-foreground)' }}>
                 {r.summary?.pct_demand_met != null ? `${r.summary.pct_demand_met}%` : ''}
+              </td>
+              <td className="num">
+                {r.inputs?.datasets?.length > 0 && <RateRun runId={r.run_id} initial={r.feedback ?? null} small />}
               </td>
             </tr>
           ))}

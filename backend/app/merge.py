@@ -281,7 +281,7 @@ def build(db: Session, items: list[dict]) -> tuple[Network, dict]:
         resolved.append((ROLE_ORDER.get(role, 9), ds, item["version"], role, sim.get("mapping") or {}, vrow))
 
     for _, ds, version, role, mapping, vrow in sorted(resolved, key=lambda r: r[0]):
-        used.append({"id": ds.id, "version": version})
+        used.append({"id": ds.id, "version": version, "role": role})
         if (vrow.summary or {}).get("has_geometry"):
             map_layers.append({"dataset_id": ds.id, "title": ds.title, "role": role,
                                "category": ds.category,

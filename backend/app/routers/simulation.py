@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -14,8 +15,9 @@ from ..db import get_db
 from ..errors import ApiError, not_found
 from ..models import Scenario, SimulationResult
 from ..network import Network, load_network
-from ..orm import SimulationRun, User
+from ..orm import SimulationRun, User, now
 from ..presets import PRESETS
+from ..scores import record_usage
 from ..security import current_user, optional_user
 from ..simulation import simulate
 from .common import page_params, paginate
@@ -135,6 +137,7 @@ def run_simulation(scenario: Scenario, user: User | None = Depends(optional_user
         db.flush()
         result.run_id = run.id
         run.result = result.model_dump(mode="json")
+        record_usage(db, user, run, inputs["datasets"])
         audit(db, user, "simulation.run", run_id=run.id, selection_id=scenario.selection_id)
         db.commit()
     return result
@@ -147,6 +150,7 @@ def _run_summary(r: SimulationRun) -> dict:
         "created_at": r.created_at,
         "scenario": r.scenario,
         "inputs": r.inputs,
+        "feedback": r.feedback,
         "summary": {k: rs.get(k) for k in ("pct_demand_met", "people_affected", "worst_area",
                                            "total_unmet_tpd")},
     }
@@ -166,3 +170,25 @@ def get_run(run_id: str, user: User = Depends(current_user), db: Session = Depen
     if r is None or (r.user_id != user.id and user.role != "admin"):
         raise not_found("run", run_id)
     return {**_run_summary(r), "result": r.result}
+
+
+class FeedbackBody(BaseModel):
+    rating: Optional[Literal["up", "meh", "down"]] = None
+
+
+@router.put("/simulations/{run_id}/feedback")
+def rate_run(run_id: str, body: FeedbackBody, user: User = Depends(current_user),
+             db: Session = Depends(get_db)) -> dict:
+    """Rate a run's result. The rating counts toward the feedback score of every
+    dataset the run used; `null` removes it. Only the latest rating counts."""
+    r = db.get(SimulationRun, run_id)
+    if r is None or r.user_id != user.id:
+        raise not_found("run", run_id)
+    if not (r.inputs or {}).get("datasets"):
+        raise ApiError(422, "nothing_to_rate",
+                       "This run used only the baseline network, so there are no datasets to rate.")
+    r.feedback = body.rating
+    r.feedback_at = now() if body.rating else None
+    audit(db, user, "simulation.feedback", run_id=r.id, rating=body.rating)
+    db.commit()
+    return {"run_id": r.id, "feedback": r.feedback, "feedback_at": r.feedback_at}
