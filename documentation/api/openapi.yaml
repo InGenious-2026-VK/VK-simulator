@@ -888,6 +888,43 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/SimulationRun' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /simulations/{run_id}/feedback:
+    parameters:
+      - name: run_id
+        in: path
+        required: true
+        schema: { type: string }
+    put:
+      tags: [Simulation]
+      summary: Rate a run's result (counts toward each used dataset's feedback score)
+      description: >
+        Only the user who ran the simulation can rate it. One rating per run;
+        sending a new one replaces it and `null` removes it. Runs that used only
+        the baseline network have nothing to rate (422 `nothing_to_rate`).
+      x-status: live
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating: { $ref: '#/components/schemas/Rating' }
+      responses:
+        '200':
+          description: Rating saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  run_id: { type: string }
+                  feedback: { $ref: '#/components/schemas/Rating' }
+                  feedback_at: { type: [string, 'null'], format: date-time }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422':
+          description: Invalid rating, or nothing_to_rate (baseline-only run)
 
   # ---------------------------------------------------------------- Admin
   /admin/removal-requests:
@@ -1428,6 +1465,7 @@ components:
               properties:
                 id: { type: string }
                 status: { $ref: '#/components/schemas/RemovalStatus' }
+        scores: { $ref: '#/components/schemas/DatasetScores' }
         size_bytes: { type: integer }
         created_at: { type: string, format: date-time }
         updated_at: { type: string, format: date-time }
@@ -1633,11 +1671,34 @@ components:
                 properties:
                   id: { type: string }
                   version: { type: integer }
+    Rating:
+      description: "A user's rating of a run: up (+2), meh (-0.5), down (-2), or null (not rated)."
+      oneOf:
+        - type: 'null'
+        - enum: [up, meh, down]
+    DatasetScores:
+      description: >
+        Quality scores of the dataset's current version (they start from zero
+        when a new version replaces the old one). Runs by platform admins do not
+        count. Datasets that are only drawn on the map (role reference) get usage
+        but no feedback points.
+      type: object
+      properties:
+        version: { type: integer }
+        usage: { type: integer, description: Number of stored simulation runs that used this version }
+        feedback: { type: number, description: "Sum of ratings: up +2, meh -0.5, down -2" }
+        ratings:
+          type: object
+          properties:
+            up: { type: integer }
+            meh: { type: integer }
+            down: { type: integer }
     SimulationRun:
       type: object
       properties:
         run_id: { type: string }
         created_at: { type: string, format: date-time }
+        feedback: { $ref: '#/components/schemas/Rating' }
         scenario: { $ref: '#/components/schemas/Scenario' }
         result: { $ref: '#/components/schemas/SimulationResult' }
     Network:

@@ -12,6 +12,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -228,6 +229,30 @@ class SimulationRun(Base):
     scenario: Mapped[dict] = mapped_column(JSON)
     inputs: Mapped[dict] = mapped_column(JSON)
     result: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = _ts()
+    # The user's rating of the result: up | meh | down (None = not rated).
+    feedback: Mapped[Optional[str]] = mapped_column(String(8), nullable=True)
+    feedback_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class DatasetRunUsage(Base):
+    """One row per dataset version used in a stored simulation run.
+
+    The source of both quality scores (see app/scores.py). Runs by platform
+    admins are not recorded, so they never affect a score."""
+
+    __tablename__ = "dataset_run_usage"
+    __table_args__ = (
+        UniqueConstraint("run_id", "dataset_id"),
+        Index("ix_dataset_run_usage_dataset_version", "dataset_id", "version"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    run_id: Mapped[str] = mapped_column(ForeignKey("simulation_runs.id", ondelete="CASCADE"), index=True)
+    dataset_id: Mapped[str] = mapped_column(ForeignKey("datasets.id", ondelete="CASCADE"))
+    version: Mapped[int] = mapped_column(Integer)
+    # The dataset's simulation role in that run. "reference" = map only.
+    role: Mapped[str] = mapped_column(String(32))
     created_at: Mapped[datetime] = _ts()
 
 

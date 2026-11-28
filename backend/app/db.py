@@ -49,4 +49,7 @@ _COLUMN_MIGRATIONS = [
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMP WITH TIME ZONE",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS review_note TEXT",
     "CREATE INDEX IF NOT EXISTS ix_users_status ON users (status)",
+    # dataset quality scores: rating of a simulation run
+    "ALTER TABLE simulation_runs ADD COLUMN IF NOT EXISTS feedback VARCHAR(8)",
+    "ALTER TABLE simulation_runs ADD COLUMN IF NOT EXISTS feedback_at TIMESTAMP WITH TIME ZONE",
 ]

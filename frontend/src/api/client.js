@@ -216,6 +216,15 @@ export const getSimulationContext = (selectionId) =>
 export const listRuns = () => request('/simulations?page_size=10');
 
 /**
+ * Rate a stored run. The rating counts toward the feedback score of every
+ * dataset the run used.
+ * @param {string} runId
+ * @param {'up' | 'meh' | 'down' | null} rating  null removes the rating
+ */
+export const rateRun = (runId, rating) =>
+  request(`/simulations/${encodeURIComponent(runId)}/feedback`, { method: 'PUT', body: { rating } });
+
+/**
  * Run a scenario.
  * @param {{ name?: string, duration_days?: number, disruptions: object[], selection_id?: string }} scenario
  */

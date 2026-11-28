@@ -231,6 +231,7 @@ one returns `409 last_group_admin`, unless a platform admin does it.
   "temporal": { "start": "2025-01-01", "end": "2025-12-31", "resolution": "month" },
   "simulation": { "role": "processing" },
   "removal_request": null,
+  "scores": { "version": 3, "usage": 14, "feedback": 9.5, "ratings": { "up": 6, "meh": 1, "down": 1 } },
   "size_bytes": 492354,
   "created_at": "2026-10-02T08:11:00Z",
   "updated_at": "2026-11-10T14:02:00Z",
@@ -240,6 +241,13 @@ one returns `409 last_group_admin`, unless a platform admin does it.
 
 `status` is one of `uploading`, `processing`, `ready`, `invalid` or `removed` (after an approved removal; removed datasets are hidden from listings).
 `removal_request`, when set, is `{ "id": "rr_…", "status": "pending" }`.
+
+`scores` are the dataset's two quality scores (#33), for its **current version**:
+
+- `usage`: the number of stored simulation runs that used this version.
+- `feedback`: the sum of the ratings users gave those runs (😊 `up` +2, 🤨 `meh` −0.5, 😞 `down` −2), with the count of each rating in `ratings`.
+
+Runs by platform admins don't count. A dataset that is only drawn on the map (role `reference`) gets usage but no feedback points, because it didn't shape the result. When a new version replaces the old one, the shown scores start again from zero; the scores of older versions are kept in the database (`dataset_run_usage`).
 
 ### `GET /datasets`
 The Data Lake grid and list.
@@ -599,15 +607,25 @@ not stored.
 { "...": "...",
   "run_id": "run_x81q",
   "inputs": { "selection_id": "sel_3hq9",
-              "datasets": [{ "id": "ds_8f2k", "version": 3 }, { "id": "ds_p0p1", "version": 1 }] } }
+              "datasets": [{ "id": "ds_8f2k", "version": 3, "role": "processing" },
+                           { "id": "ds_p0p1", "version": 1, "role": "reference" }] } }
 ```
 
 ### `GET /simulations` / `GET /simulations/{run_id}`
 History of the caller's runs. It fills the "Recent runs" list in the
 Results panel. Items carry `summary` (`pct_demand_met`, `people_affected`,
-`worst_area`, `total_unmet_tpd`), and the single-run endpoint adds the full
+`worst_area`, `total_unmet_tpd`) and the caller's `feedback` (`up`, `meh`, `down` or `null`), and the single-run endpoint adds the full
 `result`. Each run stores its scenario and the pinned dataset versions, so it can
 be reproduced.
+
+### `PUT /simulations/{run_id}/feedback` · the user who ran it
+Rate the result of a run. The rating counts toward the feedback score of every dataset the run used (see `scores` in §4).
+
+```json
+{ "rating": "up" }
+```
+
+`rating` is `up`, `meh`, `down`, or `null` to remove the rating. There is one rating per run: a new one replaces the old one. Returns `{ "run_id", "feedback", "feedback_at" }`. A run that used only the baseline network has no datasets to rate (422 `nothing_to_rate`). Someone else's run returns 404.
 
 ### 9.1 How datasets feed the model
 
@@ -709,6 +727,7 @@ Audit actions: `login`, `dataset.upload`, `dataset.update`,
 | GET | `/simulation/context` | 4 Simulation |
 | POST | `/simulate` | 4 Simulation |
 | GET | `/simulations` · `/simulations/{run_id}` | 4 Simulation |
+| PUT | `/simulations/{run_id}/feedback` | 4 Simulation |
 | * | `/admin/...` | Admin |
 
 ---
